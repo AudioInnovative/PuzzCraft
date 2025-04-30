@@ -44,7 +44,12 @@ export default function GameUI2D() {
             <p className="text-white mb-1">← → - Move selected block</p>
             <p className="text-white mb-1">Space - Select block</p>
             <p className="text-white mb-4">R - Restart level</p>
-            <p className="text-white animate-pulse">Game starting...</p>
+            <button 
+              className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded pointer-events-auto"
+              onClick={() => usePuzznic.getState().startGame()}
+            >
+              Start Game
+            </button>
           </div>
         </div>
       )}

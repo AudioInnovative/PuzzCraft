@@ -22,8 +22,9 @@ interface PuzznicState {
   score: number;
   moveCount: number;
   timeLeft: number;
-  board: BlockType[][];
+  board: (BlockType | null)[][];
   selectedBlockPos: { x: number, y: number } | null;
+  timerId?: NodeJS.Timeout;
   
   // Level data
   currentLevelData: number[][];
@@ -64,7 +65,7 @@ export const usePuzznic = create<PuzznicState>()(
       // Create empty board
       const rows = levelData.length;
       const cols = levelData[0].length;
-      const board: BlockType[][] = Array(rows).fill(0).map(() => 
+      const board: (BlockType | null)[][] = Array(rows).fill(0).map(() => 
         Array(cols).fill(null)
       );
       
@@ -107,8 +108,8 @@ export const usePuzznic = create<PuzznicState>()(
         decrementTime();
       }, 1000);
       
-      // Store the timer ID in state or clean it up in component
-      return () => clearInterval(timer);
+      // Store the timer ID so we can clear it later
+      set({ timerId: timer });
     },
     
     // Select a block
