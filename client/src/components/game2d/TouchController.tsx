@@ -24,8 +24,8 @@ export function TouchController() {
     };
     
     const handleTouchEnd = (e: TouchEvent) => {
-      // If we have a touch start position and a selected block
-      if (touchStartRef.current && selectedBlockPos) {
+      // If we have a touch start position (don't need to check selectedBlockPos here - let the moveSelectedBlock function check that)
+      if (touchStartRef.current) {
         if (e.changedTouches.length === 1) {
           const touchEnd = {
             x: e.changedTouches[0].clientX,
@@ -41,8 +41,10 @@ export function TouchController() {
             // Swipe right or left
             if (deltaX > 0) {
               moveSelectedBlock('right');
+              console.log('Swipe right detected');
             } else {
               moveSelectedBlock('left');
+              console.log('Swipe left detected');
             }
           }
         }

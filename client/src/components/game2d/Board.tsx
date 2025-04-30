@@ -172,12 +172,39 @@ export function Board2D({ width, height }: BoardProps) {
     handlePointerSelect(e.clientX, e.clientY);
   };
   
-  // Handle touch event
+  // For long press detection (to restart level on mobile)
+  const touchTimeout = useRef<NodeJS.Timeout | null>(null);
+  const LONG_PRESS_DURATION = 800; // milliseconds
+  
+  // Handle touch start event
   const handleCanvasTouch = (e: React.TouchEvent<HTMLCanvasElement>) => {
     if (e.touches.length === 1) {
       // Prevent scrolling when touching the canvas
       e.preventDefault();
+      
+      // Handle block selection
       handlePointerSelect(e.touches[0].clientX, e.touches[0].clientY);
+      
+      // Set up long press detection
+      if (touchTimeout.current) {
+        clearTimeout(touchTimeout.current);
+      }
+      
+      touchTimeout.current = setTimeout(() => {
+        // Long press detected - restart level
+        const { restartLevel } = usePuzznic.getState();
+        restartLevel();
+        // Provide visual/audio feedback that restart occurred
+        playHitSound();
+      }, LONG_PRESS_DURATION);
+    }
+  };
+  
+  // Handle touch end/cancel to clear the timeout
+  const handleTouchEnd = () => {
+    if (touchTimeout.current) {
+      clearTimeout(touchTimeout.current);
+      touchTimeout.current = null;
     }
   };
   
@@ -228,6 +255,8 @@ export function Board2D({ width, height }: BoardProps) {
       height={height}
       onClick={handleCanvasClick}
       onTouchStart={handleCanvasTouch}
+      onTouchEnd={handleTouchEnd}
+      onTouchCancel={handleTouchEnd}
       style={{ 
         width: '100%', 
         height: '100%',

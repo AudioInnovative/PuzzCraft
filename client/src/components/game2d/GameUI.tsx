@@ -124,9 +124,15 @@ export default function GameUI2D() {
       {gamePhase === "playing" && (
         <div className="absolute bottom-4 left-4 right-4 flex justify-center">
           <div className="bg-black/50 p-2 rounded-lg text-center">
-            <p className="text-sm text-white">
-              ← → to move selected block | Space to select | R to restart
-            </p>
+            {isMobile ? (
+              <p className="text-sm text-white">
+                Tap to select block | Swipe left/right to move | Tap and hold to restart
+              </p>
+            ) : (
+              <p className="text-sm text-white">
+                ← → to move selected block | Space to select | R to restart
+              </p>
+            )}
           </div>
         </div>
       )}
