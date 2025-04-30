@@ -1,5 +1,6 @@
 import { usePuzznic } from "../../lib/stores/usePuzznic";
 import { GamePanel } from "../ui/game-panel";
+import { useIsMobile } from "../../hooks/use-is-mobile";
 
 export default function GameUI2D() {
   const { 
@@ -12,6 +13,7 @@ export default function GameUI2D() {
     restartLevel,
     nextLevel
   } = usePuzznic();
+  const isMobile = useIsMobile();
   
   // Format time as MM:SS
   const formatTime = (seconds: number) => {
@@ -43,7 +45,10 @@ export default function GameUI2D() {
             <p className="text-white mb-2">Controls:</p>
             <p className="text-white mb-1">← → - Move selected block</p>
             <p className="text-white mb-1">Space - Select block</p>
-            <p className="text-white mb-4">R - Restart level</p>
+            <p className="text-white mb-1">R - Restart level</p>
+            {isMobile && (
+              <p className="text-white mb-4">Swipe left/right to move blocks</p>
+            )}
             <button 
               className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded pointer-events-auto"
               onClick={() => usePuzznic.getState().startGame()}

@@ -144,15 +144,15 @@ export function Board2D({ width, height }: BoardProps) {
   const offsetX = (width - boardWidth * scale) / 2;
   const offsetY = (height - boardHeight * scale) / 2;
   
-  // Handle canvas click to select blocks
-  const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  // Function to handle pointer (mouse or touch) events to select blocks
+  const handlePointerSelect = (clientX: number, clientY: number) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     
-    // Get click position relative to canvas
+    // Get position relative to canvas
     const rect = canvas.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / scale - offsetX / scale;
-    const y = (e.clientY - rect.top) / scale - offsetY / scale;
+    const x = (clientX - rect.left) / scale - offsetX / scale;
+    const y = (clientY - rect.top) / scale - offsetY / scale;
     
     // Convert to grid coordinates
     const gridX = Math.floor(x / BLOCK_SIZE);
@@ -164,6 +164,20 @@ export function Board2D({ width, height }: BoardProps) {
       const gameY = rows - gridY - 1;
       selectBlock(gridX, gameY);
       playHitSound();
+    }
+  };
+  
+  // Handle mouse click
+  const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    handlePointerSelect(e.clientX, e.clientY);
+  };
+  
+  // Handle touch event
+  const handleCanvasTouch = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    if (e.touches.length === 1) {
+      // Prevent scrolling when touching the canvas
+      e.preventDefault();
+      handlePointerSelect(e.touches[0].clientX, e.touches[0].clientY);
     }
   };
   
@@ -213,10 +227,12 @@ export function Board2D({ width, height }: BoardProps) {
       width={width}
       height={height}
       onClick={handleCanvasClick}
+      onTouchStart={handleCanvasTouch}
       style={{ 
         width: '100%', 
         height: '100%',
-        background: 'linear-gradient(to bottom, #87CEEB, #e0f7fa)'
+        background: 'linear-gradient(to bottom, #87CEEB, #e0f7fa)',
+        touchAction: 'none' // Prevent browser handling of touch gestures (like scrolling)
       }}
     />
   );
