@@ -252,6 +252,7 @@ export const usePuzznic = create<PuzznicState>()(
         for (let x = 0; x < newBoard[0].length - 1; x++) {
           if (newBoard[y][x] !== null && newBoard[y][x+1] !== null && 
               !newBoard[y][x]!.isFixed && !newBoard[y][x+1]!.isFixed &&
+              !newBoard[y][x]!.falling && !newBoard[y][x+1]!.falling && // Don't match falling blocks
               newBoard[y][x]!.type === newBoard[y][x+1]!.type) {
             // Mark blocks as matched
             newBoard[y][x]!.matched = true;
@@ -267,6 +268,7 @@ export const usePuzznic = create<PuzznicState>()(
         for (let x = 0; x < newBoard[0].length; x++) {
           if (newBoard[y][x] !== null && newBoard[y+1][x] !== null && 
               !newBoard[y][x]!.isFixed && !newBoard[y+1][x]!.isFixed &&
+              !newBoard[y][x]!.falling && !newBoard[y+1][x]!.falling && // Don't match falling blocks
               newBoard[y][x]!.type === newBoard[y+1][x]!.type) {
             // Mark blocks as matched
             newBoard[y][x]!.matched = true;
