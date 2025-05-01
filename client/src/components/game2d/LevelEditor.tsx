@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, DragEvent } from 'react';
 import { usePuzznic } from '../../lib/stores/usePuzznic';
 import { BlockType } from '../../lib/stores/usePuzznic';
 import { cn } from '../../lib/utils';
@@ -10,6 +10,11 @@ const blockSymbols = ["✚", "■", "●", "×", "★", "◆", "▲", "♦", "�
 
 // Grid cell size for the editor
 const CELL_SIZE = 40;
+
+// Data structure for drag and drop operations
+interface DragData {
+  blockType: number;
+}
 
 export default function LevelEditor() {
   const { 
@@ -125,6 +130,7 @@ export default function LevelEditor() {
               height: CELL_SIZE,
               border: '1px solid rgba(255,255,255,0.1)'
             }}
+            // Click handler for placing/removing blocks
             onClick={() => {
               console.log(`------------------`);
               console.log(`UI Click: row=${uiRow}, col=${uiCol}`);
@@ -146,6 +152,62 @@ export default function LevelEditor() {
                   console.log(`After placement, cell at (${gameX},${gameY}) is:`, 
                     updatedCell ? `Block type ${updatedCell.type}` : 'Empty');
                 }, 100);
+              }
+            }}
+            // Drag and drop handlers
+            onDragOver={(e) => {
+              // Allow dropping - prevent default to enable drop
+              e.preventDefault();
+              e.dataTransfer.dropEffect = 'copy';
+              
+              // Add a visual indicator that drop is allowed
+              if (cell === null || (!cell.isFloor && gameY > 0)) {
+                // Cell is droppable
+                e.currentTarget.style.outline = '3px solid rgba(0,255,0,0.7)';
+                e.currentTarget.style.boxShadow = '0 0 10px rgba(0,255,0,0.5)';
+              } else {
+                // Cell is not droppable
+                e.currentTarget.style.outline = '3px solid rgba(255,0,0,0.7)';
+                e.currentTarget.style.boxShadow = '0 0 10px rgba(255,0,0,0.5)';
+              }
+            }}
+            onDragLeave={(e) => {
+              // Remove visual indicators when leaving
+              e.currentTarget.style.outline = 'none';
+              e.currentTarget.style.boxShadow = 'none';
+            }}
+            onDrop={(e) => {
+              e.preventDefault();
+              
+              // Remove visual indicators
+              e.currentTarget.style.outline = 'none';
+              e.currentTarget.style.boxShadow = 'none';
+              
+              // Get drag data
+              try {
+                const dragData = JSON.parse(e.dataTransfer.getData('text/plain')) as DragData;
+                
+                if (dragData.blockType) {
+                  console.log(`------------------`);
+                  console.log(`Drop at UI: row=${uiRow}, col=${uiCol}`);
+                  console.log(`Game pos: X=${gameX}, Y=${gameY}`);
+                  
+                  // Check if we can place a block here
+                  if (cell === null || (!cell.isFloor && gameY > 0)) {
+                    console.log(`Placing block type ${dragData.blockType} at X=${gameX}, Y=${gameY}`);
+                    placeEditorBlock(gameX, gameY, dragData.blockType);
+                    playHit();
+                    
+                    // Verify placement
+                    setTimeout(() => {
+                      const updatedCell = board[gameY][gameX];
+                      console.log(`After placement, cell at (${gameX},${gameY}) is:`, 
+                        updatedCell ? `Block type ${updatedCell.type}` : 'Empty');
+                    }, 100);
+                  }
+                }
+              } catch (error) {
+                console.error('Error parsing drag data:', error);
               }
             }}
           >
@@ -220,11 +282,33 @@ export default function LevelEditor() {
           
           <div className="grid grid-cols-2 md:grid-cols-1 gap-4">
             {blockTypes.map(type => (
-              <button 
+              <div 
                 key={type}
+                draggable={true}
                 onClick={() => handleSelectBlockType(type)}
+                onDragStart={(e) => {
+                  // Set drag data
+                  e.dataTransfer.setData('text/plain', JSON.stringify({ blockType: type }));
+                  e.dataTransfer.effectAllowed = 'copy';
+                  
+                  // Set custom drag ghost image (optional)
+                  const ghostElement = document.createElement('div');
+                  ghostElement.className = 'w-12 h-12 rounded-md flex items-center justify-center opacity-80';
+                  ghostElement.style.backgroundColor = getBlockColor(type);
+                  ghostElement.innerHTML = `<span class="text-white font-bold text-2xl">${blockSymbols[type-1]}</span>`;
+                  document.body.appendChild(ghostElement);
+                  e.dataTransfer.setDragImage(ghostElement, 20, 20);
+                  
+                  // Remove ghost element after drag starts
+                  setTimeout(() => {
+                    document.body.removeChild(ghostElement);
+                  }, 0);
+                  
+                  console.log(`Started dragging block type ${type}`);
+                  playHit();
+                }}
                 className={cn(
-                  "h-16 cursor-pointer rounded-lg flex items-center justify-center shadow-md",
+                  "h-16 cursor-grab active:cursor-grabbing rounded-lg flex items-center justify-center shadow-md",
                   selectedBlockType === type ? "ring-4 ring-white bg-gray-600" : "bg-gray-700 hover:ring-2 hover:ring-gray-400"
                 )}
               >
@@ -234,7 +318,7 @@ export default function LevelEditor() {
                 >
                   <span className="text-white font-bold text-2xl">{blockSymbols[type-1]}</span>
                 </div>
-              </button>
+              </div>
             ))}
           </div>
           
@@ -269,8 +353,8 @@ export default function LevelEditor() {
           {/* Instructions */}
           <div className="mt-4 text-white">
             <p className="text-center mb-2 font-semibold">Instructions:</p>
-            <p className="text-sm mb-1">• Click a block to select it</p>
-            <p className="text-sm mb-1">• Click on grid to place selected block</p>
+            <p className="text-sm mb-1">• Drag blocks directly onto the grid</p>
+            <p className="text-sm mb-1">• Or click a block to select, then click grid</p>
             <p className="text-sm mb-1">• Click on existing blocks to remove</p>
             <p className="text-sm">• Each block type must have an even number</p>
           </div>
