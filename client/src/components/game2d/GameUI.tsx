@@ -1,7 +1,6 @@
 import { usePuzznic } from "../../lib/stores/usePuzznic";
 import { GamePanel } from "../ui/game-panel";
 import { useIsMobile } from "../../hooks/use-is-mobile";
-import LevelEditor from "./LevelEditor";
 
 export default function GameUI2D() {
   const { 
@@ -26,8 +25,7 @@ export default function GameUI2D() {
 
   return (
     <div className="absolute inset-0 pointer-events-none">
-      {/* Level Editor Component */}
-      <LevelEditor />
+      {/* Level Editor Component removed: now using SimpleLevelEditor in Game2D */}
       
       {/* Game HUD styled like original Puzznic */}
       <div className="absolute top-0 left-0 right-0 flex justify-between items-start p-2 bg-black/80 border-b-4 border-blue-700">
