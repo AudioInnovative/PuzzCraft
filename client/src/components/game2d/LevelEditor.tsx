@@ -78,129 +78,123 @@ export default function LevelEditor() {
   };
   
   return (
-    <div className="absolute inset-0 flex flex-col bg-blue-900/30 backdrop-blur-md">
-      {/* Editor Header */}
-      <div className="bg-gray-900 text-white p-3 border-b-2 border-cyan-600">
-        <div className="flex justify-between items-center mb-2">
-          <h2 className="text-xl uppercase text-cyan-300 font-mono">LEVEL EDITOR</h2>
-          <div className="flex space-x-2">
+    <div className="absolute inset-0 flex flex-col bg-black">
+      {/* Editor Header - Simplified for mobile */}
+      <div className="bg-gray-900 text-white p-4">
+        <div className="flex justify-between items-center">
+          <h2 className="text-2xl font-bold text-white">Editor</h2>
+          <div className="flex space-x-3">
             <button 
               onClick={() => exitEditMode()}
-              className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 text-sm uppercase font-mono"
+              className="bg-red-600 text-white px-5 py-3 text-xl font-bold rounded-lg shadow-md active:translate-y-1"
             >
               Exit
             </button>
             <button 
               onClick={handleSaveLevel}
               disabled={!isValid}
-              className={cn(
-                "px-3 py-2 text-white text-sm uppercase font-mono",
+              className={
                 isValid 
-                  ? "bg-green-600 hover:bg-green-700" 
-                  : "bg-gray-600 cursor-not-allowed"
-              )}
+                  ? "bg-green-600 text-white px-5 py-3 text-xl font-bold rounded-lg shadow-md active:translate-y-1" 
+                  : "bg-gray-600 text-white px-5 py-3 text-xl font-bold rounded-lg opacity-50"
+              }
             >
               Save
             </button>
           </div>
         </div>
-        {isMobile && (
-          <p className="text-xs text-cyan-300 font-mono mt-1">Tap on grid to place/remove blocks</p>
-        )}
       </div>
       
-      {/* Block Type Palette */}
-      <div className="bg-gray-800 p-2 flex flex-wrap gap-2 border-b-2 border-cyan-600">
-        <div className="flex justify-between items-center w-full">
-          <div className="text-white font-mono text-sm uppercase flex items-center">
-            SELECT BLOCK:
-          </div>
+      {/* Block Selection - Simplified for mobile */}
+      <div className="bg-gray-800 p-3">
+        <div className="flex justify-between items-center mb-3">
+          <div className="text-white text-xl font-semibold">Select Block:</div>
           <button
             onClick={() => {
               createEmptyLevel();
               playHit();
-              setMessage("Created new empty level");
+              setMessage("New level created");
               setTimeout(() => setMessage(null), 2000);
             }}
-            className="bg-blue-600 text-white px-3 py-1 text-sm uppercase font-mono hover:bg-blue-500"
+            className="bg-blue-600 text-white px-5 py-3 text-xl font-bold rounded-lg shadow-md active:translate-y-1"
           >
-            New Level
+            New
           </button>
         </div>
-        <div className="flex flex-wrap gap-3 justify-center w-full py-2">
+        
+        <div className="grid grid-cols-4 gap-4 w-full mb-3">
           {blockTypes.map(type => (
             <div 
               key={type}
               onClick={() => setEditorBlockType(type)}
               className={cn(
-                "w-12 h-12 cursor-pointer border-2 flex items-center justify-center",
+                "h-16 cursor-pointer rounded-lg flex items-center justify-center",
                 currentEditingBlockType === type 
-                  ? "border-yellow-400 shadow-lg" 
-                  : "border-gray-700"
+                  ? "ring-4 ring-white shadow-lg" 
+                  : "ring-1 ring-gray-600"
               )}
               style={{
-                backgroundColor: getBlockColor(type),
-                boxShadow: currentEditingBlockType === type ? "0 0 10px rgba(255,255,0,0.5)" : "none"
+                backgroundColor: getBlockColor(type)
               }}
             >
-              <span className="text-white font-bold text-xl">{blockSymbols[type-1]}</span>
+              <span className="text-white font-bold text-3xl">{blockSymbols[type-1]}</span>
             </div>
           ))}
         </div>
-        <div className="w-full flex justify-between items-center mt-1">
-          <span className={cn(
-            "px-3 py-1 text-white font-mono text-base",
-            isValid ? "bg-green-700" : "bg-red-700"
-          )}>
-            {isValid ? 'VALID' : 'INVALID'}
+        
+        <div className="flex justify-between items-center mt-4">
+          <span className={
+            isValid 
+              ? "px-4 py-2 bg-green-600 text-white text-lg font-bold rounded-lg" 
+              : "px-4 py-2 bg-red-600 text-white text-lg font-bold rounded-lg"
+          }>
+            {isValid ? 'Valid' : 'Invalid'}
           </span>
           {message && (
-            <div className="text-yellow-300 font-mono text-base">
+            <div className="text-yellow-300 text-lg font-semibold px-4 py-2 bg-gray-900 rounded-lg">
               {message}
             </div>
           )}
         </div>
       </div>
       
-      {/* User Level Browser */}
+      {/* User Level Browser - Simplified */}
       {userLevels.length > 0 && (
-        <div className="bg-gray-900 p-3 border-b-2 border-cyan-600">
-          <div className="text-white font-mono text-sm uppercase flex items-center mb-2">
-            SAVED LEVELS: {userLevels.length}
+        <div className="bg-gray-900 p-4">
+          <div className="text-white text-xl font-semibold mb-3">
+            Saved Levels: {userLevels.length}
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="grid grid-cols-3 gap-3">
             {userLevels.map((_, index) => (
               <button
                 key={index}
                 onClick={() => {
                   usePuzznic.getState().loadUserLevel(index);
                   playHit();
-                  setMessage(`Level ${index + 1} loaded!`);
+                  setMessage(`Level ${index + 1} loaded`);
                   setTimeout(() => setMessage(null), 2000);
                 }}
-                className="bg-blue-700 hover:bg-blue-600 text-white px-3 py-2 text-sm font-mono rounded"
+                className="bg-blue-700 text-white py-4 text-xl font-bold rounded-lg shadow-md active:translate-y-1"
               >
-                LEVEL {index + 1}
+                #{index + 1}
               </button>
             ))}
           </div>
         </div>
       )}
       
-      {/* Editor Info */}
-      <div className="bg-gray-900 p-3 border-b-2 border-cyan-600 text-cyan-300 font-mono">
+      {/* Editor Instructions - Simplified */}
+      <div className="bg-gray-900 p-4 text-white text-center border-t border-gray-700">
         {isMobile ? (
-          <>
-            <div className="text-sm mb-1">- TAP GRID TO PLACE/REMOVE</div>
-            <div className="text-sm mb-1">- BLOCKS MUST BE IN PAIRS</div>
-            <div className="text-sm">- FLOOR BLOCKS ARE FIXED</div>
-          </>
+          <p className="text-lg leading-relaxed">
+            Tap to place/remove blocks. <br />
+            Blocks must be in pairs.
+          </p>
         ) : (
-          <>
-            <div className="text-sm mb-1">- CLICK ON THE GRID TO PLACE OR REMOVE BLOCKS</div>
-            <div className="text-sm mb-1">- EACH BLOCK TYPE MUST APPEAR AN EVEN NUMBER OF TIMES</div>
-            <div className="text-sm">- FLOOR BLOCKS CANNOT BE EDITED</div>
-          </>
+          <p className="text-lg leading-relaxed">
+            Click to place or remove blocks. <br />
+            Each block type must appear in pairs.
+          </p>
         )}
       </div>
     </div>
