@@ -38,6 +38,7 @@ interface PuzznicState {
   selectBlock: (x: number, y: number) => void;
   moveSelectedBlock: (direction: 'left' | 'right') => void;
   checkMatches: () => void;
+  boardHasBlocksThatCanFall: (board: (BlockType | null)[][]) => boolean;
   applyGravity: () => void;
   updateGameState: () => void;
   restartLevel: () => void;
@@ -302,37 +303,57 @@ export const usePuzznic = create<PuzznicState>()(
           }, 300);
         }, 500);
       } else {
-        // No matches found, just apply gravity
-        const { applyGravity } = get();
-        applyGravity();
+        // No matches found, check if any blocks can still fall and apply gravity if needed
+        const { applyGravity, boardHasBlocksThatCanFall } = get();
+        const currentBoard = get().board;
+        
+        if (boardHasBlocksThatCanFall(currentBoard)) {
+          // Blocks can still fall, continue gravity
+          applyGravity();
+        } else {
+          // Board is fully settled with no matches, just update game state
+          const { updateGameState } = get();
+          updateGameState();
+        }
       }
+    },
+    
+    // Helper function to check if any blocks on the board can fall
+    boardHasBlocksThatCanFall: (board: (BlockType | null)[][]) => {
+      for (let y = 1; y < board.length; y++) {
+        for (let x = 0; x < board[0].length; x++) {
+          // Only consider non-fixed blocks that have empty space below
+          if (board[y][x] !== null && board[y-1][x] === null && !board[y][x]!.isFixed) {
+            return true; // Found at least one block that can fall
+          }
+        }
+      }
+      return false; // No more blocks can fall
     },
     
     // Apply gravity to make blocks fall (note: in our coordinate system, y=0 is at the bottom)
     applyGravity: () => {
-      const { board } = get();
+      const { board, boardHasBlocksThatCanFall } = get();
       
       // Create a deep copy of the board
       const newBoard = board.map(row => row.map(block => 
         block === null ? null : { ...block }
       ));
       
-      let blocksFalling = false;
+      // Check if any blocks can fall
+      const blocksFalling = boardHasBlocksThatCanFall(newBoard);
       
-      // Mark blocks that should fall - in our coordinate system y decreases as we go down
-      // so we start from 1 (second row from bottom) and check if there's empty space below
-      for (let y = 1; y < newBoard.length; y++) {
-        for (let x = 0; x < newBoard[0].length; x++) {
-          // Only make blocks fall if they're not fixed (e.g. not floor blocks)
-          if (newBoard[y][x] !== null && newBoard[y-1][x] === null && !newBoard[y][x]!.isFixed) {
-            newBoard[y][x]!.falling = true;
-            blocksFalling = true;
+      if (blocksFalling) {
+        // Mark blocks that should fall
+        for (let y = 1; y < newBoard.length; y++) {
+          for (let x = 0; x < newBoard[0].length; x++) {
+            // Only make blocks fall if they're not fixed and have empty space below
+            if (newBoard[y][x] !== null && newBoard[y-1][x] === null && !newBoard[y][x]!.isFixed) {
+              newBoard[y][x]!.falling = true;
+            }
           }
         }
-      }
-      
-      // If blocks are falling, update the board
-      if (blocksFalling) {
+        
         set({ board: newBoard });
         
         // Move falling blocks down
@@ -363,20 +384,26 @@ export const usePuzznic = create<PuzznicState>()(
           
           set({ board: updatedBoard });
           
-          // Continue applying gravity until no more blocks are falling
+          // Apply gravity again if needed, but only check for matches 
+          // when the entire board has settled (no more blocks can fall)
           setTimeout(() => {
-            const { applyGravity, checkMatches, updateGameState } = get();
+            const { applyGravity, boardHasBlocksThatCanFall, checkMatches, updateGameState } = get();
+            const currentBoard = get().board;
             
-            // Check for new matches
-            checkMatches();
-            
-            // Update game state after chain reactions
-            updateGameState();
+            if (boardHasBlocksThatCanFall(currentBoard)) {
+              // Some blocks can still fall, apply gravity again
+              applyGravity();
+            } else {
+              // Board is settled, now check for matches
+              checkMatches();
+              updateGameState();
+            }
           }, 300);
         }, 200);
       } else {
-        // No blocks are falling, update game state
-        const { updateGameState } = get();
+        // No blocks are falling, board is settled, update game state and check matches
+        const { checkMatches, updateGameState } = get();
+        checkMatches();
         updateGameState();
       }
     },
