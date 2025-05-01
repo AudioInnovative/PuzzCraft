@@ -109,14 +109,25 @@ export default function LevelEditor() {
     setDraggedBlockType(null);
   };
   
-  // Handle cell click to remove blocks
+  // Handle cell click to remove blocks or place blocks
   const handleCellClick = (row: number, col: number) => {
     // Convert grid coordinates to game coordinates
     const gameY = board.length - row - 1;
     
+    console.log(`Clicked: Row ${row}, Col ${col} (Game Y: ${gameY})`);
+    
     // If there's a block that isn't a floor block, remove it
-    if (board[gameY][col] !== null && !board[gameY][col]?.isFloor) {
+    if (board[gameY] && board[gameY][col] !== null && !board[gameY][col]?.isFloor) {
+      console.log(`Removing block at Col ${col}, Game Y ${gameY}`);
       removeEditorBlock(col, gameY);
+      playHit();
+    } 
+    // If there's no block and draggedBlockType is set, place that block
+    else if (draggedBlockType !== null && gameY >= 0 && gameY < board.length && 
+             col >= 0 && col < board[0].length && 
+             !(gameY === 0 && board[gameY][col]?.isFloor)) {
+      console.log(`Placing block type ${draggedBlockType} at Col ${col}, Game Y ${gameY}`);
+      placeEditorBlock(col, gameY, draggedBlockType);
       playHit();
     }
   };
@@ -209,7 +220,16 @@ export default function LevelEditor() {
                 key={type}
                 draggable="true"
                 onDragStart={(e) => handleDragStart(e, type)}
-                className="h-16 cursor-grab bg-gray-700 active:cursor-grabbing rounded-lg flex items-center justify-center shadow-md"
+                onClick={() => {
+                  setDraggedBlockType(type);
+                  playHit();
+                  setMessage(`Selected ${blockSymbols[type-1]} block. Click on grid to place.`);
+                  setTimeout(() => setMessage(null), 2000);
+                }}
+                className={cn(
+                  "h-16 cursor-pointer bg-gray-700 rounded-lg flex items-center justify-center shadow-md",
+                  draggedBlockType === type ? "ring-4 ring-white" : "hover:ring-2 hover:ring-gray-400"
+                )}
               >
                 <div 
                   className="w-12 h-12 rounded-md flex items-center justify-center"
@@ -221,7 +241,7 @@ export default function LevelEditor() {
             ))}
           </div>
           
-          <div className="mt-4">
+          <div className="mt-4 space-y-3">
             <button
               onClick={() => {
                 createEmptyLevel();
@@ -233,14 +253,29 @@ export default function LevelEditor() {
             >
               New Level
             </button>
+            
+            {draggedBlockType !== null && (
+              <button
+                onClick={() => {
+                  setDraggedBlockType(null);
+                  playHit();
+                  setMessage("Block selection cleared");
+                  setTimeout(() => setMessage(null), 2000);
+                }}
+                className="w-full bg-gray-600 text-white py-2 text-base font-semibold rounded-lg shadow-md active:translate-y-1"
+              >
+                Clear Selection
+              </button>
+            )}
           </div>
           
           {/* Instructions */}
           <div className="mt-4 text-white">
             <p className="text-center mb-2 font-semibold">Instructions:</p>
             <p className="text-sm mb-1">• Drag blocks from palette to grid</p>
-            <p className="text-sm mb-1">• Tap blocks on grid to remove</p>
-            <p className="text-sm">• Each block must have a matching pair</p>
+            <p className="text-sm mb-1">• Or click to select, then click grid to place</p>
+            <p className="text-sm mb-1">• Click blocks on grid to remove them</p>
+            <p className="text-sm">• Each block type must have an even number</p>
           </div>
           
           {/* Status indicator */}
