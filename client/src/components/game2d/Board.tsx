@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { usePuzznic } from '../../lib/stores/usePuzznic';
 import { useAudio } from '../../lib/stores/useAudio';
 import { BlockType } from '../../lib/stores/usePuzznic';
@@ -27,12 +27,21 @@ function renderBlock(
   x: number,
   y: number,
   size: number,
-  isSelected: boolean
+  isSelected: boolean,
+  animationProgress: number = 0 // Animation progress from 0 to 1 for falling
 ) {
   // Apply selection effect
   const blockSize = isSelected ? size * 1.1 : size * 0.95;
-  const blockX = x + (size - blockSize) / 2;
-  const blockY = y + (size - blockSize) / 2;
+  
+  // Calculate position with animation if block is falling
+  let blockX = x + (size - blockSize) / 2;
+  let blockY = y + (size - blockSize) / 2;
+  
+  // If block is falling, animate its position
+  if (block.falling && animationProgress > 0) {
+    // Animate from the position above to current position
+    blockY = (y - size) + (size * animationProgress) + (size - blockSize) / 2;
+  }
   
   // Set opacity for matched blocks
   ctx.globalAlpha = block.matched ? 0.5 : 1.0;
@@ -206,6 +215,11 @@ interface BoardProps {
 
 export function Board2D({ width, height }: BoardProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const animationFrameRef = useRef<number | null>(null);
+  const animationProgressRef = useRef<number>(0);
+  const lastFrameTimeRef = useRef<number | null>(null);
+  const anyBlocksFallingRef = useRef<boolean>(false);
+  
   const { 
     board, 
     currentLevelData,
@@ -295,8 +309,8 @@ export function Board2D({ width, height }: BoardProps) {
     }
   };
   
-  // Render the game board
-  useEffect(() => {
+  // Function to render the current game state with animations
+  const renderGameState = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     
@@ -326,14 +340,84 @@ export function Board2D({ width, height }: BoardProps) {
             x * BLOCK_SIZE, 
             uiY * BLOCK_SIZE, 
             BLOCK_SIZE,
-            selectedBlockPos?.x === x && selectedBlockPos?.y === y
+            selectedBlockPos?.x === x && selectedBlockPos?.y === y,
+            animationProgressRef.current // Pass animation progress
           );
         }
       });
     });
     
     ctx.restore();
-  }, [board, currentLevelData, width, height, offsetX, offsetY, scale, rows, cols, selectedBlockPos]);
+  }, [board, width, height, offsetX, offsetY, scale, rows, cols, selectedBlockPos]);
+
+  // Animation loop for smooth falling blocks
+  const animateBlocks = useCallback((timestamp: number) => {
+    if (!lastFrameTimeRef.current) {
+      lastFrameTimeRef.current = timestamp;
+    }
+    
+    const elapsed = timestamp - lastFrameTimeRef.current;
+    const ANIMATION_DURATION = 200; // 200ms for the falling animation
+    
+    // Update animation progress
+    animationProgressRef.current += elapsed / ANIMATION_DURATION;
+    
+    // Check if any blocks are falling
+    anyBlocksFallingRef.current = board.some(row => 
+      row.some(block => block?.falling)
+    );
+    
+    // If animation is complete or no blocks are falling, reset
+    if (animationProgressRef.current >= 1 || !anyBlocksFallingRef.current) {
+      animationProgressRef.current = 0;
+      lastFrameTimeRef.current = null;
+      
+      // If no blocks are falling, stop the animation loop
+      if (!anyBlocksFallingRef.current) {
+        if (animationFrameRef.current !== null) {
+          cancelAnimationFrame(animationFrameRef.current);
+          animationFrameRef.current = null;
+        }
+        return;
+      }
+    } else {
+      // Otherwise update last frame time
+      lastFrameTimeRef.current = timestamp;
+    }
+    
+    // Render the current state
+    renderGameState();
+    
+    // Continue the animation loop
+    animationFrameRef.current = requestAnimationFrame(animateBlocks);
+  }, [board, renderGameState]);
+  
+  // Start animation when blocks start falling
+  useEffect(() => {
+    // Check if any blocks are falling
+    const blocksFalling = board.some(row => 
+      row.some(block => block?.falling)
+    );
+    
+    // Start animation if blocks are falling and animation isn't already running
+    if (blocksFalling && animationFrameRef.current === null) {
+      animationProgressRef.current = 0;
+      lastFrameTimeRef.current = null;
+      animationFrameRef.current = requestAnimationFrame(animateBlocks);
+    } 
+    
+    // Initial render if no animation
+    if (!blocksFalling) {
+      renderGameState();
+    }
+    
+    // Cleanup animation on unmount
+    return () => {
+      if (animationFrameRef.current !== null) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, [board, animateBlocks, renderGameState]);
   
   return (
     <canvas

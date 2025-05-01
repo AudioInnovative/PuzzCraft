@@ -418,6 +418,7 @@ export const usePuzznic = create<PuzznicState>()(
         set({ board: newBoard });
         
         // Move falling blocks down
+        // Start animation and give time for visual effect (250ms)
         setTimeout(() => {
           const { board } = get();
           const updatedBoard = board.map(row => row.map(block => 
@@ -448,7 +449,7 @@ export const usePuzznic = create<PuzznicState>()(
           // Apply gravity again if needed, but only check for matches 
           // when the entire board has settled (no more blocks can fall)
           setTimeout(() => {
-            const { applyGravity, boardHasBlocksThatCanFall, checkMatches, updateGameState } = get();
+            const { applyGravity, boardHasBlocksThatCanFall, checkMatches } = get();
             const currentBoard = get().board;
             
             if (boardHasBlocksThatCanFall(currentBoard)) {
@@ -460,8 +461,8 @@ export const usePuzznic = create<PuzznicState>()(
               // when there are no more matches and the board is fully settled
               checkMatches();
             }
-          }, 300);
-        }, 200);
+          }, 250); // Shorter delay between gravity steps
+        }, 250); // Time for animation to complete
       } else {
         // No blocks are falling, board is settled, check for matches
         // checkMatches will handle updateGameState when there are no more matches
