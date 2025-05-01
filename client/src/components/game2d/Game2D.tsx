@@ -4,6 +4,7 @@ import GameUI2D from './GameUI';
 import { KeyboardController } from './KeyboardController';
 import { TouchController } from './TouchController';
 import SoundManager2D from './SoundManager';
+import SimpleLevelEditor from './SimpleLevelEditor';
 import { useAudio } from '../../lib/stores/useAudio';
 import { usePuzznic } from '../../lib/stores/usePuzznic';
 
@@ -61,13 +62,20 @@ export default function Game2D() {
     };
   }, []);
 
+  const { gamePhase } = usePuzznic();
+  
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden' }}>
-      <Board2D width={dimensions.width} height={dimensions.height} />
-      <KeyboardController />
-      <TouchController />
-      <GameUI2D />
-      <SoundManager2D />
+      {gamePhase !== "editing" && (
+        <>
+          <Board2D width={dimensions.width} height={dimensions.height} />
+          <KeyboardController />
+          <TouchController />
+          <GameUI2D />
+          <SoundManager2D />
+        </>
+      )}
+      <SimpleLevelEditor />
     </div>
   );
 }
