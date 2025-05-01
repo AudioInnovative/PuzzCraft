@@ -249,10 +249,10 @@ export function Board2D({ width, height }: BoardProps) {
   const offsetX = (width - boardWidth * scale) / 2;
   const offsetY = (height - boardHeight * scale) / 2;
   
-  // Function to handle pointer (mouse or touch) events
-  const handlePointerSelect = (clientX: number, clientY: number) => {
+  // Function to get grid coordinates from client coordinates
+  const getGridCoordinates = (clientX: number, clientY: number) => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas) return null;
     
     // Get position relative to canvas
     const rect = canvas.getBoundingClientRect();
@@ -267,26 +267,90 @@ export function Board2D({ width, height }: BoardProps) {
     if (gridX >= 0 && gridX < cols && gridY >= 0 && gridY < rows) {
       // Convert from UI y-coordinate (top-down) to game y-coordinate (bottom-up)
       const gameY = rows - gridY - 1;
+      return { gridX, gameY };
+    }
+    
+    return null;
+  };
+  
+  // For tracking mouse drag operations
+  const dragStartRef = useRef<{ x: number, y: number, gridX: number, gameY: number } | null>(null);
+  const mouseMoveThresholdRef = useRef<number>(15); // Pixels to move before triggering a direction
+  
+  // Function to handle pointer (mouse or touch) events for selection
+  const handlePointerSelect = (clientX: number, clientY: number) => {
+    const coords = getGridCoordinates(clientX, clientY);
+    if (!coords) return;
+    
+    const { gridX, gameY } = coords;
+    
+    if (gamePhase === "editing") {
+      // In editor mode, clicking places or removes blocks
+      const blockExists = board[gameY] && board[gameY][gridX] !== null;
       
-      if (gamePhase === "editing") {
-        // In editor mode, clicking places or removes blocks
-        const blockExists = board[gameY] && board[gameY][gridX] !== null;
-        
-        if (blockExists && !board[gameY][gridX]?.isFloor) {
-          // Remove existing block if it's not a floor block
-          removeEditorBlock(gridX, gameY);
-        } else if (!blockExists) {
-          // Place new block if position is empty
-          placeEditorBlock(gridX, gameY, currentEditingBlockType);
-        }
-      } else {
-        // In regular game mode, select blocks
-        selectBlock(gridX, gameY);
+      if (blockExists && !board[gameY][gridX]?.isFloor) {
+        // Remove existing block if it's not a floor block
+        removeEditorBlock(gridX, gameY);
+      } else if (!blockExists) {
+        // Place new block if position is empty
+        placeEditorBlock(gridX, gameY, currentEditingBlockType);
+      }
+    } else {
+      // In regular game mode, select blocks
+      selectBlock(gridX, gameY);
+      
+      // Store drag start position for mouse movement
+      dragStartRef.current = {
+        x: clientX,
+        y: clientY,
+        gridX,
+        gameY
+      };
+    }
+    
+    // Play sound for feedback
+    playHitSound();
+  };
+  
+  // Mouse move handler for dragging blocks
+  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    // Only handle mouse move if we're in game mode and have a dragging operation
+    if (gamePhase !== "playing" || !dragStartRef.current || !selectedBlockPos) return;
+    
+    const { x: startX, gridX: startGridX } = dragStartRef.current;
+    const diffX = e.clientX - startX;
+    
+    // Check if we've moved enough to trigger a direction
+    if (Math.abs(diffX) > mouseMoveThresholdRef.current) {
+      // Get current board state
+      const { moveSelectedBlock } = usePuzznic.getState();
+      
+      if (diffX < 0 && selectedBlockPos.x > 0) {
+        // Move left if we've dragged left
+        moveSelectedBlock('left');
+        playHitSound();
+      } else if (diffX > 0 && selectedBlockPos.x < cols - 1) {
+        // Move right if we've dragged right
+        moveSelectedBlock('right');
+        playHitSound();
       }
       
-      // Play sound for feedback
-      playHitSound();
+      // Reset drag start to current position to allow continuous dragging
+      dragStartRef.current = {
+        ...dragStartRef.current,
+        x: e.clientX
+      };
     }
+  };
+  
+  // Handle mouse up to reset drag operation
+  const handleMouseUp = () => {
+    dragStartRef.current = null;
+  };
+  
+  // Handle mouse leaving canvas to reset drag operation
+  const handleMouseLeave = () => {
+    dragStartRef.current = null;
   };
   
   // Handle mouse click
@@ -446,6 +510,9 @@ export function Board2D({ width, height }: BoardProps) {
       width={width}
       height={height}
       onClick={handleCanvasClick}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseLeave}
       onTouchStart={handleCanvasTouch}
       onTouchEnd={handleTouchEnd}
       onTouchCancel={handleTouchEnd}
@@ -453,7 +520,8 @@ export function Board2D({ width, height }: BoardProps) {
         width: '100%', 
         height: '100%',
         background: '#000000', // Black background like NES games
-        touchAction: 'none' // Prevent browser handling of touch gestures (like scrolling)
+        touchAction: 'none', // Prevent browser handling of touch gestures (like scrolling)
+        cursor: selectedBlockPos ? 'move' : 'pointer' // Show move cursor when a block is selected
       }}
     />
   );
