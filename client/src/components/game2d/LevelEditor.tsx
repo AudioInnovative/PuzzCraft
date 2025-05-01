@@ -90,47 +90,64 @@ export default function LevelEditor() {
     }
   };
   
-  // Create the grid display
+  // Create a direct visual representation of the grid with numbered coordinates
   const renderEditorGrid = () => {
     const rows = board.length;
     const cols = board[0].length;
     
-    // Directly display the game board grid, but flipped vertically
-    const gameRows = [];
+    // We'll create the grid in UI order - top to bottom
+    const uiGrid = [];
     
-    // Loop through each row from bottom to top (to display correctly in UI)
-    for (let gameY = 0; gameY < rows; gameY++) {
+    // Create the visual grid - we'll map each UI position directly to the correct game position
+    for (let uiRow = 0; uiRow < rows; uiRow++) {
       const rowCells = [];
       
-      // For each cell in the row
-      for (let gameX = 0; gameX < cols; gameX++) {
-        // Get cell content directly
+      // In each row, create columns
+      for (let uiCol = 0; uiCol < cols; uiCol++) {
+        // Convert UI coordinates to game board coordinates
+        const gameY = rows - uiRow - 1; // y=0 is bottom in game, but top in UI
+        const gameX = uiCol;            // x coordinates align
+        
+        // Get cell content from game coordinates
         const cell = board[gameY][gameX];
         
-        // Create the cell element
+        // Create a grid cell with visual position indicators (for debugging)
         rowCells.push(
           <div
-            key={`${gameY}-${gameX}`}
+            key={`${uiRow}-${uiCol}`}
             className={cn(
-              "rounded-md flex items-center justify-center",
+              "rounded-md flex items-center justify-center relative",
               selectedBlockType !== null ? "cursor-pointer" : "",
-              cell ? "" : "bg-gray-700"
+              cell ? "bg-opacity-90" : "bg-gray-700"
             )}
-            style={{ width: CELL_SIZE, height: CELL_SIZE }}
+            style={{ 
+              width: CELL_SIZE, 
+              height: CELL_SIZE,
+              border: '1px solid rgba(255,255,255,0.1)'
+            }}
             onClick={() => {
-              // Direct click-to-place/remove
+              console.log(`------------------`);
+              console.log(`UI Click: row=${uiRow}, col=${uiCol}`);
+              console.log(`Game pos: X=${gameX}, Y=${gameY}`);
+              
+              // Direct click-to-place/remove at game coordinates
               if (cell !== null && !cell.isFloor) {
-                console.log(`Removing block at X=${gameX}, Y=${gameY}`);
+                console.log(`Removing block at game X=${gameX}, Y=${gameY}`);
                 removeEditorBlock(gameX, gameY);
                 playHit();
               } else if (selectedBlockType !== null && !(gameY === 0 && cell?.isFloor)) {
-                console.log(`Placing block type ${selectedBlockType} at X=${gameX}, Y=${gameY}`);
+                console.log(`Placing block type ${selectedBlockType} at game X=${gameX}, Y=${gameY}`);
                 placeEditorBlock(gameX, gameY, selectedBlockType); 
                 playHit();
+                
+                // Verify placement
+                setTimeout(() => {
+                  const updatedCell = board[gameY][gameX];
+                  console.log(`After placement, cell at (${gameX},${gameY}) is:`, 
+                    updatedCell ? `Block type ${updatedCell.type}` : 'Empty');
+                }, 100);
               }
             }}
-            data-game-x={gameX}
-            data-game-y={gameY}
           >
             {cell && (
               <div 
@@ -140,12 +157,17 @@ export default function LevelEditor() {
                 <span className="text-white font-bold">{blockSymbols[cell.type-1]}</span>
               </div>
             )}
+            
+            {/* Small top-left coordinate indicator for debugging */}
+            <span className="absolute text-[6px] text-white opacity-40 top-0 left-0.5">
+              {gameX},{gameY}
+            </span>
           </div>
         );
       }
       
-      gameRows.unshift( // Add to front to flip the display vertically
-        <div key={`row-${gameY}`} className="flex flex-row gap-1">
+      uiGrid.push(
+        <div key={`row-${uiRow}`} className="flex flex-row gap-1">
           {rowCells}
         </div>
       );
@@ -157,7 +179,7 @@ export default function LevelEditor() {
         className="flex flex-col gap-1 bg-gray-800 p-2 rounded-lg"
         style={{ width: cols * (CELL_SIZE + 4) + 8, height: rows * (CELL_SIZE + 4) + 8 }}
       >
-        {gameRows}
+        {uiGrid}
       </div>
     );
   };
