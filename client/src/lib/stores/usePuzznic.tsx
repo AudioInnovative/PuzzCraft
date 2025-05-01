@@ -63,46 +63,36 @@ export const usePuzznic = create<PuzznicState>()(
     
     // Helper function to validate level data
     validateLevelData: (levelData: number[][]) => {
-      // Count occurrences of each block type (excluding floor blocks)
       const blockCounts: Record<number, number> = {};
       
-      // Find the floor row - usually the last row or second-to-last row
-      let floorRowY = -1;
-      for (let y = levelData.length - 1; y >= 0; y--) {
+      // Identify the floor blocks which are typically at the bottom rows
+      const floorBlocks: Set<string> = new Set();
+      
+      // First find all rows that look like floor rows (rows with many type 1 blocks at the bottom)
+      const potentialFloorRows: number[] = [];
+      for (let y = levelData.length - 1; y >= Math.max(0, levelData.length - 3); y--) {
         // Check if this row has type 1 blocks (typical floor blocks)
-        if (levelData[y].some(value => value === 1)) {
-          // Check if it's a consistent pattern of floor blocks
-          const rowHasMostlyFloorBlocks = levelData[y].filter(value => value === 1).length >= levelData[y].length / 2;
-          if (rowHasMostlyFloorBlocks) {
-            floorRowY = y;
-            break;
+        const type1Count = levelData[y].filter(value => value === 1).length;
+        if (type1Count >= 3) { // If there are several type 1 blocks, this is likely a floor row
+          potentialFloorRows.push(y);
+          
+          // Mark all type 1 blocks in this row as floor blocks
+          for (let x = 0; x < levelData[y].length; x++) {
+            if (levelData[y][x] === 1) {
+              floorBlocks.add(`${y},${x}`);
+            }
           }
         }
       }
       
-      // Count all non-floor blocks
+      // Now count all non-floor blocks
       for (let y = 0; y < levelData.length; y++) {
-        // Skip the floor row
-        if (y === floorRowY) continue;
-        
         for (let x = 0; x < levelData[y].length; x++) {
           const blockType = levelData[y][x];
-          // Only count gameplay blocks (not floor blocks and not empty spaces)
-          if (blockType > 1) {
-            blockCounts[blockType] = (blockCounts[blockType] || 0) + 1;
-          }
-        }
-      }
-      
-      // Handle red blocks (type 1) that aren't floor blocks
-      for (let y = 0; y < levelData.length; y++) {
-        // Skip the floor row
-        if (y === floorRowY) continue;
-        
-        for (let x = 0; x < levelData[y].length; x++) {
-          const blockType = levelData[y][x];
-          // Only count red blocks that aren't floor blocks
-          if (blockType === 1) {
+          const isFloorBlock = floorBlocks.has(`${y},${x}`);
+          
+          // Count only non-floor, non-zero blocks
+          if (blockType > 0 && !isFloorBlock) {
             blockCounts[blockType] = (blockCounts[blockType] || 0) + 1;
           }
         }
