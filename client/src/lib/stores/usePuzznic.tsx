@@ -277,6 +277,20 @@ export const usePuzznic = create<PuzznicState>()(
       if (gamePhase !== "playing" || !selectedBlockPos) return;
       
       const { x, y } = selectedBlockPos;
+      
+      // Safety check: ensure the coordinates are valid
+      if (y < 0 || y >= board.length || x < 0 || x >= board[0].length) {
+        console.warn("Invalid selected block position", selectedBlockPos);
+        return;
+      }
+      
+      // Safety check: ensure the selected block exists
+      if (!board[y][x]) {
+        console.warn("No block at selected position", selectedBlockPos);
+        return;
+      }
+      
+      // Create a deep copy of the board
       const newBoard = board.map(row => row.map(block => 
         block === null ? null : { ...block }
       ));
@@ -286,29 +300,35 @@ export const usePuzznic = create<PuzznicState>()(
       
       // Check if move is valid (in bounds and destination is empty)
       if (newX >= 0 && newX < board[0].length && newBoard[y][newX] === null) {
-        // Move the block
-        newBoard[y][newX] = { 
-          ...newBoard[y][x]!, 
-          x: newX, 
-          y,
-          isFloor: newBoard[y][x]!.isFloor // Make sure to copy the isFloor property
-        };
-        newBoard[y][x] = null;
+        // Get the current block safely
+        const currentBlock = newBoard[y][x];
         
-        // Update selection
-        newBoard[y][newX]!.selected = true;
-        
-        set({ 
-          board: newBoard,
-          selectedBlockPos: { x: newX, y },
-          moveCount: get().moveCount + 1
-        });
-        
-        // After moving, check for matches and apply gravity
-        setTimeout(() => {
-          const { checkMatches } = get();
-          checkMatches();
-        }, 100);
+        // Only proceed if the current block exists
+        if (currentBlock) {
+          // Move the block with all properties intact
+          newBoard[y][newX] = { 
+            ...currentBlock, 
+            x: newX, 
+            y,
+            // No need to access isFloor separately since we're copying the entire object
+          };
+          newBoard[y][x] = null;
+          
+          // Update selection
+          newBoard[y][newX].selected = true;
+          
+          set({ 
+            board: newBoard,
+            selectedBlockPos: { x: newX, y },
+            moveCount: get().moveCount + 1
+          });
+          
+          // After moving, check for matches and apply gravity
+          setTimeout(() => {
+            const { checkMatches } = get();
+            checkMatches();
+          }, 100);
+        }
       }
     },
     

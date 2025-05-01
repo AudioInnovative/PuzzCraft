@@ -315,48 +315,73 @@ export function Board2D({ width, height }: BoardProps) {
   
   // Mouse move handler for dragging blocks
   const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    // Only handle mouse move if we're in game mode and have a dragging operation
-    if (gamePhase !== "playing" || !dragStartRef.current || !selectedBlockPos) return;
-    
-    // Check if we've moved recently (enforcing a cooldown period)
-    const currentTime = Date.now();
-    const timeSinceLastMove = currentTime - lastMoveTimeRef.current;
-    
-    // Don't allow moves more frequently than every 300ms
-    if (timeSinceLastMove < 300) return;
-    
-    const { x: startX, gridX: startGridX } = dragStartRef.current;
-    const diffX = e.clientX - startX;
-    
-    // Check if we've moved enough to trigger a direction
-    if (Math.abs(diffX) > mouseMoveThresholdRef.current) {
-      // Get current game state and check if the move would be valid
-      const { moveSelectedBlock } = usePuzznic.getState();
-      const { board } = usePuzznic.getState();
-      const { x, y } = selectedBlockPos;
+    try {
+      // Only handle mouse move if we're in game mode and have a dragging operation
+      if (gamePhase !== "playing" || !dragStartRef.current || !selectedBlockPos) return;
       
-      // Safely check if move is valid before attempting it
-      if (diffX < 0 && x > 0) {
-        // Check if there's space to move left
-        if (board[y] && x-1 >= 0 && board[y][x-1] === null) {
-          moveSelectedBlock('left');
-          playHitSound();
-          lastMoveTimeRef.current = currentTime;
+      // Check if we've moved recently (enforcing a cooldown period)
+      const currentTime = Date.now();
+      const timeSinceLastMove = currentTime - lastMoveTimeRef.current;
+      
+      // Don't allow moves more frequently than every 300ms
+      if (timeSinceLastMove < 300) return;
+      
+      const { x: startX } = dragStartRef.current;
+      const diffX = e.clientX - startX;
+      
+      // Check if we've moved enough to trigger a direction
+      if (Math.abs(diffX) > mouseMoveThresholdRef.current) {
+        // Get current game state safely
+        const puzznicState = usePuzznic.getState();
+        if (!puzznicState) return;
+        
+        const { moveSelectedBlock, board } = puzznicState;
+        
+        // Safety check for selectedBlockPos
+        if (!selectedBlockPos) return;
+        
+        const { x, y } = selectedBlockPos;
+        
+        // Safety check for board dimensions
+        if (!board || !board[y] || y < 0 || y >= board.length) {
+          console.warn("Board or row is undefined, or y is out of bounds", y, board?.length);
+          return;
         }
-      } else if (diffX > 0 && x < cols - 1) {
-        // Check if there's space to move right
-        if (board[y] && x+1 < board[y].length && board[y][x+1] === null) {
-          moveSelectedBlock('right');
-          playHitSound();
-          lastMoveTimeRef.current = currentTime;
+        
+        try {
+          // Safely check if move is valid before attempting it
+          if (diffX < 0 && x > 0) {
+            // Check if there's space to move left
+            if (x-1 >= 0 && board[y][x-1] === null) {
+              moveSelectedBlock('left');
+              playHitSound();
+              lastMoveTimeRef.current = currentTime;
+            }
+          } else if (diffX > 0 && x < cols - 1) {
+            // Check if there's space to move right
+            if (x+1 < board[y].length && board[y][x+1] === null) {
+              moveSelectedBlock('right');
+              playHitSound();
+              lastMoveTimeRef.current = currentTime;
+            }
+          }
+        } catch (error) {
+          console.error("Error checking move validity:", error);
+          // Reset drag operation on error
+          dragStartRef.current = null;
+          return;
         }
+        
+        // Reset drag start to current position to allow continuous dragging
+        dragStartRef.current = {
+          ...dragStartRef.current,
+          x: e.clientX
+        };
       }
-      
-      // Reset drag start to current position to allow continuous dragging
-      dragStartRef.current = {
-        ...dragStartRef.current,
-        x: e.clientX
-      };
+    } catch (error) {
+      console.error("Error in handleMouseMove:", error);
+      // Reset drag operation on any error
+      dragStartRef.current = null;
     }
   };
   
