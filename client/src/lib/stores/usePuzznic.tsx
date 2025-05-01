@@ -268,7 +268,7 @@ export const usePuzznic = create<PuzznicState>()(
       }
     },
     
-    // Apply gravity to make blocks fall
+    // Apply gravity to make blocks fall (note: in our coordinate system, y=0 is at the bottom)
     applyGravity: () => {
       const { board } = get();
       
@@ -279,10 +279,11 @@ export const usePuzznic = create<PuzznicState>()(
       
       let blocksFalling = false;
       
-      // Mark blocks that should fall
-      for (let y = newBoard.length - 2; y >= 0; y--) {
+      // Mark blocks that should fall - in our coordinate system y decreases as we go down
+      // so we start from 1 (second row from bottom) and check if there's empty space below
+      for (let y = 1; y < newBoard.length; y++) {
         for (let x = 0; x < newBoard[0].length; x++) {
-          if (newBoard[y][x] !== null && newBoard[y+1][x] === null) {
+          if (newBoard[y][x] !== null && newBoard[y-1][x] === null) {
             newBoard[y][x]!.falling = true;
             blocksFalling = true;
           }
@@ -300,14 +301,14 @@ export const usePuzznic = create<PuzznicState>()(
             block === null ? null : { ...block }
           ));
           
-          // Move blocks down one step
-          for (let y = updatedBoard.length - 2; y >= 0; y--) {
+          // Move blocks down - in our system, moving down means y decreases
+          for (let y = 1; y < updatedBoard.length; y++) {
             for (let x = 0; x < updatedBoard[0].length; x++) {
-              if (updatedBoard[y][x] !== null && updatedBoard[y][x]!.falling && updatedBoard[y+1][x] === null) {
-                // Move block down
-                updatedBoard[y+1][x] = { 
+              if (updatedBoard[y][x] !== null && updatedBoard[y][x]!.falling && updatedBoard[y-1][x] === null) {
+                // Move block down (decrease y)
+                updatedBoard[y-1][x] = { 
                   ...updatedBoard[y][x]!, 
-                  y: y+1,
+                  y: y-1,  // Update the y coordinate to match new position
                   falling: false
                 };
                 updatedBoard[y][x] = null;
