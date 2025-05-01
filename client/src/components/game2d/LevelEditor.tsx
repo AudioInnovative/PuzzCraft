@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, DragEvent } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { usePuzznic } from '../../lib/stores/usePuzznic';
 import { BlockType } from '../../lib/stores/usePuzznic';
 import { cn } from '../../lib/utils';
@@ -31,7 +31,7 @@ export default function LevelEditor() {
   
   const [message, setMessage] = useState<string | null>(null);
   const [isValid, setIsValid] = useState(true);
-  const [draggedBlockType, setDraggedBlockType] = useState<number | null>(null);
+  const [selectedBlockType, setSelectedBlockType] = useState<number | null>(null);
   const editorGridRef = useRef<HTMLDivElement>(null);
   
   // Check level validity whenever the board changes
@@ -69,65 +69,38 @@ export default function LevelEditor() {
     }
   };
   
-  // Drag handlers
-  const handleDragStart = (e: DragEvent<HTMLDivElement>, blockType: number) => {
-    setDraggedBlockType(blockType);
-    
-    // Set drag image (transparent 1x1 pixel)
-    const img = new Image();
-    img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
-    e.dataTransfer.setDragImage(img, 0, 0);
-    
-    // Add some data to the drag operation
-    e.dataTransfer.setData('text/plain', blockType.toString());
-    e.dataTransfer.effectAllowed = 'copy';
+  // Handle selection of block type from palette
+  const handleSelectBlockType = (blockType: number) => {
+    setSelectedBlockType(blockType);
+    playHit();
+    setMessage(`Selected ${blockSymbols[blockType-1]} block. Click on grid to place.`);
+    setTimeout(() => setMessage(null), 2000);
   };
   
-  const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'copy';
-  };
-  
-  const handleDrop = (e: DragEvent<HTMLDivElement>, row: number, col: number) => {
-    e.preventDefault();
+  // Handle cell click (to place or remove blocks)
+  const handleCellClick = (rowIndex: number, colIndex: number) => {
+    // Convert UI grid coordinates to game board coordinates
+    // In the UI, row 0 is at the top, but in the game, y=0 is at the bottom
+    const gameY = board.length - rowIndex - 1;
     
-    if (draggedBlockType !== null) {
-      // Convert grid coordinates to game coordinates
-      // In the UI grid, row 0 is at the top, but in the game grid, y=0 is at the bottom
-      const gameY = board.length - row - 1;
-      
-      // Don't allow placing blocks on the floor row
-      if (gameY === 0 && board[gameY][col]?.isFloor) {
-        return;
-      }
-      
-      // Place the block
-      placeEditorBlock(col, gameY, draggedBlockType);
+    console.log(`Clicked: Row ${rowIndex}, Col ${colIndex} (Game Y: ${gameY})`);
+    
+    // First check if there's a block to remove
+    if (board[gameY] && board[gameY][colIndex] !== null && !board[gameY][colIndex]?.isFloor) {
+      console.log(`Removing block at Col ${colIndex}, Game Y ${gameY}`);
+      removeEditorBlock(colIndex, gameY);
       playHit();
+      return;
     }
     
-    setDraggedBlockType(null);
-  };
-  
-  // Handle cell click to remove blocks or place blocks
-  const handleCellClick = (row: number, col: number) => {
-    // Convert grid coordinates to game coordinates
-    const gameY = board.length - row - 1;
-    
-    console.log(`Clicked: Row ${row}, Col ${col} (Game Y: ${gameY})`);
-    
-    // If there's a block that isn't a floor block, remove it
-    if (board[gameY] && board[gameY][col] !== null && !board[gameY][col]?.isFloor) {
-      console.log(`Removing block at Col ${col}, Game Y ${gameY}`);
-      removeEditorBlock(col, gameY);
-      playHit();
-    } 
-    // If there's no block and draggedBlockType is set, place that block
-    else if (draggedBlockType !== null && gameY >= 0 && gameY < board.length && 
-             col >= 0 && col < board[0].length && 
-             !(gameY === 0 && board[gameY][col]?.isFloor)) {
-      console.log(`Placing block type ${draggedBlockType} at Col ${col}, Game Y ${gameY}`);
-      placeEditorBlock(col, gameY, draggedBlockType);
+    // If there's no block and a block type is selected, place that block
+    if (selectedBlockType !== null && 
+        gameY >= 0 && gameY < board.length && 
+        colIndex >= 0 && colIndex < board[0].length && 
+        !(gameY === 0 && board[gameY][colIndex]?.isFloor)) {
+      
+      console.log(`Placing block type ${selectedBlockType} at Col ${colIndex}, Game Y ${gameY}`);
+      placeEditorBlock(colIndex, gameY, selectedBlockType);
       playHit();
     }
   };
@@ -159,11 +132,13 @@ export default function LevelEditor() {
           row.map((cell, colIndex) => (
             <div
               key={`${rowIndex}-${colIndex}`}
-              className="bg-gray-700 rounded-md flex items-center justify-center"
+              className={cn(
+                "rounded-md flex items-center justify-center",
+                selectedBlockType !== null ? "cursor-pointer" : "",
+                cell ? "" : "bg-gray-700"
+              )}
               style={{ width: CELL_SIZE, height: CELL_SIZE }}
               onClick={() => handleCellClick(rowIndex, colIndex)}
-              onDragOver={handleDragOver}
-              onDrop={(e) => handleDrop(e, rowIndex, colIndex)}
             >
               {cell && (
                 <div 
@@ -216,19 +191,12 @@ export default function LevelEditor() {
           
           <div className="grid grid-cols-2 md:grid-cols-1 gap-4">
             {blockTypes.map(type => (
-              <div 
+              <button 
                 key={type}
-                draggable="true"
-                onDragStart={(e) => handleDragStart(e, type)}
-                onClick={() => {
-                  setDraggedBlockType(type);
-                  playHit();
-                  setMessage(`Selected ${blockSymbols[type-1]} block. Click on grid to place.`);
-                  setTimeout(() => setMessage(null), 2000);
-                }}
+                onClick={() => handleSelectBlockType(type)}
                 className={cn(
-                  "h-16 cursor-pointer bg-gray-700 rounded-lg flex items-center justify-center shadow-md",
-                  draggedBlockType === type ? "ring-4 ring-white" : "hover:ring-2 hover:ring-gray-400"
+                  "h-16 cursor-pointer rounded-lg flex items-center justify-center shadow-md",
+                  selectedBlockType === type ? "ring-4 ring-white bg-gray-600" : "bg-gray-700 hover:ring-2 hover:ring-gray-400"
                 )}
               >
                 <div 
@@ -237,7 +205,7 @@ export default function LevelEditor() {
                 >
                   <span className="text-white font-bold text-2xl">{blockSymbols[type-1]}</span>
                 </div>
-              </div>
+              </button>
             ))}
           </div>
           
@@ -254,10 +222,10 @@ export default function LevelEditor() {
               New Level
             </button>
             
-            {draggedBlockType !== null && (
+            {selectedBlockType !== null && (
               <button
                 onClick={() => {
-                  setDraggedBlockType(null);
+                  setSelectedBlockType(null);
                   playHit();
                   setMessage("Block selection cleared");
                   setTimeout(() => setMessage(null), 2000);
@@ -272,11 +240,28 @@ export default function LevelEditor() {
           {/* Instructions */}
           <div className="mt-4 text-white">
             <p className="text-center mb-2 font-semibold">Instructions:</p>
-            <p className="text-sm mb-1">• Drag blocks from palette to grid</p>
-            <p className="text-sm mb-1">• Or click to select, then click grid to place</p>
-            <p className="text-sm mb-1">• Click blocks on grid to remove them</p>
+            <p className="text-sm mb-1">• Click a block to select it</p>
+            <p className="text-sm mb-1">• Click on grid to place selected block</p>
+            <p className="text-sm mb-1">• Click on existing blocks to remove</p>
             <p className="text-sm">• Each block type must have an even number</p>
           </div>
+          
+          {/* Currently selected block */}
+          {selectedBlockType && (
+            <div className="mt-4 bg-gray-900 p-3 rounded-lg">
+              <p className="text-white text-center text-sm mb-2">Selected Block:</p>
+              <div className="flex justify-center">
+                <div 
+                  className="w-12 h-12 rounded-md flex items-center justify-center"
+                  style={{ backgroundColor: getBlockColor(selectedBlockType) }}
+                >
+                  <span className="text-white font-bold text-2xl">
+                    {blockSymbols[selectedBlockType-1]}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
           
           {/* Status indicator */}
           <div className="mt-auto">
