@@ -8,9 +8,12 @@ interface GamePanelProps {
 
 export function GamePanel({ title, value, alert = false }: GamePanelProps) {
   return (
-    <div className="bg-black/70 text-white p-2 rounded-lg min-w-[100px] text-center">
-      <h3 className="text-sm font-semibold">{title}</h3>
-      <p className={cn("text-lg", alert && "text-red-500 animate-pulse font-bold")}>
+    <div className="min-w-[100px] text-white">
+      <h3 className="text-sm uppercase font-bold tracking-wider mb-1">{title}</h3>
+      <p className={cn(
+        "text-lg font-bold font-mono", 
+        alert ? "text-red-500 animate-pulse" : "text-cyan-300"
+      )}>
         {value}
       </p>
     </div>

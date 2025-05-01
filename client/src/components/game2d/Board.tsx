@@ -3,7 +3,7 @@ import { usePuzznic } from '../../lib/stores/usePuzznic';
 import { useAudio } from '../../lib/stores/useAudio';
 import { BlockType } from '../../lib/stores/usePuzznic';
 
-// Define block colors based on type
+// Define block colors based on type (using NES Puzznic color palette)
 const blockColors = [
   "#FF0000", // Red
   "#00FF00", // Green
@@ -11,12 +11,16 @@ const blockColors = [
   "#FFFF00", // Yellow
   "#FF00FF", // Magenta
   "#00FFFF", // Cyan
+  "#FF8800", // Orange
+  "#8800FF", // Purple
+  "#FF00AA", // Pink
+  "#00AAFF", // Light Blue
 ];
 
-// Define block symbols based on type
-const blockSymbols = ["★", "■", "●", "▲", "♦", "✦"];
+// Define block symbols based on original Puzznic
+const blockSymbols = ["✚", "■", "●", "×", "★", "◆", "▲", "♦", "◇", "○"];
 
-// Render a single block
+// Render a single block in NES Puzznic style
 function renderBlock(
   ctx: CanvasRenderingContext2D,
   block: BlockType,
@@ -26,7 +30,7 @@ function renderBlock(
   isSelected: boolean
 ) {
   // Apply selection effect
-  const blockSize = isSelected ? size * 1.1 : size * 0.9;
+  const blockSize = isSelected ? size * 1.1 : size * 0.95;
   const blockX = x + (size - blockSize) / 2;
   const blockY = y + (size - blockSize) / 2;
   
@@ -35,37 +39,60 @@ function renderBlock(
   
   // Draw block shadow if selected
   if (isSelected) {
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
-    ctx.fillRect(blockX + 3, blockY + 3, blockSize, blockSize);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+    ctx.fillRect(blockX - 2, blockY - 2, blockSize + 4, blockSize + 4);
   }
   
-  // Check if this is a floor block (fixed AND at the bottom)
+  // Check if this is a floor block
   if (block.isFloor) {
-    // Draw floor block with a wood texture
-    ctx.fillStyle = '#8B4513'; // Wood color
+    // Draw floor block with a gray color (like NES Puzznic)
+    ctx.fillStyle = '#BBBBBB'; // Light gray
     ctx.fillRect(blockX, blockY, blockSize, blockSize);
     
-    // Add wood grain lines
-    ctx.strokeStyle = '#6B3100';
+    // Add grid lines to match NES floor blocks
+    ctx.strokeStyle = '#999999';
     ctx.lineWidth = 1;
     
-    // Horizontal grain lines
-    for (let i = 1; i < 5; i++) {
+    // Draw grid pattern
+    const gridSize = blockSize / 4;
+    for (let i = 1; i < 4; i++) {
+      // Horizontal lines
       ctx.beginPath();
-      ctx.moveTo(blockX, blockY + i * blockSize / 5);
-      ctx.lineTo(blockX + blockSize, blockY + i * blockSize / 5);
+      ctx.moveTo(blockX, blockY + i * gridSize);
+      ctx.lineTo(blockX + blockSize, blockY + i * gridSize);
+      ctx.stroke();
+      
+      // Vertical lines
+      ctx.beginPath();
+      ctx.moveTo(blockX + i * gridSize, blockY);
+      ctx.lineTo(blockX + i * gridSize, blockY + blockSize);
       ctx.stroke();
     }
     
     // Border
-    ctx.strokeStyle = '#4D2600';
+    ctx.strokeStyle = '#666666';
     ctx.lineWidth = 2;
     ctx.strokeRect(blockX, blockY, blockSize, blockSize);
   } else if (block.isFixed && !block.isFloor) {
-    // Other fixed block types
-    ctx.fillStyle = '#555555'; // Dark gray
+    // Wall blocks - blue/gray like in NES Puzznic
+    ctx.fillStyle = '#6688AA'; // Blue-gray
     ctx.fillRect(blockX, blockY, blockSize, blockSize);
-    ctx.strokeStyle = '#000000';
+    
+    // Add subtle texture to wall blocks
+    const lineSize = blockSize / 4;
+    ctx.strokeStyle = '#556677';
+    ctx.lineWidth = 1;
+    
+    for (let i = 1; i < 4; i++) {
+      // Horizontal lines only - like the original
+      ctx.beginPath();
+      ctx.moveTo(blockX, blockY + i * lineSize);
+      ctx.lineTo(blockX + blockSize, blockY + i * lineSize);
+      ctx.stroke();
+    }
+    
+    // Border
+    ctx.strokeStyle = '#445566';
     ctx.lineWidth = 2;
     ctx.strokeRect(blockX, blockY, blockSize, blockSize);
   } else {
@@ -74,20 +101,45 @@ function renderBlock(
     const color = blockColors[(block.type - 1) % blockColors.length];
     const symbol = blockSymbols[(block.type - 1) % blockSymbols.length];
     
-    // Draw block background
+    // Draw block background (dark version for NES style)
     ctx.fillStyle = color;
     ctx.fillRect(blockX, blockY, blockSize, blockSize);
+    
+    // Draw highlight (for NES-style bevel effect)
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+    ctx.beginPath();
+    ctx.moveTo(blockX, blockY);
+    ctx.lineTo(blockX + blockSize, blockY);
+    ctx.lineTo(blockX + blockSize - blockSize/6, blockY + blockSize/6);
+    ctx.lineTo(blockX + blockSize/6, blockY + blockSize/6);
+    ctx.lineTo(blockX, blockY);
+    ctx.fill();
+    
+    // Draw shadow (for NES-style bevel effect)
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+    ctx.beginPath();
+    ctx.moveTo(blockX, blockY + blockSize);
+    ctx.lineTo(blockX + blockSize, blockY + blockSize);
+    ctx.lineTo(blockX + blockSize, blockY);
+    ctx.lineTo(blockX + blockSize - blockSize/6, blockY + blockSize/6);
+    ctx.lineTo(blockX + blockSize - blockSize/6, blockY + blockSize - blockSize/6);
+    ctx.lineTo(blockX + blockSize/6, blockY + blockSize - blockSize/6);
+    ctx.lineTo(blockX, blockY + blockSize);
+    ctx.fill();
     
     // Draw block border
     ctx.strokeStyle = 'rgba(0, 0, 0, 0.7)';
     ctx.lineWidth = 2;
     ctx.strokeRect(blockX, blockY, blockSize, blockSize);
     
-    // Draw block symbol
-    ctx.fillStyle = 'white';
+    // Draw block symbol (with slight shadow for readability)
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
     ctx.font = `bold ${blockSize * 0.5}px Arial`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
+    ctx.fillText(symbol, blockX + blockSize / 2 + 2, blockY + blockSize / 2 + 2);
+    
+    ctx.fillStyle = 'white';
     ctx.fillText(symbol, blockX + blockSize / 2, blockY + blockSize / 2);
   }
   
@@ -95,16 +147,48 @@ function renderBlock(
   ctx.globalAlpha = 1.0;
 }
 
-// Render the game board (background and border)
+// Render the game board (background and border) in NES Puzznic style
 function renderGameBoard(
   ctx: CanvasRenderingContext2D,
   blockSize: number,
   rows: number,
   cols: number
 ) {
-  // Draw sky background
-  ctx.fillStyle = '#87CEEB';
+  // Draw blue background (like the original NES Puzznic)
+  ctx.fillStyle = '#5588AA'; // Blue background color similar to NES Puzznic
   ctx.fillRect(0, 0, cols * blockSize, rows * blockSize);
+  
+  // Draw subtle brick pattern in background
+  const brickSize = blockSize / 3;
+  ctx.strokeStyle = '#4477AA';
+  ctx.lineWidth = 1;
+  
+  // Horizontal brick pattern lines
+  for (let y = 0; y < rows; y++) {
+    for (let x = 0; x < cols; x++) {
+      // Only draw pattern where there's no block (for a subtle effect)
+      const patternX = x * blockSize;
+      const patternY = y * blockSize;
+      
+      // Draw horizontal lines of the brick pattern
+      for (let i = 1; i < 3; i++) {
+        ctx.beginPath();
+        ctx.moveTo(patternX, patternY + i * brickSize);
+        ctx.lineTo(patternX + blockSize, patternY + i * brickSize);
+        ctx.stroke();
+      }
+      
+      // Draw vertical lines (with offset for brick pattern)
+      for (let i = 0; i < 4; i++) {
+        // Offset every other row to create brick effect
+        const offsetX = (y % 2 === 0) ? 0 : brickSize / 2;
+        ctx.beginPath();
+        ctx.moveTo(patternX + i * brickSize + offsetX, patternY);
+        ctx.lineTo(patternX + i * brickSize + offsetX, patternY + blockSize);
+        ctx.stroke();
+      }
+    }
+  }
   
   // Draw board border
   ctx.strokeStyle = '#000000';

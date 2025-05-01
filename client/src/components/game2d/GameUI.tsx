@@ -24,16 +24,20 @@ export default function GameUI2D() {
 
   return (
     <div className="absolute inset-0 pointer-events-none">
-      {/* Game HUD */}
-      <div className="absolute top-4 left-4 right-4 flex justify-between items-center">
-        <GamePanel title="Level" value={`${level}/${maxLevel}`} />
-        <GamePanel title="Score" value={score.toString()} />
-        <GamePanel title="Moves" value={moveCount.toString()} />
-        <GamePanel 
-          title="Time" 
-          value={formatTime(timeLeft)} 
-          alert={timeLeft <= 30}
-        />
+      {/* Game HUD styled like original Puzznic */}
+      <div className="absolute top-0 left-0 right-0 flex justify-between items-start p-2 bg-black/80 border-b-4 border-blue-700">
+        <div className="flex flex-col gap-2">
+          <GamePanel title="Score" value={score.toString()} />
+          <GamePanel title="Level" value={`${level}-${maxLevel}`} />
+          <GamePanel 
+            title="Time" 
+            value={formatTime(timeLeft)} 
+            alert={timeLeft <= 30}
+          />
+        </div>
+        
+        {/* Right-side blocks counter would go here in the future */}
+        <div className="w-24"></div>
       </div>
       
       {/* Game messages */}
