@@ -71,19 +71,24 @@ export const usePuzznic = create<PuzznicState>()(
       );
       
       // Populate board from level data
-      for (let y = 0; y < rows; y++) {
+      // Important: Level data is stored with the top row first, but we need to
+      // convert to game coordinates where the bottom row is at y=0
+      for (let gameY = 0; gameY < rows; gameY++) {
+        // Convert game Y-coordinate to level data Y-coordinate
+        // In level data, the first row is the top; in our game state, the first row is the bottom
+        const levelY = rows - gameY - 1;
+        
         for (let x = 0; x < cols; x++) {
-          const value = levelData[y][x];
+          const value = levelData[levelY][x];
           if (value > 0) {
-            // In the original game, type 1 blocks that form the bottom row are typically floor blocks
-            // Type 1 blocks are red with stars, but we only want floor blocks to be fixed
-            // A floor block is a type 1 block that's at the bottom of the level
-            const isFloor = value === 1 && y === 0;
-            board[y][x] = {
-              id: y * cols + x,
+            // Floor blocks are at the bottom (gameY=0) and are typically type 1
+            const isFloor = gameY === 0 && value === 1;
+            
+            board[gameY][x] = {
+              id: gameY * cols + x,
               type: value,
               x,
-              y,
+              y: gameY,
               selected: false,
               matched: false,
               falling: false,
