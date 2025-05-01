@@ -93,6 +93,8 @@ export const usePuzznic = create<PuzznicState>()(
           const value = levelData[levelY][x];
           if (value > 0) {
             // Floor blocks are at the bottom (gameY=0) and are typically type 1
+            // Important: Only blocks at the very bottom should be fixed floor blocks
+            // Red blocks (type 1) anywhere else should behave like normal blocks
             const isFloor = gameY === 0 && value === 1;
             
             board[gameY][x] = {
