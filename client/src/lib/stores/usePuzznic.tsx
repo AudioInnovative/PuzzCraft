@@ -75,9 +75,11 @@ export const usePuzznic = create<PuzznicState>()(
         for (let x = 0; x < cols; x++) {
           const value = levelData[y][x];
           if (value > 0) {
-            // Check if this is a floor block (usually the bottom row)
-            // Adding isFixed flag to identify blocks that should never move or fall
-            const isFloor = (y === rows - 1 || y === rows - 2) && value === 1;
+            // Check if this is a floor block
+            // Floor blocks are the ones at the bottom row of the level
+            // We'll identify them by position rather than type
+            const isFloor = (y === rows - 1 && value > 0) || (y === rows - 2 && value === 1 && 
+                            (levelData[rows-1][x] === 0 || levelData[rows-1][x] === undefined));
             board[y][x] = {
               id: y * cols + x,
               type: value,

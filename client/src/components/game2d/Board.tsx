@@ -25,10 +25,6 @@ function renderBlock(
   size: number,
   isSelected: boolean
 ) {
-  // Get color based on block type (1-indexed)
-  const color = blockColors[(block.type - 1) % blockColors.length];
-  const symbol = blockSymbols[(block.type - 1) % blockSymbols.length];
-  
   // Apply selection effect
   const blockSize = isSelected ? size * 1.1 : size * 0.9;
   const blockX = x + (size - blockSize) / 2;
@@ -43,65 +39,75 @@ function renderBlock(
     ctx.fillRect(blockX + 3, blockY + 3, blockSize, blockSize);
   }
   
-  // Draw block background
-  ctx.fillStyle = color;
-  ctx.fillRect(blockX, blockY, blockSize, blockSize);
-  
-  // Draw block border
-  ctx.strokeStyle = 'rgba(0, 0, 0, 0.7)';
-  ctx.lineWidth = 2;
-  ctx.strokeRect(blockX, blockY, blockSize, blockSize);
-  
-  // Draw block symbol
-  ctx.fillStyle = 'white';
-  ctx.font = `bold ${blockSize * 0.5}px Arial`;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(symbol, blockX + blockSize / 2, blockY + blockSize / 2);
+  // Check if this is a floor/fixed block
+  if (block.isFixed) {
+    // Draw fixed blocks (like walls/floor) with a special style
+    if (block.type === 1) { // Type 1 is typically a floor block
+      // Draw floor block with a wood texture
+      ctx.fillStyle = '#8B4513'; // Wood color
+      ctx.fillRect(blockX, blockY, blockSize, blockSize);
+      
+      // Add wood grain lines
+      ctx.strokeStyle = '#6B3100';
+      ctx.lineWidth = 1;
+      
+      // Horizontal grain lines
+      for (let i = 1; i < 5; i++) {
+        ctx.beginPath();
+        ctx.moveTo(blockX, blockY + i * blockSize / 5);
+        ctx.lineTo(blockX + blockSize, blockY + i * blockSize / 5);
+        ctx.stroke();
+      }
+      
+      // Border
+      ctx.strokeStyle = '#4D2600';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(blockX, blockY, blockSize, blockSize);
+    } else {
+      // Other fixed block types
+      ctx.fillStyle = '#555555'; // Dark gray
+      ctx.fillRect(blockX, blockY, blockSize, blockSize);
+      ctx.strokeStyle = '#000000';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(blockX, blockY, blockSize, blockSize);
+    }
+  } else {
+    // Regular game blocks
+    // Get color based on block type (1-indexed)
+    const color = blockColors[(block.type - 1) % blockColors.length];
+    const symbol = blockSymbols[(block.type - 1) % blockSymbols.length];
+    
+    // Draw block background
+    ctx.fillStyle = color;
+    ctx.fillRect(blockX, blockY, blockSize, blockSize);
+    
+    // Draw block border
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.7)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(blockX, blockY, blockSize, blockSize);
+    
+    // Draw block symbol
+    ctx.fillStyle = 'white';
+    ctx.font = `bold ${blockSize * 0.5}px Arial`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(symbol, blockX + blockSize / 2, blockY + blockSize / 2);
+  }
   
   // Reset opacity
   ctx.globalAlpha = 1.0;
 }
 
-// Render the game board (walls, platforms, background)
+// Render the game board (background and border)
 function renderGameBoard(
   ctx: CanvasRenderingContext2D,
-  levelData: number[][],
   blockSize: number,
   rows: number,
   cols: number
 ) {
-  // Draw background
+  // Draw sky background
   ctx.fillStyle = '#87CEEB';
   ctx.fillRect(0, 0, cols * blockSize, rows * blockSize);
-  
-  // Draw walls/platforms (value 1 represents walls in level data)
-  ctx.fillStyle = '#8B4513'; // Wood color
-  
-  for (let y = 0; y < levelData.length; y++) {
-    for (let x = 0; x < levelData[y].length; x++) {
-      if (levelData[y][x] === 1) {
-        // Convert from game y-coordinate (bottom-up) to UI y-coordinate (top-down)
-        const uiY = rows - y - 1;
-        
-        // Draw wall/platform with wood texture effect
-        ctx.fillStyle = '#8B4513';
-        ctx.fillRect(x * blockSize, uiY * blockSize, blockSize, blockSize);
-        
-        // Add wood grain lines
-        ctx.strokeStyle = '#6B3100';
-        ctx.lineWidth = 1;
-        
-        // Horizontal grain lines
-        for (let i = 1; i < 5; i++) {
-          ctx.beginPath();
-          ctx.moveTo(x * blockSize, uiY * blockSize + i * blockSize / 5);
-          ctx.lineTo(x * blockSize + blockSize, uiY * blockSize + i * blockSize / 5);
-          ctx.stroke();
-        }
-      }
-    }
-  }
   
   // Draw board border
   ctx.strokeStyle = '#000000';
@@ -224,8 +230,8 @@ export function Board2D({ width, height }: BoardProps) {
     ctx.translate(offsetX, offsetY);
     ctx.scale(scale, scale);
     
-    // Render game board (walls, platforms, etc.)
-    renderGameBoard(ctx, currentLevelData, BLOCK_SIZE, rows, cols);
+    // Render game board background and border
+    renderGameBoard(ctx, BLOCK_SIZE, rows, cols);
     
     // Render blocks
     board.forEach((row, y) => {
