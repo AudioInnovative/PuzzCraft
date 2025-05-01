@@ -10,6 +10,7 @@ export type BlockType = {
   selected: boolean;
   matched: boolean;
   falling: boolean;
+  isFixed?: boolean; // New property to identify blocks that shouldn't move
 };
 
 export type GamePhase = "ready" | "playing" | "level_complete" | "game_over" | "game_won";
@@ -74,6 +75,9 @@ export const usePuzznic = create<PuzznicState>()(
         for (let x = 0; x < cols; x++) {
           const value = levelData[y][x];
           if (value > 0) {
+            // Check if this is a floor block (usually the bottom row)
+            // Adding isFixed flag to identify blocks that should never move or fall
+            const isFloor = (y === rows - 1 || y === rows - 2) && value === 1;
             board[y][x] = {
               id: y * cols + x,
               type: value,
@@ -81,7 +85,8 @@ export const usePuzznic = create<PuzznicState>()(
               y,
               selected: false,
               matched: false,
-              falling: false
+              falling: false,
+              isFixed: isFloor // Mark floor blocks as fixed
             };
           }
         }
@@ -143,9 +148,9 @@ export const usePuzznic = create<PuzznicState>()(
           x >= 0 && x < newBoard[y].length && 
           newBoard[y][x] !== null) {
         
-        // Select the new block if it's not already matched
+        // Select the new block if it's not already matched, not falling, and not fixed
         const block = newBoard[y][x];
-        if (block && !block.matched && !block.falling) {
+        if (block && !block.matched && !block.falling && !block.isFixed) {
           block.selected = true;
           
           set({ 
@@ -221,6 +226,7 @@ export const usePuzznic = create<PuzznicState>()(
       for (let y = 0; y < newBoard.length; y++) {
         for (let x = 0; x < newBoard[0].length - 1; x++) {
           if (newBoard[y][x] !== null && newBoard[y][x+1] !== null && 
+              !newBoard[y][x]!.isFixed && !newBoard[y][x+1]!.isFixed &&
               newBoard[y][x]!.type === newBoard[y][x+1]!.type) {
             // Mark blocks as matched
             newBoard[y][x]!.matched = true;
@@ -235,6 +241,7 @@ export const usePuzznic = create<PuzznicState>()(
       for (let y = 0; y < newBoard.length - 1; y++) {
         for (let x = 0; x < newBoard[0].length; x++) {
           if (newBoard[y][x] !== null && newBoard[y+1][x] !== null && 
+              !newBoard[y][x]!.isFixed && !newBoard[y+1][x]!.isFixed &&
               newBoard[y][x]!.type === newBoard[y+1][x]!.type) {
             // Mark blocks as matched
             newBoard[y][x]!.matched = true;
@@ -289,7 +296,8 @@ export const usePuzznic = create<PuzznicState>()(
       // so we start from 1 (second row from bottom) and check if there's empty space below
       for (let y = 1; y < newBoard.length; y++) {
         for (let x = 0; x < newBoard[0].length; x++) {
-          if (newBoard[y][x] !== null && newBoard[y-1][x] === null) {
+          // Only make blocks fall if they're not fixed (e.g. not floor blocks)
+          if (newBoard[y][x] !== null && newBoard[y-1][x] === null && !newBoard[y][x]!.isFixed) {
             newBoard[y][x]!.falling = true;
             blocksFalling = true;
           }
@@ -349,20 +357,21 @@ export const usePuzznic = create<PuzznicState>()(
     updateGameState: () => {
       const { board, level, maxLevel } = get();
       
-      // Check if all blocks are cleared
-      let blocksRemaining = false;
+      // Check if all non-fixed blocks are cleared
+      let nonFixedBlocksRemaining = false;
       
       for (let y = 0; y < board.length; y++) {
         for (let x = 0; x < board[0].length; x++) {
-          if (board[y][x] !== null) {
-            blocksRemaining = true;
+          // Only consider blocks that are not fixed (e.g., not floor blocks)
+          if (board[y][x] !== null && !board[y][x]!.isFixed) {
+            nonFixedBlocksRemaining = true;
             break;
           }
         }
-        if (blocksRemaining) break;
+        if (nonFixedBlocksRemaining) break;
       }
       
-      if (!blocksRemaining) {
+      if (!nonFixedBlocksRemaining) {
         // Level complete!
         if (level === maxLevel) {
           // Game won!
