@@ -14,7 +14,7 @@ export type BlockType = {
   isFloor: boolean; // Property to specifically identify floor blocks (type 1 at bottom)
 };
 
-export type GamePhase = "ready" | "playing" | "level_complete" | "game_over" | "game_won";
+export type GamePhase = "ready" | "playing" | "level_complete" | "game_over" | "game_won" | "editing";
 
 interface PuzznicState {
   // Game state
@@ -31,6 +31,8 @@ interface PuzznicState {
   // Level data
   currentLevelData: number[][];
   blockTypes: number;
+  currentEditingBlockType: number;
+  userLevels: number[][][];
   
   // Actions
   validateLevelData: (levelData: number[][]) => boolean;
@@ -45,21 +47,34 @@ interface PuzznicState {
   restartLevel: () => void;
   nextLevel: () => void;
   decrementTime: () => void;
+  
+  // Editor-specific actions
+  enterEditMode: () => void;
+  exitEditMode: () => void;
+  createEmptyLevel: () => void;
+  placeEditorBlock: (x: number, y: number, blockType: number) => void;
+  removeEditorBlock: (x: number, y: number) => void;
+  setEditorBlockType: (blockType: number) => void;
+  saveUserLevel: () => void;
+  loadUserLevel: (index: number) => void;
+  generateLevelData: () => number[][];
 }
 
 export const usePuzznic = create<PuzznicState>()(
   subscribeWithSelector((set, get) => ({
     // Initial state
-    gamePhase: "ready",
+    gamePhase: "ready" as GamePhase,
     level: 1,
     maxLevel: Levels.length,
     score: 0,
     moveCount: 0,
     timeLeft: 180, // 3 minutes per level
-    board: [], 
+    board: [] as (BlockType | null)[][], 
     selectedBlockPos: null,
-    currentLevelData: [],
+    currentLevelData: [] as number[][],
     blockTypes: 6, // Default number of block types
+    currentEditingBlockType: 2, // Start with block type 2 (type 1 is usually reserved for floors)
+    userLevels: [] as number[][][], // Array to store user-created levels
     
     // Helper function to validate level data
     validateLevelData: (levelData: number[][]) => {
@@ -541,6 +556,238 @@ export const usePuzznic = create<PuzznicState>()(
         // Time's up! Game over
         set({ gamePhase: "game_over" });
       }
+    },
+    
+    // Editor mode functions
+    enterEditMode: () => {
+      // Clear any existing game timer
+      const { timerId } = get();
+      if (timerId) {
+        clearInterval(timerId);
+      }
+      
+      // Create an empty level for editing
+      const { createEmptyLevel } = get();
+      createEmptyLevel();
+      
+      // Set gamePhase to editing
+      set({ gamePhase: "editing" });
+    },
+    
+    exitEditMode: () => {
+      // Return to ready state
+      set({ gamePhase: "ready" });
+    },
+    
+    createEmptyLevel: () => {
+      // Create an 8x8 empty grid with a floor at the bottom
+      const emptyLevel: number[][] = Array(8).fill(0).map(() => Array(8).fill(0));
+      
+      // Add floor blocks at the bottom row
+      for (let x = 0; x < 8; x++) {
+        emptyLevel[7][x] = 1; // Type 1 is typically floor blocks
+      }
+      
+      // Create a board from this level data
+      const rows = emptyLevel.length;
+      const cols = emptyLevel[0].length;
+      const board: (BlockType | null)[][] = Array(rows).fill(0).map(() => 
+        Array(cols).fill(null)
+      );
+      
+      // Populate board
+      for (let gameY = 0; gameY < rows; gameY++) {
+        // Convert game Y-coordinate to level data Y-coordinate
+        const levelY = rows - gameY - 1;
+        
+        for (let x = 0; x < cols; x++) {
+          const value = emptyLevel[levelY][x];
+          if (value > 0) {
+            // Floor blocks are at the bottom (gameY=0) and are type 1
+            const isFloor = gameY === 0 && value === 1;
+            
+            board[gameY][x] = {
+              id: gameY * cols + x,
+              type: value,
+              x,
+              y: gameY,
+              selected: false,
+              matched: false,
+              falling: false,
+              isFixed: isFloor,
+              isFloor: isFloor
+            };
+          }
+        }
+      }
+      
+      set({ 
+        board,
+        currentLevelData: emptyLevel,
+        selectedBlockPos: null
+      });
+    },
+    
+    placeEditorBlock: (x, y, blockType) => {
+      const { board, gamePhase } = get();
+      
+      if (gamePhase !== "editing") return;
+      
+      // Create a deep copy of the board
+      const newBoard = board.map(row => row.map(block => 
+        block === null ? null : { ...block }
+      ));
+      
+      // Check if position is valid
+      if (y >= 0 && y < newBoard.length && x >= 0 && x < newBoard[0].length) {
+        // Don't allow placing blocks on the floor row
+        if (y === 0 && newBoard[y][x]?.isFloor) {
+          return;
+        }
+        
+        // Place new block or replace existing one
+        newBoard[y][x] = {
+          id: y * newBoard[0].length + x,
+          type: blockType,
+          x,
+          y,
+          selected: false,
+          matched: false,
+          falling: false,
+          isFixed: false,
+          isFloor: false
+        };
+        
+        set({ board: newBoard });
+        
+        // Update the current level data based on the board
+        const { generateLevelData } = get();
+        const updatedLevelData = generateLevelData();
+        set({ currentLevelData: updatedLevelData });
+      }
+    },
+    
+    removeEditorBlock: (x, y) => {
+      const { board, gamePhase } = get();
+      
+      if (gamePhase !== "editing") return;
+      
+      // Create a deep copy of the board
+      const newBoard = board.map(row => row.map(block => 
+        block === null ? null : { ...block }
+      ));
+      
+      // Check if position is valid
+      if (y >= 0 && y < newBoard.length && x >= 0 && x < newBoard[0].length) {
+        // Don't allow removing floor blocks
+        if (newBoard[y][x]?.isFloor) {
+          return;
+        }
+        
+        // Remove block
+        newBoard[y][x] = null;
+        
+        set({ board: newBoard });
+        
+        // Update the current level data
+        const { generateLevelData } = get();
+        const updatedLevelData = generateLevelData();
+        set({ currentLevelData: updatedLevelData });
+      }
+    },
+    
+    setEditorBlockType: (blockType) => {
+      set({ currentEditingBlockType: blockType });
+    },
+    
+    saveUserLevel: () => {
+      const { currentLevelData, userLevels, validateLevelData } = get();
+      
+      // Validate level before saving
+      const isValid = validateLevelData(currentLevelData);
+      if (!isValid) {
+        console.warn("Cannot save invalid level. Each block type must appear an even number of times.");
+        return false;
+      }
+      
+      // Add the level to user levels
+      const updatedUserLevels = [...userLevels, JSON.parse(JSON.stringify(currentLevelData))];
+      set({ userLevels: updatedUserLevels });
+      
+      // Update max level count to include user levels
+      set({ maxLevel: Levels.length + updatedUserLevels.length });
+      
+      return true;
+    },
+    
+    loadUserLevel: (index) => {
+      const { userLevels } = get();
+      
+      if (index >= 0 && index < userLevels.length) {
+        const levelData = userLevels[index];
+        
+        // Create a board from this level data
+        const rows = levelData.length;
+        const cols = levelData[0].length;
+        const board: (BlockType | null)[][] = Array(rows).fill(0).map(() => 
+          Array(cols).fill(null)
+        );
+        
+        // Populate board
+        for (let gameY = 0; gameY < rows; gameY++) {
+          // Convert game Y-coordinate to level data Y-coordinate
+          const levelY = rows - gameY - 1;
+          
+          for (let x = 0; x < cols; x++) {
+            const value = levelData[levelY][x];
+            if (value > 0) {
+              // Floor blocks are at the bottom (gameY=0) and are type 1
+              const isFloor = gameY === 0 && value === 1;
+              
+              board[gameY][x] = {
+                id: gameY * cols + x,
+                type: value,
+                x,
+                y: gameY,
+                selected: false,
+                matched: false,
+                falling: false,
+                isFixed: isFloor,
+                isFloor: isFloor
+              };
+            }
+          }
+        }
+        
+        set({ 
+          board,
+          currentLevelData: levelData,
+          selectedBlockPos: null
+        });
+      }
+    },
+    
+    generateLevelData: () => {
+      const { board } = get();
+      
+      // Create a grid representation of the current board
+      const rows = board.length;
+      const cols = board[0].length;
+      const levelData: number[][] = Array(rows).fill(0).map(() => Array(cols).fill(0));
+      
+      // Fill the grid based on the board
+      for (let gameY = 0; gameY < rows; gameY++) {
+        // Convert game Y-coordinate to level data Y-coordinate
+        const levelY = rows - gameY - 1;
+        
+        for (let x = 0; x < cols; x++) {
+          if (board[gameY][x] !== null) {
+            levelData[levelY][x] = board[gameY][x]!.type;
+          }
+        }
+      }
+      
+      return levelData;
     }
   }))
 );
