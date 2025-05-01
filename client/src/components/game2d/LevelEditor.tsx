@@ -77,61 +77,16 @@ export default function LevelEditor() {
     setTimeout(() => setMessage(null), 2000);
   };
   
-  // Map from UI grid coordinates to game board coordinates
-  const mapUIToGameCoordinates = (uiRow: number, uiCol: number) => {
-    // Simple, direct mapping - UI row 0 maps to game Y = board.length - 1
-    const gameY = board.length - uiRow - 1;
-    // Column mapping is straightforward, UI col = game X
-    const gameX = uiCol;
-    
-    return { gameX, gameY };
-  };
-  
-  // Map from game board coordinates to UI grid coordinates
-  const mapGameToUICoordinates = (gameY: number, gameX: number) => {
-    // Reverse the Y mapping
-    const uiRow = board.length - gameY - 1;
-    // Column mapping is straightforward
-    const uiCol = gameX;
-    
-    return { uiRow, uiCol };
-  };
-  
-  // Handle cell click (to place or remove blocks)
-  const handleCellClick = (uiRow: number, uiCol: number) => {
-    // Convert UI grid coordinates to game board coordinates
-    const { gameX, gameY } = mapUIToGameCoordinates(uiRow, uiCol);
-    
-    console.log(`Clicked UI Grid: Row ${uiRow}, Col ${uiCol}`);
-    console.log(`Mapped to Game: X ${gameX}, Y ${gameY}`);
-    
-    // Debug display of current cell content
-    if (gameY >= 0 && gameY < board.length && gameX >= 0 && gameX < board[0].length) {
-      const cell = board[gameY][gameX];
-      console.log(`Cell content: ${cell ? `Block type ${cell.type}` : 'Empty'}`);
-    }
-    
-    // First check if there's a block to remove
-    if (gameY >= 0 && gameY < board.length && 
-        gameX >= 0 && gameX < board[0].length && 
-        board[gameY][gameX] !== null && 
-        !board[gameY][gameX]?.isFloor) {
-      
-      console.log(`Removing block at Game X ${gameX}, Game Y ${gameY}`);
-      removeEditorBlock(gameX, gameY);
-      playHit();
-      return;
-    }
-    
-    // If there's no block and a block type is selected, place that block
-    if (selectedBlockType !== null && 
-        gameY >= 0 && gameY < board.length && 
-        gameX >= 0 && gameX < board[0].length && 
-        !(gameY === 0 && board[gameY][gameX]?.isFloor)) {
-      
-      console.log(`Placing block type ${selectedBlockType} at Game X ${gameX}, Game Y ${gameY}`);
-      placeEditorBlock(gameX, gameY, selectedBlockType);
-      playHit();
+  // Debugging function to log the board structure
+  const logBoardStructure = () => {
+    console.log('Current Board Structure:');
+    for (let y = board.length - 1; y >= 0; y--) {
+      let rowStr = `Row ${y}: `;
+      for (let x = 0; x < board[0].length; x++) {
+        const cell = board[y][x];
+        rowStr += cell ? `[${cell.type}]` : '[ ]';
+      }
+      console.log(rowStr);
     }
   };
   
@@ -140,36 +95,40 @@ export default function LevelEditor() {
     const rows = board.length;
     const cols = board[0].length;
     
-    // Create UI grid from bottom to top (view perspective)
-    const uiRows = [];
+    // Directly display the game board grid, but flipped vertically
+    const gameRows = [];
     
-    // Loop through each row in UI coordinates (0 at top)
-    for (let uiRow = 0; uiRow < rows; uiRow++) {
+    // Loop through each row from bottom to top (to display correctly in UI)
+    for (let gameY = 0; gameY < rows; gameY++) {
       const rowCells = [];
       
       // For each cell in the row
-      for (let uiCol = 0; uiCol < cols; uiCol++) {
-        // Map to game coordinates
-        const { gameX, gameY } = mapUIToGameCoordinates(uiRow, uiCol);
-        
-        // Get cell content from game board
-        const cell = gameY >= 0 && gameY < board.length && 
-                     gameX >= 0 && gameX < board[0].length ? 
-                     board[gameY][gameX] : null;
+      for (let gameX = 0; gameX < cols; gameX++) {
+        // Get cell content directly
+        const cell = board[gameY][gameX];
         
         // Create the cell element
         rowCells.push(
           <div
-            key={`${uiRow}-${uiCol}`}
+            key={`${gameY}-${gameX}`}
             className={cn(
               "rounded-md flex items-center justify-center",
               selectedBlockType !== null ? "cursor-pointer" : "",
               cell ? "" : "bg-gray-700"
             )}
             style={{ width: CELL_SIZE, height: CELL_SIZE }}
-            onClick={() => handleCellClick(uiRow, uiCol)}
-            data-ui-row={uiRow}
-            data-ui-col={uiCol}
+            onClick={() => {
+              // Direct click-to-place/remove
+              if (cell !== null && !cell.isFloor) {
+                console.log(`Removing block at X=${gameX}, Y=${gameY}`);
+                removeEditorBlock(gameX, gameY);
+                playHit();
+              } else if (selectedBlockType !== null && !(gameY === 0 && cell?.isFloor)) {
+                console.log(`Placing block type ${selectedBlockType} at X=${gameX}, Y=${gameY}`);
+                placeEditorBlock(gameX, gameY, selectedBlockType); 
+                playHit();
+              }
+            }}
             data-game-x={gameX}
             data-game-y={gameY}
           >
@@ -185,8 +144,8 @@ export default function LevelEditor() {
         );
       }
       
-      uiRows.push(
-        <div key={`row-${uiRow}`} className="flex flex-row gap-1">
+      gameRows.unshift( // Add to front to flip the display vertically
+        <div key={`row-${gameY}`} className="flex flex-row gap-1">
           {rowCells}
         </div>
       );
@@ -198,7 +157,7 @@ export default function LevelEditor() {
         className="flex flex-col gap-1 bg-gray-800 p-2 rounded-lg"
         style={{ width: cols * (CELL_SIZE + 4) + 8, height: rows * (CELL_SIZE + 4) + 8 }}
       >
-        {uiRows}
+        {gameRows}
       </div>
     );
   };
