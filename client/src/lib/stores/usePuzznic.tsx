@@ -575,8 +575,17 @@ export const usePuzznic = create<PuzznicState>()(
     },
     
     exitEditMode: () => {
-      // Return to ready state
-      set({ gamePhase: "ready" });
+      // Return to main menu state without starting the game
+      set({ 
+        gamePhase: "ready",
+        level: 1  // Reset to level 1, but don't actually start the game
+      });
+      
+      // Reinitialize game to ensure we're back at the main menu
+      setTimeout(() => {
+        const { initGame } = get();
+        initGame();
+      }, 100);
     },
     
     createEmptyLevel: () => {
