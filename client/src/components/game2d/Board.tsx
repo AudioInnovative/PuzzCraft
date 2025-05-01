@@ -275,7 +275,7 @@ export function Board2D({ width, height }: BoardProps) {
   
   // For tracking mouse drag operations
   const dragStartRef = useRef<{ x: number, y: number, gridX: number, gameY: number } | null>(null);
-  const mouseMoveThresholdRef = useRef<number>(40); // Increased threshold to prevent accidental/rapid movements
+  const mouseMoveThresholdRef = useRef<number>(20); // Reduced threshold for easier movement
   const lastMoveTimeRef = useRef<number>(0); // To limit how frequently moves can happen
   
   // Function to handle pointer (mouse or touch) events for selection
@@ -347,6 +347,9 @@ export function Board2D({ width, height }: BoardProps) {
       const { x: startX } = dragStartRef.current;
       const diffX = e.clientX - startX;
       
+      // Add debug information to help understand what's happening
+      console.log(`Mouse drag: diffX=${diffX}, threshold=${mouseMoveThresholdRef.current}`);
+      
       // Check if we've moved enough to trigger a direction
       if (Math.abs(diffX) > mouseMoveThresholdRef.current) {
         // Get current game state safely
@@ -370,14 +373,18 @@ export function Board2D({ width, height }: BoardProps) {
           // Safely check if move is valid before attempting it
           if (diffX < 0 && x > 0) {
             // Check if there's space to move left
+            console.log(`Trying to move left: block at (${x},${y}), space at (${x-1},${y}): ${board[y][x-1] === null}`);
             if (x-1 >= 0 && board[y][x-1] === null) {
+              console.log("Moving left");
               moveSelectedBlock('left');
               playHitSound();
               lastMoveTimeRef.current = currentTime;
             }
           } else if (diffX > 0 && x < cols - 1) {
             // Check if there's space to move right
+            console.log(`Trying to move right: block at (${x},${y}), space at (${x+1},${y}): ${board[y][x+1] === null}`);
             if (x+1 < board[y].length && board[y][x+1] === null) {
+              console.log("Moving right");
               moveSelectedBlock('right');
               playHitSound();
               lastMoveTimeRef.current = currentTime;
