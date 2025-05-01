@@ -110,6 +110,12 @@ export const usePuzznic = create<PuzznicState>()(
       
       // Store the timer ID so we can clear it later
       set({ timerId: timer });
+      
+      // Apply gravity immediately when the game starts
+      setTimeout(() => {
+        const { applyGravity } = get();
+        applyGravity();
+      }, 500);
     },
     
     // Select a block
@@ -372,6 +378,12 @@ export const usePuzznic = create<PuzznicState>()(
     restartLevel: () => {
       const { initGame } = get();
       initGame();
+      
+      // Auto-start with gravity after a brief delay to show the initial state
+      setTimeout(() => {
+        const { startGame } = get();
+        startGame();
+      }, 300);
     },
     
     // Go to next level
@@ -382,6 +394,12 @@ export const usePuzznic = create<PuzznicState>()(
       
       const { initGame } = get();
       initGame();
+      
+      // Start game with the initial gravity
+      setTimeout(() => {
+        const { startGame } = get();
+        startGame();
+      }, 300);
     },
     
     // Decrement time left
