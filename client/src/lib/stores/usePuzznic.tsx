@@ -10,7 +10,8 @@ export type BlockType = {
   selected: boolean;
   matched: boolean;
   falling: boolean;
-  isFixed?: boolean; // New property to identify blocks that shouldn't move
+  isFixed: boolean; // Property to identify blocks that shouldn't move (like floors)
+  isFloor: boolean; // Property to specifically identify floor blocks (type 1 at bottom)
 };
 
 export type GamePhase = "ready" | "playing" | "level_complete" | "game_over" | "game_won";
@@ -73,10 +74,20 @@ export const usePuzznic = create<PuzznicState>()(
       // Populate board from level data
       // Important: Level data is stored with the top row first, but we need to
       // convert to game coordinates where the bottom row is at y=0
+      // We'll also handle the special case of the top row of red blocks
+      
+      // First, determine if there's a top row of all red blocks (type 1)
+      // This is a common pattern in Puzznic levels but causes issues in our implementation
+      const hasTopRowOfRedBlocks = levelData[0].every(value => value === 1 || value === 0);
+      const skipTopRow = hasTopRowOfRedBlocks;
+      
       for (let gameY = 0; gameY < rows; gameY++) {
         // Convert game Y-coordinate to level data Y-coordinate
         // In level data, the first row is the top; in our game state, the first row is the bottom
         const levelY = rows - gameY - 1;
+        
+        // Skip the top row of red blocks if needed
+        if (skipTopRow && levelY === 0) continue;
         
         for (let x = 0; x < cols; x++) {
           const value = levelData[levelY][x];
@@ -92,7 +103,8 @@ export const usePuzznic = create<PuzznicState>()(
               selected: false,
               matched: false,
               falling: false,
-              isFixed: isFloor // Mark floor blocks as fixed
+              isFixed: isFloor, // Mark floor blocks as fixed
+              isFloor: isFloor // Also explicitly mark them as floor blocks
             };
           }
         }
@@ -196,7 +208,12 @@ export const usePuzznic = create<PuzznicState>()(
       // Check if move is valid (in bounds and destination is empty)
       if (newX >= 0 && newX < board[0].length && newBoard[y][newX] === null) {
         // Move the block
-        newBoard[y][newX] = { ...newBoard[y][x]!, x: newX, y };
+        newBoard[y][newX] = { 
+          ...newBoard[y][x]!, 
+          x: newX, 
+          y,
+          isFloor: newBoard[y][x]!.isFloor // Make sure to copy the isFloor property
+        };
         newBoard[y][x] = null;
         
         // Update selection
@@ -329,7 +346,8 @@ export const usePuzznic = create<PuzznicState>()(
                 updatedBoard[y-1][x] = { 
                   ...updatedBoard[y][x]!, 
                   y: y-1,  // Update the y coordinate to match new position
-                  falling: false
+                  falling: false,
+                  isFloor: false // A falling block can't be a floor block
                 };
                 updatedBoard[y][x] = null;
               } else if (updatedBoard[y][x] !== null && updatedBoard[y][x]!.falling) {
