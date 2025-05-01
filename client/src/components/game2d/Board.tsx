@@ -223,8 +223,12 @@ export function Board2D({ width, height }: BoardProps) {
   const { 
     board, 
     currentLevelData,
+    gamePhase,
     selectBlock,
-    selectedBlockPos 
+    selectedBlockPos,
+    currentEditingBlockType,
+    placeEditorBlock,
+    removeEditorBlock
   } = usePuzznic();
   const { playHit: playHitSound } = useAudio();
   
@@ -245,7 +249,7 @@ export function Board2D({ width, height }: BoardProps) {
   const offsetX = (width - boardWidth * scale) / 2;
   const offsetY = (height - boardHeight * scale) / 2;
   
-  // Function to handle pointer (mouse or touch) events to select blocks
+  // Function to handle pointer (mouse or touch) events
   const handlePointerSelect = (clientX: number, clientY: number) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -263,7 +267,24 @@ export function Board2D({ width, height }: BoardProps) {
     if (gridX >= 0 && gridX < cols && gridY >= 0 && gridY < rows) {
       // Convert from UI y-coordinate (top-down) to game y-coordinate (bottom-up)
       const gameY = rows - gridY - 1;
-      selectBlock(gridX, gameY);
+      
+      if (gamePhase === "editing") {
+        // In editor mode, clicking places or removes blocks
+        const blockExists = board[gameY] && board[gameY][gridX] !== null;
+        
+        if (blockExists && !board[gameY][gridX]?.isFloor) {
+          // Remove existing block if it's not a floor block
+          removeEditorBlock(gridX, gameY);
+        } else if (!blockExists) {
+          // Place new block if position is empty
+          placeEditorBlock(gridX, gameY, currentEditingBlockType);
+        }
+      } else {
+        // In regular game mode, select blocks
+        selectBlock(gridX, gameY);
+      }
+      
+      // Play sound for feedback
       playHitSound();
     }
   };

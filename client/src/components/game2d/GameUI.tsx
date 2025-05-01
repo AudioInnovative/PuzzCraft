@@ -1,6 +1,7 @@
 import { usePuzznic } from "../../lib/stores/usePuzznic";
 import { GamePanel } from "../ui/game-panel";
 import { useIsMobile } from "../../hooks/use-is-mobile";
+import LevelEditor from "./LevelEditor";
 
 export default function GameUI2D() {
   const { 
@@ -11,7 +12,8 @@ export default function GameUI2D() {
     moveCount, 
     timeLeft,
     restartLevel,
-    nextLevel
+    nextLevel,
+    enterEditMode
   } = usePuzznic();
   const isMobile = useIsMobile();
   
@@ -24,6 +26,9 @@ export default function GameUI2D() {
 
   return (
     <div className="absolute inset-0 pointer-events-none">
+      {/* Level Editor Component */}
+      <LevelEditor />
+      
       {/* Game HUD styled like original Puzznic */}
       <div className="absolute top-0 left-0 right-0 flex justify-between items-start p-2 bg-black/80 border-b-4 border-blue-700">
         <div className="flex flex-col gap-2">
@@ -36,8 +41,17 @@ export default function GameUI2D() {
           />
         </div>
         
-        {/* Right-side blocks counter would go here in the future */}
-        <div className="w-24"></div>
+        {/* Right-side utility panel */}
+        <div className="w-28 flex flex-col items-end">
+          {gamePhase === "ready" && (
+            <button 
+              className="bg-purple-600 hover:bg-purple-800 text-white text-xs font-bold py-1 px-2 pointer-events-auto border-2 border-white uppercase mb-2"
+              onClick={() => enterEditMode()}
+            >
+              Level Editor
+            </button>
+          )}
+        </div>
       </div>
       
       {/* Game messages */}
@@ -55,12 +69,18 @@ export default function GameUI2D() {
                 <p className="text-yellow-300 mt-3 font-mono">TAP & SWIPE TO PLAY ON MOBILE</p>
               )}
             </div>
-            <div className="animate-pulse">
+            <div className="flex justify-center space-x-4">
               <button 
                 className="bg-red-600 hover:bg-red-800 text-white font-bold py-2 px-8 pointer-events-auto border-2 border-white"
                 onClick={() => usePuzznic.getState().startGame()}
               >
-                PRESS START
+                PLAY GAME
+              </button>
+              <button 
+                className="bg-purple-600 hover:bg-purple-800 text-white font-bold py-2 px-4 pointer-events-auto border-2 border-white"
+                onClick={() => enterEditMode()}
+              >
+                LEVEL EDITOR
               </button>
             </div>
           </div>

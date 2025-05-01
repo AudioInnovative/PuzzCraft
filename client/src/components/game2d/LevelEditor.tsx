@@ -62,11 +62,9 @@ export default function LevelEditor() {
   
   const handleSaveLevel = () => {
     if (isValid) {
-      const success = saveUserLevel();
-      if (success) {
-        setMessage('Level saved successfully!');
-        setTimeout(() => setMessage(null), 2000);
-      }
+      saveUserLevel();
+      setMessage('Level saved successfully!');
+      setTimeout(() => setMessage(null), 2000);
     } else {
       setMessage('Cannot save invalid level!');
       setTimeout(() => setMessage(null), 2000);

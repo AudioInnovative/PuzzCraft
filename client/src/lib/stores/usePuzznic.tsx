@@ -707,7 +707,7 @@ export const usePuzznic = create<PuzznicState>()(
       const isValid = validateLevelData(currentLevelData);
       if (!isValid) {
         console.warn("Cannot save invalid level. Each block type must appear an even number of times.");
-        return false;
+        return;
       }
       
       // Add the level to user levels
@@ -716,8 +716,6 @@ export const usePuzznic = create<PuzznicState>()(
       
       // Update max level count to include user levels
       set({ maxLevel: Levels.length + updatedUserLevels.length });
-      
-      return true;
     },
     
     loadUserLevel: (index) => {
