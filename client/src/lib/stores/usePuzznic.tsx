@@ -75,11 +75,10 @@ export const usePuzznic = create<PuzznicState>()(
         for (let x = 0; x < cols; x++) {
           const value = levelData[y][x];
           if (value > 0) {
-            // Check if this is a floor block
-            // Floor blocks are the ones at the bottom row of the level
-            // We'll identify them by position rather than type
-            const isFloor = (y === rows - 1 && value > 0) || (y === rows - 2 && value === 1 && 
-                            (levelData[rows-1][x] === 0 || levelData[rows-1][x] === undefined));
+            // In the original game, type 1 blocks that form the bottom row are typically floor blocks
+            // Type 1 blocks are red with stars, but we only want floor blocks to be fixed
+            // A floor block is a type 1 block that's at the bottom of the level
+            const isFloor = value === 1 && y === 0;
             board[y][x] = {
               id: y * cols + x,
               type: value,

@@ -230,7 +230,7 @@ export function Board2D({ width, height }: BoardProps) {
     ctx.translate(offsetX, offsetY);
     ctx.scale(scale, scale);
     
-    // Render game board background and border
+    // Render game board background and border only
     renderGameBoard(ctx, BLOCK_SIZE, rows, cols);
     
     // Render blocks
