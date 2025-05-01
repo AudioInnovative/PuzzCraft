@@ -275,7 +275,7 @@ export function Board2D({ width, height }: BoardProps) {
   
   // For tracking mouse drag operations
   const dragStartRef = useRef<{ x: number, y: number, gridX: number, gameY: number } | null>(null);
-  const mouseMoveThresholdRef = useRef<number>(20); // Reduced threshold for easier movement
+  const mouseMoveThresholdRef = useRef<number>(5); // Even lower threshold for easier movement
   const lastMoveTimeRef = useRef<number>(0); // To limit how frequently moves can happen
   
   // Function to handle pointer (mouse or touch) events for selection
@@ -341,8 +341,8 @@ export function Board2D({ width, height }: BoardProps) {
       const currentTime = Date.now();
       const timeSinceLastMove = currentTime - lastMoveTimeRef.current;
       
-      // Don't allow moves more frequently than every 300ms
-      if (timeSinceLastMove < 300) return;
+      // Don't allow moves more frequently than every 100ms for smoother dragging
+      if (timeSinceLastMove < 100) return;
       
       const { x: startX } = dragStartRef.current;
       const diffX = e.clientX - startX;
@@ -398,6 +398,9 @@ export function Board2D({ width, height }: BoardProps) {
         }
         
         // Reset drag start to current position to allow continuous dragging
+        // When a block moves, we reset the drag start position to the current mouse position
+        // This allows for continuous dragging without requiring the user to release and click again
+        console.log(`Resetting drag start position to ${e.clientX}`);
         dragStartRef.current = {
           ...dragStartRef.current,
           x: e.clientX
