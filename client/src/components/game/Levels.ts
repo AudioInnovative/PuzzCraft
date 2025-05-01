@@ -27,14 +27,14 @@ export const Levels = [
     [1, 1, 1, 1, 1, 1, 1, 1], // Floor
   ],
   
-  // Level 3: Multiple platforms (redesigned to be beatable)
+  // Level 3: Multiple platforms (fixed to ensure even pairs)
   [
     [0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 1, 2, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 2, 3, 0, 1, 4, 0],
-    [0, 0, 0, 4, 3, 0, 0, 0],
-    [0, 5, 6, 0, 0, 5, 6, 0],
+    [0, 0, 2, 3, 0, 1, 3, 0],
+    [0, 0, 0, 4, 4, 0, 0, 0],
+    [0, 5, 5, 0, 0, 6, 6, 0],
     [0, 0, 0, 0, 0, 0, 0, 0],
     [1, 1, 0, 1, 1, 0, 1, 1], // Floor with gaps
   ],
