@@ -33,6 +33,7 @@ interface PuzznicState {
   blockTypes: number;
   
   // Actions
+  validateLevelData: (levelData: number[][]) => boolean;
   initGame: () => void;
   startGame: () => void;
   selectBlock: (x: number, y: number) => void;
@@ -60,10 +61,62 @@ export const usePuzznic = create<PuzznicState>()(
     currentLevelData: [],
     blockTypes: 6, // Default number of block types
     
+    // Helper function to validate level data
+    validateLevelData: (levelData: number[][]) => {
+      // Count occurrences of each block type (excluding floor blocks)
+      const blockCounts: Record<number, number> = {};
+      
+      // First check if the bottom row has floor blocks (type 1)
+      const hasFloorRow = levelData[levelData.length - 1].some(value => value === 1);
+      
+      // Count non-floor blocks
+      for (let y = 0; y < levelData.length - 1; y++) {
+        for (let x = 0; x < levelData[y].length; x++) {
+          const blockType = levelData[y][x];
+          if (blockType > 0) {
+            blockCounts[blockType] = (blockCounts[blockType] || 0) + 1;
+          }
+        }
+      }
+      
+      // Count blocks in the bottom row only if they're not floor blocks
+      if (hasFloorRow) {
+        const bottomRowY = levelData.length - 1;
+        for (let x = 0; x < levelData[bottomRowY].length; x++) {
+          const blockType = levelData[bottomRowY][x];
+          // Only count non-floor blocks in the bottom row
+          if (blockType > 1) {
+            blockCounts[blockType] = (blockCounts[blockType] || 0) + 1;
+          }
+        }
+      }
+      
+      // Check if all block types have an even count
+      let isValid = true;
+      const blockTypeErrors: number[] = [];
+      
+      for (const blockType in blockCounts) {
+        if (blockCounts[blockType] % 2 !== 0) {
+          isValid = false;
+          blockTypeErrors.push(parseInt(blockType));
+        }
+      }
+      
+      // Log warning if level is not valid
+      if (!isValid) {
+        console.warn(`Level validation failed: Block types ${blockTypeErrors.join(', ')} have odd counts.`);
+      }
+      
+      return isValid;
+    },
+    
     // Game initialization
     initGame: () => {
-      const { level } = get();
+      const { level, validateLevelData } = get();
       const levelData = Levels[level - 1] || Levels[0];
+      
+      // Validate level data to ensure it's beatable
+      validateLevelData(levelData);
       
       // Create empty board
       const rows = levelData.length;

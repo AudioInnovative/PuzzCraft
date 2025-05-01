@@ -39,16 +39,16 @@ export const Levels = [
     [1, 1, 0, 1, 1, 0, 1, 1], // Floor with gaps
   ],
   
-  // Level 4: Advanced arrangement
+  // Level 4: Advanced arrangement (fixed to be beatable)
   [
     [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 1, 0, 2, 0, 3, 0, 0],
+    [0, 1, 0, 2, 0, 3, 0, 1],
     [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 3, 0, 1, 0, 2, 0, 0],
+    [0, 3, 0, 1, 0, 2, 0, 3],
     [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 2, 0, 3, 0, 1, 0, 0],
+    [0, 2, 0, 4, 0, 4, 0, 2],
+    [0, 0, 0, 0, 0, 0, 0, 0],
     [1, 1, 1, 1, 1, 1, 1, 1], // Floor
-    [0, 0, 0, 0, 0, 0, 0, 0], 
   ],
   
   // Level 5: Complex arrangement
