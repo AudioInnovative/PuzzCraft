@@ -347,7 +347,7 @@ export function Board2D({ width, height }: BoardProps) {
       style={{ 
         width: '100%', 
         height: '100%',
-        background: 'linear-gradient(to bottom, #87CEEB, #e0f7fa)',
+        background: '#000000', // Black background like NES games
         touchAction: 'none' // Prevent browser handling of touch gestures (like scrolling)
       }}
     />
