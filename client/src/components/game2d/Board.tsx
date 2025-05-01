@@ -297,16 +297,34 @@ export function Board2D({ width, height }: BoardProps) {
         placeEditorBlock(gridX, gameY, currentEditingBlockType);
       }
     } else {
-      // In regular game mode, select blocks
-      selectBlock(gridX, gameY);
+      // In regular game mode
       
-      // Store drag start position for mouse movement
-      dragStartRef.current = {
-        x: clientX,
-        y: clientY,
-        gridX,
-        gameY
-      };
+      // Check if we're clicking on the already selected block
+      const isClickingSelectedBlock = 
+        selectedBlockPos && 
+        selectedBlockPos.x === gridX && 
+        selectedBlockPos.y === gameY;
+      
+      if (isClickingSelectedBlock) {
+        // If clicking the already selected block, deselect it
+        selectBlock(-1, -1); // Invalid coordinates to deselect
+        // Reset drag tracking
+        dragStartRef.current = null;
+      } else {
+        // Otherwise select the clicked block
+        selectBlock(gridX, gameY);
+        
+        // Only store drag start if we actually selected a block
+        // (which happens if there's a movable block at the clicked position)
+        if (selectedBlockPos && selectedBlockPos.x === gridX && selectedBlockPos.y === gameY) {
+          dragStartRef.current = {
+            x: clientX,
+            y: clientY,
+            gridX,
+            gameY
+          };
+        }
+      }
     }
     
     // Play sound for feedback
