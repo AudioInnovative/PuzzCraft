@@ -24,6 +24,7 @@ export default function LevelEditor() {
   } = usePuzznic();
   
   const { playHit } = useAudio();
+  const isMobile = useIsMobile();
   
   const [message, setMessage] = useState<string | null>(null);
   const [isValid, setIsValid] = useState(true);
@@ -75,8 +76,6 @@ export default function LevelEditor() {
       setTimeout(() => setMessage(null), 2000);
     }
   };
-  
-  const isMobile = useIsMobile();
   
   return (
     <div className="absolute inset-0 flex flex-col bg-blue-900/30 backdrop-blur-md">
