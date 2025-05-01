@@ -275,7 +275,8 @@ export function Board2D({ width, height }: BoardProps) {
   
   // For tracking mouse drag operations
   const dragStartRef = useRef<{ x: number, y: number, gridX: number, gameY: number } | null>(null);
-  const mouseMoveThresholdRef = useRef<number>(15); // Pixels to move before triggering a direction
+  const mouseMoveThresholdRef = useRef<number>(40); // Increased threshold to prevent accidental/rapid movements
+  const lastMoveTimeRef = useRef<number>(0); // To limit how frequently moves can happen
   
   // Function to handle pointer (mouse or touch) events for selection
   const handlePointerSelect = (clientX: number, clientY: number) => {
@@ -317,22 +318,38 @@ export function Board2D({ width, height }: BoardProps) {
     // Only handle mouse move if we're in game mode and have a dragging operation
     if (gamePhase !== "playing" || !dragStartRef.current || !selectedBlockPos) return;
     
+    // Check if we've moved recently (enforcing a cooldown period)
+    const currentTime = Date.now();
+    const timeSinceLastMove = currentTime - lastMoveTimeRef.current;
+    
+    // Don't allow moves more frequently than every 300ms
+    if (timeSinceLastMove < 300) return;
+    
     const { x: startX, gridX: startGridX } = dragStartRef.current;
     const diffX = e.clientX - startX;
     
     // Check if we've moved enough to trigger a direction
     if (Math.abs(diffX) > mouseMoveThresholdRef.current) {
-      // Get current board state
+      // Get current game state and check if the move would be valid
       const { moveSelectedBlock } = usePuzznic.getState();
+      const { board } = usePuzznic.getState();
+      const { x, y } = selectedBlockPos;
       
-      if (diffX < 0 && selectedBlockPos.x > 0) {
-        // Move left if we've dragged left
-        moveSelectedBlock('left');
-        playHitSound();
-      } else if (diffX > 0 && selectedBlockPos.x < cols - 1) {
-        // Move right if we've dragged right
-        moveSelectedBlock('right');
-        playHitSound();
+      // Safely check if move is valid before attempting it
+      if (diffX < 0 && x > 0) {
+        // Check if there's space to move left
+        if (board[y] && x-1 >= 0 && board[y][x-1] === null) {
+          moveSelectedBlock('left');
+          playHitSound();
+          lastMoveTimeRef.current = currentTime;
+        }
+      } else if (diffX > 0 && x < cols - 1) {
+        // Check if there's space to move right
+        if (board[y] && x+1 < board[y].length && board[y][x+1] === null) {
+          moveSelectedBlock('right');
+          playHitSound();
+          lastMoveTimeRef.current = currentTime;
+        }
       }
       
       // Reset drag start to current position to allow continuous dragging
