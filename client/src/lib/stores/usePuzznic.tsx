@@ -51,6 +51,7 @@ interface PuzznicState {
   // Editor-specific actions
   enterEditMode: () => void;
   exitEditMode: () => void;
+  testLevel: () => boolean;
   createEmptyLevel: () => void;
   placeEditorBlock: (x: number, y: number, blockType: number) => void;
   removeEditorBlock: (x: number, y: number) => void;
@@ -586,6 +587,44 @@ export const usePuzznic = create<PuzznicState>()(
         const { initGame } = get();
         initGame();
       }, 100);
+    },
+    
+    testLevel: () => {
+      // Save the current level data for testing
+      const { generateLevelData, validateLevelData } = get();
+      const levelData = generateLevelData();
+      
+      // Validate the level first
+      if (!validateLevelData(levelData)) {
+        console.warn("Cannot test invalid level - all block types must have even counts");
+        return false;
+      }
+      
+      // Store the current level as a temporary test level
+      const currentUserLevels = get().userLevels;
+      const tempUserLevels = [...currentUserLevels, levelData];
+      
+      // Set up testing state - use the last index of the temporary levels array
+      const testLevelIndex = tempUserLevels.length - 1;
+      
+      // Set the game state to ready, then start the game with the test level
+      set({ 
+        gamePhase: "ready",
+        userLevels: tempUserLevels,
+        level: 1
+      });
+      
+      // Start the game with the test level
+      setTimeout(() => {
+        const { startGame } = get();
+        startGame();
+        
+        // Load the test level
+        const { loadUserLevel } = get();
+        loadUserLevel(testLevelIndex);
+      }, 100);
+      
+      return true;
     },
     
     createEmptyLevel: () => {

@@ -19,7 +19,8 @@ export default function SimpleLevelEditor() {
     validateLevelData,
     generateLevelData,
     createEmptyLevel,
-    loadUserLevel
+    loadUserLevel,
+    testLevel
   } = usePuzznic();
   
   const { playHit } = useAudio();
@@ -88,6 +89,32 @@ export default function SimpleLevelEditor() {
             >
               Exit
             </button>
+            
+            <button 
+              onClick={() => {
+                if (isValid) {
+                  const success = testLevel();
+                  if (success) {
+                    playHit();
+                  } else {
+                    setMessage("Cannot test invalid level!");
+                    setTimeout(() => setMessage(null), 2000);
+                  }
+                } else {
+                  setMessage("Cannot test invalid level!");
+                  setTimeout(() => setMessage(null), 2000);
+                }
+              }}
+              disabled={!isValid}
+              className={
+                isValid 
+                  ? "bg-blue-600 text-white px-4 py-2 text-lg font-bold rounded-lg shadow-md active:translate-y-1" 
+                  : "bg-gray-600 text-white px-4 py-2 text-lg font-bold rounded-lg opacity-50"
+              }
+            >
+              Test Level
+            </button>
+            
             <button 
               onClick={handleSaveLevel}
               disabled={!isValid}
