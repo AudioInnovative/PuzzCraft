@@ -308,7 +308,17 @@ export const usePuzznic = create<PuzznicState>()(
     
     // Check for matching blocks
     checkMatches: () => {
-      const { board } = get();
+      const { board, boardHasBlocksThatCanFall } = get();
+      
+      // First check if any blocks can still fall - if so, don't do matching yet
+      if (boardHasBlocksThatCanFall(board)) {
+        // Continue applying gravity if blocks can still fall
+        const { applyGravity } = get();
+        applyGravity();
+        return;
+      }
+      
+      // Only proceed with matching once the board has settled completely
       
       // Create a deep copy of the board
       const newBoard = board.map(row => row.map(block => 
@@ -373,18 +383,9 @@ export const usePuzznic = create<PuzznicState>()(
           }, 300);
         }, 500);
       } else {
-        // No matches found, check if any blocks can still fall and apply gravity if needed
-        const { applyGravity, boardHasBlocksThatCanFall } = get();
-        const currentBoard = get().board;
-        
-        if (boardHasBlocksThatCanFall(currentBoard)) {
-          // Blocks can still fall, continue gravity
-          applyGravity();
-        } else {
-          // Board is fully settled with no matches, just update game state
-          const { updateGameState } = get();
-          updateGameState();
-        }
+        // No matches found and board is settled, update game state
+        const { updateGameState } = get();
+        updateGameState();
       }
     },
     
@@ -465,16 +466,17 @@ export const usePuzznic = create<PuzznicState>()(
               applyGravity();
             } else {
               // Board is settled, now check for matches
+              // No need to manually call updateGameState here as checkMatches will handle it 
+              // when there are no more matches and the board is fully settled
               checkMatches();
-              updateGameState();
             }
           }, 300);
         }, 200);
       } else {
-        // No blocks are falling, board is settled, update game state and check matches
-        const { checkMatches, updateGameState } = get();
+        // No blocks are falling, board is settled, check for matches
+        // checkMatches will handle updateGameState when there are no more matches
+        const { checkMatches } = get();
         checkMatches();
-        updateGameState();
       }
     },
     
