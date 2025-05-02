@@ -272,10 +272,12 @@ export const usePuzznic = create<PuzznicState>()(
           });
           
           // After moving, check for matches and apply gravity
+          // Use the same delay as our falling animation for consistency
+          const MOVE_DELAY = 300;
           setTimeout(() => {
             const { checkMatches } = get();
             checkMatches();
-          }, 100);
+          }, MOVE_DELAY);
         }
       }
     },
@@ -351,11 +353,13 @@ export const usePuzznic = create<PuzznicState>()(
           set({ board: updatedBoard });
           
           // Apply gravity after removing blocks
+          // Use consistent delay for all animations
+          const ANIMATION_DELAY = 300;
           setTimeout(() => {
             const { applyGravity } = get();
             applyGravity();
-          }, 300);
-        }, 500);
+          }, ANIMATION_DELAY);
+        }, ANIMATION_DELAY);
       } else {
         // No matches found and board is settled, update game state
         const { updateGameState } = get();
@@ -401,8 +405,12 @@ export const usePuzznic = create<PuzznicState>()(
         
         set({ board: newBoard });
         
+        // Use a consistent falling speed for all blocks
+        // We use a constant delay regardless of whether the block was previously moved horizontally
+        const FALL_ANIMATION_DELAY = 300; // Slightly slower for more natural feel
+        
         // Move falling blocks down
-        // Start animation and give time for visual effect (250ms)
+        // Start animation and give time for visual effect
         setTimeout(() => {
           const { board } = get();
           const updatedBoard = board.map(row => row.map(block => 
@@ -445,8 +453,8 @@ export const usePuzznic = create<PuzznicState>()(
               // when there are no more matches and the board is fully settled
               checkMatches();
             }
-          }, 250); // Shorter delay between gravity steps
-        }, 250); // Time for animation to complete
+          }, FALL_ANIMATION_DELAY); // Consistent delay between gravity steps
+        }, FALL_ANIMATION_DELAY); // Consistent time for animation to complete
       } else {
         // No blocks are falling, board is settled, check for matches
         // checkMatches will handle updateGameState when there are no more matches
@@ -553,10 +561,12 @@ export const usePuzznic = create<PuzznicState>()(
         set({ gamePhase: "editing" });
         
         // Then load the level we were testing
+        // Use consistent delay for all animations
+        const ANIMATION_DELAY = 300;
         setTimeout(() => {
           const { loadUserLevel } = get();
           loadUserLevel(testLevelIndex);
-        }, 100);
+        }, ANIMATION_DELAY);
       } else {
         // Standard editor entry - create an empty level
         const { createEmptyLevel } = get();
@@ -577,10 +587,11 @@ export const usePuzznic = create<PuzznicState>()(
       });
       
       // Reinitialize game to ensure we're back at the main menu
+      const ANIMATION_DELAY = 300;
       setTimeout(() => {
         const { initGame } = get();
         initGame();
-      }, 100);
+      }, ANIMATION_DELAY);
     },
     
     testLevel: () => {
