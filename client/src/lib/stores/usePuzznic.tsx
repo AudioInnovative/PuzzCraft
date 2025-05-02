@@ -220,7 +220,7 @@ export const usePuzznic = create<PuzznicState>()(
       }, 500);
     },
     
-    // Select a block (or deselect if negative coordinates provided)
+    // Select a block at given position
     selectBlock: (x, y) => {
       const { board, gamePhase } = get();
       
@@ -240,16 +240,6 @@ export const usePuzznic = create<PuzznicState>()(
         });
       });
       
-      // Special case: negative coordinates used to explicitly deselect
-      if (x < 0 || y < 0) {
-        console.log("Explicitly deselecting all blocks");
-        set({ 
-          board: newBoard,
-          selectedBlockPos: null
-        });
-        return;
-      }
-      
       // Check if the position is valid and has a block
       if (y >= 0 && y < newBoard.length && 
           x >= 0 && x < newBoard[y].length && 
@@ -259,7 +249,6 @@ export const usePuzznic = create<PuzznicState>()(
         const block = newBoard[y][x];
         if (block && !block.matched && !block.falling && !block.isFixed) {
           block.selected = true;
-          console.log(`Selected block at (${x}, ${y}), type: ${block.type}`);
           
           set({ 
             board: newBoard,
@@ -267,7 +256,6 @@ export const usePuzznic = create<PuzznicState>()(
           });
         } else {
           // No valid block to select
-          console.log(`Block at (${x}, ${y}) exists but is not selectable`);
           set({ 
             board: newBoard,
             selectedBlockPos: null
@@ -275,7 +263,6 @@ export const usePuzznic = create<PuzznicState>()(
         }
       } else {
         // No valid block to select
-        console.log(`No valid block at (${x}, ${y})`);
         set({ 
           board: newBoard,
           selectedBlockPos: null
