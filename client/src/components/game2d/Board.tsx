@@ -153,43 +153,26 @@ function renderBlock(
     ctx.closePath();
     ctx.fill();
     
-    // Add tech grid pattern for futuristic feel
-    ctx.strokeStyle = 'rgba(0, 150, 255, 0.3)'; // Subtle blue tech lines
-    ctx.lineWidth = 0.7;
-    
-    // Use clipping to ensure grid lines don't extend beyond rounded corners
+    // No grid patterns - keeping floor blocks completely solid
     ctx.save();
-    ctx.clip();
+    ctx.clip(); // Still use clipping for safety
     
-    // Draw futuristic grid pattern
-    const gridSize = blockSize / 5;
+    // Just a very subtle highlight in the top-left
+    const lightSize = blockSize * 0.5;
+    const gradientHighlight = ctx.createRadialGradient(
+      blockX + blockSize * 0.3,
+      blockY + blockSize * 0.3,
+      0,
+      blockX + blockSize * 0.3,
+      blockY + blockSize * 0.3,
+      lightSize
+    );
     
-    // Draw horizontal and vertical grid lines
-    for (let i = 1; i < 5; i++) {
-      ctx.beginPath();
-      ctx.moveTo(blockX, blockY + i * gridSize);
-      ctx.lineTo(blockX + blockSize, blockY + i * gridSize);
-      ctx.stroke();
-      
-      ctx.beginPath();
-      ctx.moveTo(blockX + i * gridSize, blockY);
-      ctx.lineTo(blockX + i * gridSize, blockY + blockSize);
-      ctx.stroke();
-    }
+    gradientHighlight.addColorStop(0, `rgba(255, 255, 255, 0.1)`); // Very subtle highlight
+    gradientHighlight.addColorStop(1, `rgba(255, 255, 255, 0)`); // Fade to transparent
     
-    // Add glowing dots at intersections
-    ctx.fillStyle = 'rgba(0, 150, 255, 0.4)';
-    for (let i = 1; i < 5; i++) {
-      for (let j = 1; j < 5; j++) {
-        ctx.beginPath();
-        ctx.arc(
-          blockX + i * gridSize, 
-          blockY + j * gridSize, 
-          0.8, 0, Math.PI * 2
-        );
-        ctx.fill();
-      }
-    }
+    ctx.fillStyle = gradientHighlight;
+    ctx.fillRect(blockX, blockY, blockSize, blockSize);
     
     ctx.restore();
     
@@ -279,77 +262,26 @@ function renderBlock(
     ctx.closePath();
     ctx.fill();
     
-    // Add tech circuit pattern
-    ctx.strokeStyle = 'rgba(0, 150, 255, 0.4)'; // Slightly brighter blue tech lines
-    ctx.lineWidth = 0.8;
-    
-    // Use clipping to ensure lines don't extend beyond rounded corners
+    // No circuit patterns - keeping wall blocks completely solid
     ctx.save();
-    ctx.clip();
+    ctx.clip(); // Still use clipping for safety
     
-    // Horizontal tech lines
-    const lineSize = blockSize / 5;
-    for (let i = 1; i < 5; i++) {
-      ctx.beginPath();
-      ctx.moveTo(blockX, blockY + i * lineSize);
-      ctx.lineTo(blockX + blockSize, blockY + i * lineSize);
-      ctx.stroke();
-    }
-    
-    // Add tech circuit pattern with vertical lines
-    ctx.beginPath();
-    ctx.moveTo(blockX + blockSize / 2, blockY);
-    ctx.lineTo(blockX + blockSize / 2, blockY + blockSize);
-    ctx.stroke();
-    
-    ctx.beginPath();
-    ctx.moveTo(blockX + blockSize / 4, blockY);
-    ctx.lineTo(blockX + blockSize / 4, blockY + blockSize / 2);
-    ctx.stroke();
-    
-    ctx.beginPath();
-    ctx.moveTo(blockX + 3 * blockSize / 4, blockY + blockSize / 2);
-    ctx.lineTo(blockX + 3 * blockSize / 4, blockY + blockSize);
-    ctx.stroke();
-    
-    // Add diagonal circuit lines for more futuristic look
-    ctx.beginPath();
-    ctx.moveTo(blockX + blockSize / 5, blockY);
-    ctx.lineTo(blockX + blockSize, blockY + 4 * blockSize / 5);
-    ctx.stroke();
-    
-    ctx.beginPath();
-    ctx.moveTo(blockX, blockY + blockSize / 5);
-    ctx.lineTo(blockX + 4 * blockSize / 5, blockY + blockSize);
-    ctx.stroke();
-    
-    // Add small glowing dots at key circuit intersections
-    ctx.fillStyle = 'rgba(0, 220, 255, 0.7)'; // Brighter dots
-    
-    // Center dot
-    ctx.beginPath();
-    ctx.arc(
-      blockX + blockSize / 2, 
-      blockY + blockSize / 2, 
-      1.5, 0, Math.PI * 2
+    // Just a very subtle top-left highlight for 3D effect
+    const lightSize = blockSize * 0.6;
+    const gradientHighlight = ctx.createRadialGradient(
+      blockX + blockSize * 0.25, // More towards the top-left
+      blockY + blockSize * 0.25,
+      0,
+      blockX + blockSize * 0.25,
+      blockY + blockSize * 0.25,
+      lightSize
     );
-    ctx.fill();
     
-    // Corner and circuit intersections
-    const dotPositions = [
-      [blockX + blockSize / 4, blockY + blockSize / 3],
-      [blockX + 3 * blockSize / 4, blockY + 2 * blockSize / 3],
-      [blockX + blockSize / 4, blockY + blockSize / 2],
-      [blockX + 3 * blockSize / 4, blockY + blockSize / 2],
-      [blockX + blockSize / 2, blockY + blockSize / 4],
-      [blockX + blockSize / 2, blockY + 3 * blockSize / 4]
-    ];
+    gradientHighlight.addColorStop(0, 'rgba(60, 100, 140, 0.15)'); // Subtle blue highlight
+    gradientHighlight.addColorStop(1, 'rgba(60, 100, 140, 0)'); // Fade to transparent
     
-    for (const [x, y] of dotPositions) {
-      ctx.beginPath();
-      ctx.arc(x, y, 1.2, 0, Math.PI * 2);
-      ctx.fill();
-    }
+    ctx.fillStyle = gradientHighlight;
+    ctx.fillRect(blockX, blockY, blockSize, blockSize);
     
     ctx.restore();
     
@@ -451,42 +383,26 @@ function renderBlock(
     ctx.closePath();
     ctx.fill();
     
-    // Add tech-style grid pattern (very subtle)
-    ctx.strokeStyle = `rgba(255, 255, 255, 0.2)`; // Slightly more visible grid
-    ctx.lineWidth = 0.7;
-    
+    // No grid patterns or center circle - keeping blocks completely solid
     ctx.save();
-    ctx.clip(); // Use current path as clip
+    ctx.clip(); // Still use clipping for safety
     
-    // Draw a simple tech grid
-    const gridSize = blockSize / 5;
-    
-    // Horizontal lines
-    for (let i = 1; i < 5; i++) {
-      ctx.beginPath();
-      ctx.moveTo(blockX, blockY + i * gridSize);
-      ctx.lineTo(blockX + blockSize, blockY + i * gridSize);
-      ctx.stroke();
-    }
-    
-    // Vertical lines
-    for (let i = 1; i < 5; i++) {
-      ctx.beginPath();
-      ctx.moveTo(blockX + i * gridSize, blockY);
-      ctx.lineTo(blockX + i * gridSize, blockY + blockSize);
-      ctx.stroke();
-    }
-    
-    // Add subtle highlight arc for visual interest
-    ctx.fillStyle = `rgba(255, 255, 255, 0.15)`;
-    ctx.beginPath();
-    ctx.arc(
-      blockX + blockSize / 2,
-      blockY + blockSize / 2,
-      blockSize / 3,
-      0, Math.PI * 2
+    // Just a very subtle top highlight to maintain 3D look without patterns
+    const lightSize = blockSize * 0.3;
+    const gradientHighlight = ctx.createRadialGradient(
+      blockX + blockSize * 0.3, // Slightly to the top-left
+      blockY + blockSize * 0.3,
+      0,
+      blockX + blockSize * 0.3,
+      blockY + blockSize * 0.3,
+      lightSize
     );
-    ctx.fill();
+    
+    gradientHighlight.addColorStop(0, `rgba(255, 255, 255, 0.15)`); // Very subtle light spot
+    gradientHighlight.addColorStop(1, `rgba(255, 255, 255, 0)`); // Fade to transparent
+    
+    ctx.fillStyle = gradientHighlight;
+    ctx.fillRect(blockX, blockY, blockSize, blockSize);
     
     ctx.restore();
     
