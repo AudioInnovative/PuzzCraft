@@ -271,10 +271,23 @@ export const usePuzznic = create<PuzznicState>()(
             moveCount: get().moveCount + 1
           });
           
-          // After moving, check for matches and apply gravity
+          // After moving, unselect the block, then check for matches and apply gravity
           // Use the same delay as our falling animation for consistency
           const MOVE_DELAY = 300;
           setTimeout(() => {
+            // Create a new board copy to unselect the block after movement completes
+            const currentBoard = get().board;
+            const updatedBoard = currentBoard.map(row => row.map(block => 
+              block === null ? null : { ...block, selected: false }
+            ));
+            
+            // Clear the selection
+            set({
+              board: updatedBoard,
+              selectedBlockPos: null
+            });
+            
+            // Then check for matches
             const { checkMatches } = get();
             checkMatches();
           }, MOVE_DELAY);
