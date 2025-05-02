@@ -28,3 +28,8 @@ canvas {
   height: 100% !important;
   touch-action: none;
 }
+
+/* 3D block bevel effect using clip-path */
+.clip-polygon {
+  clip-path: polygon(0 0, 100% 0, 0 100%);
+}

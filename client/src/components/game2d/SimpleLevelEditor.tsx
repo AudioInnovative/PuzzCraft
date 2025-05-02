@@ -7,6 +7,18 @@ const CELL_SIZE = 40;
 const GRID_SIZE = 8;
 const BLOCK_SYMBOLS = ["✚", "■", "●", "×", "★", "◆", "▲", "♦"];
 
+// Define block colors based on type (using NES Puzznic color palette) - same as in Board.tsx
+const blockColors = [
+  "#FF0000", // Red (type 1, typically floor) 
+  "#00FF00", // Green (type 2)
+  "#0000FF", // Blue (type 3)
+  "#FFFF00", // Yellow (type 4)
+  "#FF00FF", // Magenta (type 5)
+  "#00FFFF", // Cyan (type 6)
+  "#FF8800", // Orange (type 7)
+  "#8800FF", // Purple (type 8)
+];
+
 export default function SimpleLevelEditor() {
   const { 
     gamePhase, 
@@ -49,20 +61,9 @@ export default function SimpleLevelEditor() {
     setTimeout(() => setMessage(null), 2000);
   };
   
-  // Function to get a color for each block type
+  // Function to get a color for each block type - Use the same colors as the game
   const getBlockColor = (type: number): string => {
-    const colors = [
-      '#FF0000', // Red (type 1, typically floor)
-      '#4CAF50', // Green (type 2)
-      '#2196F3', // Blue (type 3)
-      '#FFC107', // Yellow (type 4)
-      '#9C27B0', // Purple (type 5)
-      '#FF9800', // Orange (type 6)
-      '#E91E63', // Pink (type 7)
-      '#00BCD4'  // Cyan (type 8)
-    ];
-    
-    return colors[(type - 1) % colors.length];
+    return blockColors[(type - 1) % blockColors.length];
   };
   
   return (
@@ -121,10 +122,26 @@ export default function SimpleLevelEditor() {
                 )}
               >
                 <div 
-                  className="w-12 h-12 rounded-md flex items-center justify-center"
+                  className="w-12 h-12 rounded-md flex items-center justify-center relative overflow-hidden"
                   style={{ backgroundColor: getBlockColor(type) }}
                 >
-                  <span className="text-white font-bold text-2xl">{BLOCK_SYMBOLS[type-1]}</span>
+                  {/* 3D bevel effect - top/left highlight */}
+                  <div className="absolute top-0 left-0 right-0 h-[20%] bg-white opacity-40"></div>
+                  <div className="absolute top-0 left-0 bottom-0 w-[20%] bg-white opacity-40"></div>
+                  
+                  {/* 3D bevel effect - bottom/right shadow */}
+                  <div className="absolute bottom-0 left-0 right-0 h-[20%] bg-black opacity-40"></div>
+                  <div className="absolute top-0 right-0 bottom-0 w-[20%] bg-black opacity-40"></div>
+                  
+                  {/* Block symbol with drop shadow */}
+                  <div className="relative">
+                    <span className="absolute text-black opacity-30 font-bold text-2xl" style={{top: '2px', left: '2px'}}>
+                      {BLOCK_SYMBOLS[type-1]}
+                    </span>
+                    <span className="text-white font-bold text-2xl relative">
+                      {BLOCK_SYMBOLS[type-1]}
+                    </span>
+                  </div>
                 </div>
               </button>
             ))}
@@ -212,12 +229,26 @@ export default function SimpleLevelEditor() {
                           {/* Display block if it exists */}
                           {block && (
                             <div
-                              className="w-full h-full rounded-md flex items-center justify-center"
+                              className="w-full h-full rounded-md flex items-center justify-center relative overflow-hidden"
                               style={{ backgroundColor: getBlockColor(block.type) }}
                             >
-                              <span className="text-white font-bold">
-                                {BLOCK_SYMBOLS[block.type-1]}
-                              </span>
+                              {/* 3D bevel effect - top/left highlight */}
+                              <div className="absolute top-0 left-0 right-0 h-[20%] bg-white opacity-40 clip-polygon"></div>
+                              <div className="absolute top-0 left-0 bottom-0 w-[20%] bg-white opacity-40 clip-polygon"></div>
+                              
+                              {/* 3D bevel effect - bottom/right shadow */}
+                              <div className="absolute bottom-0 left-0 right-0 h-[20%] bg-black opacity-40 clip-polygon"></div>
+                              <div className="absolute top-0 right-0 bottom-0 w-[20%] bg-black opacity-40 clip-polygon"></div>
+                              
+                              {/* Block symbol with drop shadow for better readability */}
+                              <div className="relative">
+                                <span className="absolute text-black opacity-30 font-bold" style={{top: '2px', left: '2px'}}>
+                                  {BLOCK_SYMBOLS[block.type-1]}
+                                </span>
+                                <span className="text-white font-bold relative">
+                                  {BLOCK_SYMBOLS[block.type-1]}
+                                </span>
+                              </div>
                             </div>
                           )}
                           
