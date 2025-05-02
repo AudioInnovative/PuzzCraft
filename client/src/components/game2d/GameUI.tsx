@@ -12,7 +12,8 @@ export default function GameUI2D() {
     timeLeft,
     restartLevel,
     nextLevel,
-    enterEditMode
+    enterEditMode,
+    isTestingCustomLevel
   } = usePuzznic();
   const isMobile = useIsMobile();
   
@@ -67,14 +68,27 @@ export default function GameUI2D() {
           </button>
         )}
         
-        {/* Restart button during gameplay */}
+        {/* Buttons during gameplay */}
         {gamePhase === "playing" && (
-          <button 
-            className="bg-red-600 hover:bg-red-800 text-white text-xs font-bold py-1 px-2 pointer-events-auto border border-white uppercase mt-auto w-full"
-            onClick={() => restartLevel()}
-          >
-            Restart
-          </button>
+          <div className="mt-auto w-full flex flex-col gap-2">
+            {/* Edit button only shown when testing a custom level */}
+            {isTestingCustomLevel && (
+              <button 
+                className="bg-purple-600 hover:bg-purple-800 text-white text-xs font-bold py-1 px-2 pointer-events-auto border border-white uppercase w-full"
+                onClick={() => enterEditMode()}
+              >
+                Edit Level
+              </button>
+            )}
+            
+            {/* Restart button */}
+            <button 
+              className="bg-red-600 hover:bg-red-800 text-white text-xs font-bold py-1 px-2 pointer-events-auto border border-white uppercase w-full"
+              onClick={() => restartLevel()}
+            >
+              Restart
+            </button>
+          </div>
         )}
       </div>
       
@@ -124,13 +138,30 @@ export default function GameUI2D() {
                 <p className="text-cyan-300 font-mono text-right">{moveCount}</p>
               </div>
             </div>
-            <div className="animate-pulse">
-              <button 
-                className="bg-green-600 hover:bg-green-800 text-white font-bold py-2 px-8 pointer-events-auto border-2 border-white uppercase font-mono"
-                onClick={() => nextLevel()}
-              >
-                Next Level
-              </button>
+            <div className="animate-pulse flex justify-center space-x-4">
+              {isTestingCustomLevel ? (
+                <>
+                  <button 
+                    className="bg-purple-600 hover:bg-purple-800 text-white font-bold py-2 px-4 pointer-events-auto border-2 border-white uppercase font-mono"
+                    onClick={() => enterEditMode()}
+                  >
+                    Edit Level
+                  </button>
+                  <button 
+                    className="bg-green-600 hover:bg-green-800 text-white font-bold py-2 px-4 pointer-events-auto border-2 border-white uppercase font-mono"
+                    onClick={() => restartLevel()}
+                  >
+                    Try Again
+                  </button>
+                </>
+              ) : (
+                <button 
+                  className="bg-green-600 hover:bg-green-800 text-white font-bold py-2 px-8 pointer-events-auto border-2 border-white uppercase font-mono"
+                  onClick={() => nextLevel()}
+                >
+                  Next Level
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -150,18 +181,37 @@ export default function GameUI2D() {
               </div>
             </div>
             <div className="flex justify-center space-x-4">
-              <button 
-                className="bg-blue-600 hover:bg-blue-800 text-white font-bold py-2 px-4 pointer-events-auto border-2 border-white uppercase font-mono"
-                onClick={() => restartLevel()}
-              >
-                Retry
-              </button>
-              <button 
-                className="bg-green-600 hover:bg-green-800 text-white font-bold py-2 px-4 pointer-events-auto border-2 border-white uppercase font-mono"
-                onClick={() => nextLevel()}
-              >
-                New Game
-              </button>
+              {isTestingCustomLevel ? (
+                <>
+                  <button 
+                    className="bg-purple-600 hover:bg-purple-800 text-white font-bold py-2 px-4 pointer-events-auto border-2 border-white uppercase font-mono"
+                    onClick={() => enterEditMode()}
+                  >
+                    Edit Level
+                  </button>
+                  <button 
+                    className="bg-blue-600 hover:bg-blue-800 text-white font-bold py-2 px-4 pointer-events-auto border-2 border-white uppercase font-mono"
+                    onClick={() => restartLevel()}
+                  >
+                    Retry Level
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button 
+                    className="bg-blue-600 hover:bg-blue-800 text-white font-bold py-2 px-4 pointer-events-auto border-2 border-white uppercase font-mono"
+                    onClick={() => restartLevel()}
+                  >
+                    Retry
+                  </button>
+                  <button 
+                    className="bg-green-600 hover:bg-green-800 text-white font-bold py-2 px-4 pointer-events-auto border-2 border-white uppercase font-mono"
+                    onClick={() => nextLevel()}
+                  >
+                    New Game
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>
