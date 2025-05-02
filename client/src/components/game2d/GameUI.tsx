@@ -3,20 +3,23 @@ import { usePuzznic, BlockType } from "../../lib/stores/usePuzznic";
 import { GamePanel } from "../ui/game-panel";
 import { useIsMobile } from "../../hooks/use-is-mobile";
 
-// Direct mapping from block type number to color
-// This ensures a perfect 1:1 match between the actual game blocks and the color indicators
-const blockColors: Record<number, string> = {
-  1: "#777777", // Floor blocks (gray)
-  2: "#FF005E", // Intense Neon Pink
-  3: "#00FF33", // Electric Neon Green
-  4: "#00FFFF", // Brilliant Cyan
-  5: "#FFFF00", // Vivid Yellow
-  6: "#FF00FF", // Vibrant Magenta
-  7: "#4D4DFF", // Electric Blue
-  8: "#FF7700", // Blazing Orange
-  9: "#AA00FF", // Deep Purple
-  10: "#FF0099", // Hot Pink
-};
+// Define floor block color
+const floorColor = "#777777";
+
+// Import the exact same color array from Board.tsx to ensure perfect matching
+// These colors are applied with (blockType - 1) as the index
+const boardColors = [
+  "#FF005E", // Intense Neon Pink (index 0, type 2)
+  "#00FF33", // Electric Neon Green (index 1, type 3)
+  "#00FFFF", // Brilliant Cyan (index 2, type 4)
+  "#FFFF00", // Vivid Yellow (index 3, type 5)
+  "#FF00FF", // Vibrant Magenta (index 4, type 6)
+  "#4D4DFF", // Electric Blue (index 5, type 7)
+  "#FF7700", // Blazing Orange (index 6, type 8)
+  "#AA00FF", // Deep Purple (index 7, type 9)
+  "#FF0099", // Hot Pink (index 8, type 10)
+  "#00DDFF", // Bright Aqua (index 9, type 11)
+];
 
 // Interface for block counter
 interface BlockCount {
@@ -117,8 +120,8 @@ export default function GameUI2D() {
                   <div 
                     className="w-4 h-4 rounded-sm" 
                     style={{ 
-                      backgroundColor: blockColors[item.type as keyof typeof blockColors],
-                      boxShadow: `0 0 4px ${blockColors[item.type as keyof typeof blockColors]}`,
+                      backgroundColor: item.type === 1 ? floorColor : boardColors[(item.type - 2) % boardColors.length],
+                      boxShadow: `0 0 4px ${item.type === 1 ? floorColor : boardColors[(item.type - 2) % boardColors.length]}`,
                       border: '1px solid rgba(255, 255, 255, 0.4)'
                     }}
                   />

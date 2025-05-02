@@ -328,12 +328,18 @@ export const usePuzznic = create<PuzznicState>()(
       let matchScore = 0;
       
       // Check horizontal matches (at least 2 same blocks)
+      console.log("Checking for horizontal matches");
       for (let y = 0; y < newBoard.length; y++) {
         for (let x = 0; x < newBoard[0].length - 1; x++) {
           if (newBoard[y][x] !== null && newBoard[y][x+1] !== null && 
               !newBoard[y][x]!.isFixed && !newBoard[y][x+1]!.isFixed &&
               !newBoard[y][x]!.falling && !newBoard[y][x+1]!.falling && // Don't match falling blocks
               newBoard[y][x]!.type === newBoard[y][x+1]!.type) {
+            
+            // Debug logging for matches
+            const blockType = newBoard[y][x]!.type;
+            console.log(`MATCH FOUND - Horizontal: Type ${blockType} at [${x},${y}] and [${x+1},${y}]`);
+            
             // Mark blocks as matched
             newBoard[y][x]!.matched = true;
             newBoard[y][x+1]!.matched = true;
@@ -344,12 +350,18 @@ export const usePuzznic = create<PuzznicState>()(
       }
       
       // Check vertical matches (at least 2 same blocks)
+      console.log("Checking for vertical matches");
       for (let y = 0; y < newBoard.length - 1; y++) {
         for (let x = 0; x < newBoard[0].length; x++) {
           if (newBoard[y][x] !== null && newBoard[y+1][x] !== null && 
               !newBoard[y][x]!.isFixed && !newBoard[y+1][x]!.isFixed &&
               !newBoard[y][x]!.falling && !newBoard[y+1][x]!.falling && // Don't match falling blocks
               newBoard[y][x]!.type === newBoard[y+1][x]!.type) {
+            
+            // Debug logging for matches
+            const blockType = newBoard[y][x]!.type;
+            console.log(`MATCH FOUND - Vertical: Type ${blockType} at [${x},${y}] and [${x},${y+1}]`);
+            
             // Mark blocks as matched
             newBoard[y][x]!.matched = true;
             newBoard[y+1][x]!.matched = true;
