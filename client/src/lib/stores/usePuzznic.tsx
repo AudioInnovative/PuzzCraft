@@ -33,6 +33,8 @@ interface PuzznicState {
   blockTypes: number;
   currentEditingBlockType: number;
   userLevels: number[][][];
+  isTestingCustomLevel: boolean;
+  testLevelIndex: number;
   
   // Actions
   validateLevelData: (levelData: number[][]) => boolean;
@@ -76,6 +78,8 @@ export const usePuzznic = create<PuzznicState>()(
     blockTypes: 6, // Default number of block types
     currentEditingBlockType: 2, // Start with block type 2 (type 1 is usually reserved for floors)
     userLevels: [] as number[][][], // Array to store user-created levels
+    isTestingCustomLevel: false, // Flag to track if we're testing a custom level
+    testLevelIndex: -1, // Index of the test level in userLevels array
     
     // Helper function to validate level data
     validateLevelData: (levelData: number[][]) => {
@@ -483,14 +487,30 @@ export const usePuzznic = create<PuzznicState>()(
     
     // Restart current level
     restartLevel: () => {
-      const { initGame } = get();
-      initGame();
+      const { isTestingCustomLevel, testLevelIndex } = get();
       
-      // Auto-start with gravity after a brief delay to show the initial state
-      setTimeout(() => {
-        const { startGame } = get();
-        startGame();
-      }, 300);
+      if (isTestingCustomLevel && testLevelIndex >= 0) {
+        // We're testing a custom level, so reload it instead of the standard level
+        const { initGame } = get();
+        initGame(); // This will initialize with the current level (which is 1, the default)
+        
+        // Auto-start and load the custom level
+        setTimeout(() => {
+          const { startGame, loadUserLevel } = get();
+          startGame();
+          loadUserLevel(testLevelIndex);
+        }, 300);
+      } else {
+        // Normal level restart
+        const { initGame } = get();
+        initGame();
+        
+        // Auto-start with gravity after a brief delay to show the initial state
+        setTimeout(() => {
+          const { startGame } = get();
+          startGame();
+        }, 300);
+      }
     },
     
     // Go to next level
@@ -536,7 +556,9 @@ export const usePuzznic = create<PuzznicState>()(
       // Return to main menu state without starting the game
       set({ 
         gamePhase: "ready",
-        level: 1  // Reset to level 1, but don't actually start the game
+        level: 1,  // Reset to level 1, but don't actually start the game
+        isTestingCustomLevel: false,
+        testLevelIndex: -1
       });
       
       // Reinitialize game to ensure we're back at the main menu
@@ -564,7 +586,9 @@ export const usePuzznic = create<PuzznicState>()(
       set({ 
         gamePhase: "ready",
         userLevels: tempUserLevels,
-        level: 1
+        level: 1,
+        isTestingCustomLevel: true,
+        testLevelIndex: testLevelIndex
       });
       
       // Start the game with the test level
