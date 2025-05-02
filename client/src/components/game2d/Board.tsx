@@ -3,24 +3,24 @@ import { usePuzznic } from '../../lib/stores/usePuzznic';
 import { useAudio } from '../../lib/stores/useAudio';
 import { BlockType } from '../../lib/stores/usePuzznic';
 
-// Define block colors based on type (using a modern gradient palette)
+// Define block colors based on type (using a futuristic neon palette)
 const blockColors = [
-  "#FF5252", // Modern Red
-  "#4CAF50", // Modern Green
-  "#448AFF", // Modern Blue
-  "#FFC107", // Modern Amber
-  "#E040FB", // Modern Purple
-  "#18FFFF", // Modern Cyan
-  "#FF9800", // Modern Orange
-  "#7C4DFF", // Modern Deep Purple
-  "#F50057", // Modern Pink
-  "#00B0FF", // Modern Light Blue
+  "#FF355E", // Neon Pink
+  "#39FF14", // Neon Green
+  "#00FFFF", // Neon Cyan
+  "#FFF01F", // Neon Yellow
+  "#E600FF", // Neon Purple
+  "#00FFFF", // Neon Aqua
+  "#FF8C00", // Neon Orange
+  "#9D00FF", // Neon Violet
+  "#FF00FF", // Neon Magenta
+  "#00BFFF", // Neon Sky Blue
 ];
 
 // Define block symbols based on original Puzznic
 const blockSymbols = ["✚", "■", "●", "×", "★", "◆", "▲", "♦", "◇", "○"];
 
-// Render a single block in NES Puzznic style
+// Render a single block in futuristic glowing style
 function renderBlock(
   ctx: CanvasRenderingContext2D,
   block: BlockType,
@@ -52,28 +52,53 @@ function renderBlock(
   ctx.shadowOffsetX = 0;
   ctx.shadowOffsetY = 0;
   
-  // Draw block shadow/glow if selected
+  // Determine the glow color based on block type
+  let glowColor = 'rgba(255, 255, 255, 0.8)'; // Default white glow
+  
+  if (block.type !== 1 && !block.isFixed) {
+    // Get color based on block type for regular blocks
+    const baseColor = blockColors[(block.type - 1) % blockColors.length];
+    
+    // For hex colors, convert to RGB and create a glow
+    if (baseColor.startsWith('#')) {
+      // Convert hex to RGB
+      const r = parseInt(baseColor.substring(1, 3), 16);
+      const g = parseInt(baseColor.substring(3, 5), 16);
+      const b = parseInt(baseColor.substring(5, 7), 16);
+      
+      // Create semi-transparent glow color
+      glowColor = `rgba(${r}, ${g}, ${b}, 0.7)`;
+    }
+  }
+  
+  // Apply appropriate glow effect based on block state
   if (isSelected) {
-    // Bright glow for selected blocks
-    ctx.shadowColor = 'rgba(255, 255, 255, 0.8)';
-    ctx.shadowBlur = 15;
+    // Intense glow for selected blocks
+    ctx.shadowColor = 'rgba(255, 255, 255, 0.9)';
+    ctx.shadowBlur = 20;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+  } else if (block.type !== 1 && !block.isFixed) {
+    // Subtle neon glow for regular blocks
+    ctx.shadowColor = glowColor;
+    ctx.shadowBlur = 10;
     ctx.shadowOffsetX = 0;
     ctx.shadowOffsetY = 0;
   } else {
-    // Subtle shadow for regular blocks
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+    // Very subtle shadow for floor and wall blocks
+    ctx.shadowColor = 'rgba(0, 150, 255, 0.3)';
     ctx.shadowBlur = 5;
-    ctx.shadowOffsetX = 2;
-    ctx.shadowOffsetY = 2;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
   }
   
-  // Simply check if this is a floor block (type 1)
+  // Floor block (type 1)
   if (block.type === 1) {
-    // Use modern version of floor blocks with rounded corners
+    // Use futuristic version of floor blocks with rounded corners
     let radius = blockSize * 0.15; // Same radius as other blocks for consistency
     
-    // Draw floor block with a gray color (modernized)
-    ctx.fillStyle = '#BBBBBB'; // Light gray
+    // Draw floor block with a dark metallic color for futuristic look
+    ctx.fillStyle = '#555555'; // Dark gray metallic base
     
     // Draw with rounded corners
     ctx.beginPath();
@@ -89,10 +114,11 @@ function renderBlock(
     ctx.closePath();
     ctx.fill();
     
-    // Add subtle gradient
-    const gradient = ctx.createLinearGradient(blockX, blockY, blockX, blockY + blockSize);
-    gradient.addColorStop(0, 'rgba(255, 255, 255, 0.2)');
-    gradient.addColorStop(1, 'rgba(0, 0, 0, 0.1)');
+    // Add futuristic gradient with metallic look
+    const gradient = ctx.createLinearGradient(blockX, blockY, blockX + blockSize, blockY + blockSize);
+    gradient.addColorStop(0, 'rgba(100, 100, 100, 0.8)');
+    gradient.addColorStop(0.5, 'rgba(70, 70, 70, 0.6)');
+    gradient.addColorStop(1, 'rgba(40, 40, 40, 0.7)');
     
     ctx.fillStyle = gradient;
     ctx.beginPath();
@@ -108,35 +134,48 @@ function renderBlock(
     ctx.closePath();
     ctx.fill();
     
-    // Add grid lines to match floor blocks (but more subtle)
-    ctx.strokeStyle = 'rgba(153, 153, 153, 0.5)';
+    // Add tech grid pattern for futuristic feel
+    ctx.strokeStyle = 'rgba(0, 150, 255, 0.3)'; // Subtle blue tech lines
     ctx.lineWidth = 0.5;
-    
-    // Draw grid pattern
-    const gridSize = blockSize / 4;
     
     // Use clipping to ensure grid lines don't extend beyond rounded corners
     ctx.save();
     ctx.clip();
     
+    // Draw futuristic grid pattern
+    const gridSize = blockSize / 4;
+    
+    // Draw horizontal and vertical grid lines
     for (let i = 1; i < 4; i++) {
-      // Horizontal lines
       ctx.beginPath();
       ctx.moveTo(blockX, blockY + i * gridSize);
       ctx.lineTo(blockX + blockSize, blockY + i * gridSize);
       ctx.stroke();
       
-      // Vertical lines
       ctx.beginPath();
       ctx.moveTo(blockX + i * gridSize, blockY);
       ctx.lineTo(blockX + i * gridSize, blockY + blockSize);
       ctx.stroke();
     }
     
+    // Add glowing dots at intersections
+    ctx.fillStyle = 'rgba(0, 150, 255, 0.4)';
+    for (let i = 0; i <= 4; i++) {
+      for (let j = 0; j <= 4; j++) {
+        ctx.beginPath();
+        ctx.arc(
+          blockX + i * gridSize, 
+          blockY + j * gridSize, 
+          0.8, 0, Math.PI * 2
+        );
+        ctx.fill();
+      }
+    }
+    
     ctx.restore();
     
-    // Border
-    ctx.strokeStyle = 'rgba(102, 102, 102, 0.7)';
+    // Subtle glowing border
+    ctx.strokeStyle = 'rgba(0, 150, 255, 0.4)';
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(blockX + radius, blockY);
@@ -151,11 +190,11 @@ function renderBlock(
     ctx.closePath();
     ctx.stroke();
   } else if (block.isFixed && block.type !== 1) {
-    // Wall blocks with modern style
+    // Wall blocks with futuristic tech style
     let radius = blockSize * 0.15; // Same radius as other blocks
     
-    // Draw wall block with rounded corners
-    ctx.fillStyle = '#6688AA'; // Blue-gray color
+    // Draw wall block with a metallic dark blue
+    ctx.fillStyle = '#2A3B4A'; // Dark blue-gray base color
     
     ctx.beginPath();
     ctx.moveTo(blockX + radius, blockY);
@@ -170,10 +209,11 @@ function renderBlock(
     ctx.closePath();
     ctx.fill();
     
-    // Add subtle gradient
-    const gradient = ctx.createLinearGradient(blockX, blockY, blockX, blockY + blockSize);
-    gradient.addColorStop(0, 'rgba(255, 255, 255, 0.2)');
-    gradient.addColorStop(1, 'rgba(0, 0, 0, 0.1)');
+    // Add futuristic tech gradient
+    const gradient = ctx.createLinearGradient(blockX, blockY, blockX + blockSize, blockY + blockSize);
+    gradient.addColorStop(0, 'rgba(60, 90, 120, 0.6)');
+    gradient.addColorStop(0.5, 'rgba(40, 70, 100, 0.4)');
+    gradient.addColorStop(1, 'rgba(20, 40, 60, 0.5)');
     
     ctx.fillStyle = gradient;
     ctx.beginPath();
@@ -189,28 +229,73 @@ function renderBlock(
     ctx.closePath();
     ctx.fill();
     
-    // Add texture lines to wall blocks (but clipped to the rounded shape)
-    const lineSize = blockSize / 4;
-    ctx.strokeStyle = 'rgba(85, 102, 119, 0.6)';
-    ctx.lineWidth = 0.8;
+    // Add futuristic tech lines
+    ctx.strokeStyle = 'rgba(0, 150, 255, 0.3)'; // Subtle blue tech lines
+    ctx.lineWidth = 0.7;
     
     // Use clipping to ensure lines don't extend beyond rounded corners
     ctx.save();
     ctx.clip();
     
-    for (let i = 1; i < 4; i++) {
-      // Horizontal lines only - like the original
+    // Horizontal tech lines
+    const lineSize = blockSize / 6;
+    for (let i = 1; i < 6; i++) {
       ctx.beginPath();
       ctx.moveTo(blockX, blockY + i * lineSize);
       ctx.lineTo(blockX + blockSize, blockY + i * lineSize);
       ctx.stroke();
     }
     
+    // Add tech circuit pattern - few vertical lines
+    ctx.beginPath();
+    ctx.moveTo(blockX + blockSize / 2, blockY);
+    ctx.lineTo(blockX + blockSize / 2, blockY + blockSize);
+    ctx.stroke();
+    
+    ctx.beginPath();
+    ctx.moveTo(blockX + blockSize / 4, blockY);
+    ctx.lineTo(blockX + blockSize / 4, blockY + blockSize / 2);
+    ctx.stroke();
+    
+    ctx.beginPath();
+    ctx.moveTo(blockX + 3 * blockSize / 4, blockY + blockSize / 2);
+    ctx.lineTo(blockX + 3 * blockSize / 4, blockY + blockSize);
+    ctx.stroke();
+    
+    // Add small glowing dots at key intersections
+    ctx.fillStyle = 'rgba(0, 200, 255, 0.6)';
+    
+    // Center dot
+    ctx.beginPath();
+    ctx.arc(
+      blockX + blockSize / 2, 
+      blockY + blockSize / 2, 
+      1.2, 0, Math.PI * 2
+    );
+    ctx.fill();
+    
+    // Corner dots
+    ctx.beginPath();
+    ctx.arc(
+      blockX + blockSize / 4, 
+      blockY + blockSize / 3, 
+      1, 0, Math.PI * 2
+    );
+    ctx.fill();
+    
+    ctx.beginPath();
+    ctx.arc(
+      blockX + 3 * blockSize / 4, 
+      blockY + 2 * blockSize / 3, 
+      1, 0, Math.PI * 2
+    );
+    ctx.fill();
+    
     ctx.restore();
     
-    // Border
-    ctx.strokeStyle = 'rgba(68, 85, 102, 0.7)';
-    ctx.lineWidth = 1.5;
+    // Glowing border
+    ctx.strokeStyle = 'rgba(0, 150, 255, 0.4)';
+    ctx.lineWidth = 1.2;
     ctx.beginPath();
     ctx.moveTo(blockX + radius, blockY);
     ctx.lineTo(blockX + blockSize - radius, blockY);
@@ -224,15 +309,23 @@ function renderBlock(
     ctx.closePath();
     ctx.stroke();
   } else {
-    // Regular game blocks
+    // Regular game blocks with futuristic neon glowing style
     // Get color based on block type (1-indexed)
     const color = blockColors[(block.type - 1) % blockColors.length];
     const symbol = blockSymbols[(block.type - 1) % blockSymbols.length];
     
-    // Draw block with rounded corners for modern look
+    // Convert hex to RGB for glow
+    let r = 255, g = 255, b = 255;
+    if (color.startsWith('#')) {
+      r = parseInt(color.substring(1, 3), 16);
+      g = parseInt(color.substring(3, 5), 16);
+      b = parseInt(color.substring(5, 7), 16);
+    }
+    
     let radius = blockSize * 0.15; // Rounded corner radius
     
-    ctx.fillStyle = color;
+    // Draw a darker base underlying block for better contrast
+    ctx.fillStyle = `rgb(${Math.floor(r*0.3)}, ${Math.floor(g*0.3)}, ${Math.floor(b*0.3)})`;
     ctx.beginPath();
     ctx.moveTo(blockX + radius, blockY);
     ctx.lineTo(blockX + blockSize - radius, blockY);
@@ -246,31 +339,81 @@ function renderBlock(
     ctx.closePath();
     ctx.fill();
     
-    // Draw modern subtle gradient overlay instead of bevel
-    const gradient = ctx.createLinearGradient(blockX, blockY, blockX, blockY + blockSize);
-    gradient.addColorStop(0, 'rgba(255, 255, 255, 0.4)');
-    gradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.1)');
-    gradient.addColorStop(1, 'rgba(0, 0, 0, 0.2)');
+    // Draw main block with specified color
+    ctx.fillStyle = color;
+    const inset = 2; // Small inset to create a border effect
+    ctx.beginPath();
+    ctx.moveTo(blockX + radius, blockY + inset);
+    ctx.lineTo(blockX + blockSize - radius, blockY + inset);
+    ctx.quadraticCurveTo(blockX + blockSize - inset, blockY + inset, blockX + blockSize - inset, blockY + radius);
+    ctx.lineTo(blockX + blockSize - inset, blockY + blockSize - radius);
+    ctx.quadraticCurveTo(blockX + blockSize - inset, blockY + blockSize - inset, blockX + blockSize - radius, blockY + blockSize - inset);
+    ctx.lineTo(blockX + radius, blockY + blockSize - inset);
+    ctx.quadraticCurveTo(blockX + inset, blockY + blockSize - inset, blockX + inset, blockY + blockSize - radius);
+    ctx.lineTo(blockX + inset, blockY + radius);
+    ctx.quadraticCurveTo(blockX + inset, blockY + inset, blockX + radius, blockY + inset);
+    ctx.closePath();
+    ctx.fill();
     
-    // Apply gradient with rounded corners
+    // Add futuristic gradient overlay
+    const gradient = ctx.createRadialGradient(
+      blockX + blockSize / 2, blockY + blockSize / 2, 0,
+      blockX + blockSize / 2, blockY + blockSize / 2, blockSize / 1.5
+    );
+    gradient.addColorStop(0, `rgba(${r}, ${g}, ${b}, 0.9)`);
+    gradient.addColorStop(0.6, `rgba(${r}, ${g}, ${b}, 0.6)`);
+    gradient.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0.2)`);
+    
+    // Apply gradient with inner rounded corners
     ctx.fillStyle = gradient;
     ctx.beginPath();
-    // Using the same radius as defined above
-    ctx.moveTo(blockX + radius, blockY);
-    ctx.lineTo(blockX + blockSize - radius, blockY);
-    ctx.quadraticCurveTo(blockX + blockSize, blockY, blockX + blockSize, blockY + radius);
-    ctx.lineTo(blockX + blockSize, blockY + blockSize - radius);
-    ctx.quadraticCurveTo(blockX + blockSize, blockY + blockSize, blockX + blockSize - radius, blockY + blockSize);
-    ctx.lineTo(blockX + radius, blockY + blockSize);
-    ctx.quadraticCurveTo(blockX, blockY + blockSize, blockX, blockY + blockSize - radius);
-    ctx.lineTo(blockX, blockY + radius);
-    ctx.quadraticCurveTo(blockX, blockY, blockX + radius, blockY);
+    ctx.moveTo(blockX + radius, blockY + inset);
+    ctx.lineTo(blockX + blockSize - radius, blockY + inset);
+    ctx.quadraticCurveTo(blockX + blockSize - inset, blockY + inset, blockX + blockSize - inset, blockY + radius);
+    ctx.lineTo(blockX + blockSize - inset, blockY + blockSize - radius);
+    ctx.quadraticCurveTo(blockX + blockSize - inset, blockY + blockSize - inset, blockX + blockSize - radius, blockY + blockSize - inset);
+    ctx.lineTo(blockX + radius, blockY + blockSize - inset);
+    ctx.quadraticCurveTo(blockX + inset, blockY + blockSize - inset, blockX + inset, blockY + blockSize - radius);
+    ctx.lineTo(blockX + inset, blockY + radius);
+    ctx.quadraticCurveTo(blockX + inset, blockY + inset, blockX + radius, blockY + inset);
     ctx.closePath();
     ctx.fill();
     
-    // Draw border with rounded corners
-    ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
-    ctx.lineWidth = 1.5;
+    // Add tech-style grid pattern (very subtle)
+    ctx.strokeStyle = `rgba(255, 255, 255, 0.15)`;
+    ctx.lineWidth = 0.5;
+    
+    ctx.save();
+    ctx.clip(); // Use current path as clip
+    
+    // Draw a simple tech grid
+    const gridSize = blockSize / 5;
+    for (let i = 0; i < 6; i++) {
+      ctx.beginPath();
+      ctx.moveTo(blockX, blockY + i * gridSize);
+      ctx.lineTo(blockX + blockSize, blockY + i * gridSize);
+      ctx.stroke();
+    }
+    
+    for (let i = 0; i < 6; i++) {
+      ctx.beginPath();
+      ctx.moveTo(blockX + i * gridSize, blockY);
+      ctx.lineTo(blockX + i * gridSize, blockY + blockSize);
+      ctx.stroke();
+    }
+    
+    ctx.restore();
+    
+    // Draw glowing border with color matching the block
+    ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, 0.8)`;
+    ctx.lineWidth = 2;
+    
+    // Add inner glow effect
+    ctx.shadowColor = `rgba(${r}, ${g}, ${b}, 0.8)`;
+    ctx.shadowBlur = 5;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+    
     ctx.beginPath();
     ctx.moveTo(blockX + radius, blockY);
     ctx.lineTo(blockX + blockSize - radius, blockY);
@@ -284,14 +427,22 @@ function renderBlock(
     ctx.closePath();
     ctx.stroke();
     
-    // Draw block symbol (with slight shadow for readability)
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+    // Reset shadow to draw the symbol
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
+    
+    // Draw block symbol with glow
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
     ctx.font = `bold ${blockSize * 0.5}px Arial`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(symbol, blockX + blockSize / 2 + 2, blockY + blockSize / 2 + 2);
     
-    ctx.fillStyle = 'white';
+    // Add text glow effect
+    ctx.shadowColor = `rgba(${r}, ${g}, ${b}, 0.8)`;
+    ctx.shadowBlur = 6;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+    
     ctx.fillText(symbol, blockX + blockSize / 2, blockY + blockSize / 2);
   }
   
@@ -299,61 +450,71 @@ function renderBlock(
   ctx.globalAlpha = 1.0;
 }
 
-// Render the game board (background and border) in modern style
+// Render the game board (background and border) in futuristic style
 function renderGameBoard(
   ctx: CanvasRenderingContext2D,
   blockSize: number,
   rows: number,
   cols: number
 ) {
-  // Create modern gradient background
-  const gradient = ctx.createLinearGradient(0, 0, 0, rows * blockSize);
-  gradient.addColorStop(0, '#4A7DA5'); // Darker blue at top
-  gradient.addColorStop(1, '#86B5D9'); // Lighter blue at bottom
+  // Create dark futuristic gradient background
+  const gradient = ctx.createLinearGradient(0, 0, cols * blockSize, rows * blockSize);
+  gradient.addColorStop(0, '#0A1521'); // Very dark blue at top left
+  gradient.addColorStop(0.3, '#0F2031'); // Dark blue 
+  gradient.addColorStop(0.7, '#102436'); // Slightly lighter dark blue
+  gradient.addColorStop(1, '#0A1521'); // Back to very dark blue at bottom right
   
   // Apply gradient to background
   ctx.fillStyle = gradient;
   ctx.fillRect(0, 0, cols * blockSize, rows * blockSize);
   
-  // Add subtle patterns for depth
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)'; // Very subtle white lines
+  // Add futuristic grid pattern
+  ctx.strokeStyle = 'rgba(0, 150, 255, 0.08)'; // Subtle tech blue lines
   ctx.lineWidth = 0.5;
   
-  // Draw a modern grid pattern
-  for (let y = 0; y < rows; y++) {
-    for (let x = 0; x < cols; x++) {
-      const patternX = x * blockSize;
-      const patternY = y * blockSize;
-      
-      // Draw grid dots instead of full lines for a more modern look
-      const dotSpacing = blockSize / 8;
-      
-      for (let i = 1; i < 8; i += 2) {
-        for (let j = 1; j < 8; j += 2) {
-          ctx.beginPath();
-          ctx.arc(
-            patternX + i * dotSpacing, 
-            patternY + j * dotSpacing, 
-            0.5, 0, Math.PI * 2
-          );
-          ctx.fill();
-        }
-      }
+  // Draw horizontal grid lines
+  for (let y = 0; y <= rows; y++) {
+    ctx.beginPath();
+    ctx.moveTo(0, y * blockSize);
+    ctx.lineTo(cols * blockSize, y * blockSize);
+    ctx.stroke();
+  }
+  
+  // Draw vertical grid lines
+  for (let x = 0; x <= cols; x++) {
+    ctx.beginPath();
+    ctx.moveTo(x * blockSize, 0);
+    ctx.lineTo(x * blockSize, rows * blockSize);
+    ctx.stroke();
+  }
+  
+  // Add some tech-style dots at intersections for futuristic feel
+  ctx.fillStyle = 'rgba(0, 150, 255, 0.2)';
+  for (let y = 0; y <= rows; y++) {
+    for (let x = 0; x <= cols; x++) {
+      ctx.beginPath();
+      ctx.arc(
+        x * blockSize, 
+        y * blockSize, 
+        1, 0, Math.PI * 2
+      );
+      ctx.fill();
     }
   }
   
-  // Draw a more modern border with rounded corners and shadow
-  const borderWidth = 3;
+  // Create dark futuristic border with glow effect
   const borderRadius = 8;
   
-  // Add shadow to the board
-  ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+  // Draw glowing border
+  ctx.strokeStyle = 'rgba(0, 150, 255, 0.6)';
+  ctx.lineWidth = 2;
+  
+  // Add glow effect
+  ctx.shadowColor = 'rgba(0, 150, 255, 0.8)';
   ctx.shadowBlur = 15;
   ctx.shadowOffsetX = 0;
-  ctx.shadowOffsetY = 5;
+  ctx.shadowOffsetY = 0;
   
-  // Draw border as a filled rounded rectangle slightly bigger than the board
-  ctx.fillStyle = '#2D5F88';
   ctx.beginPath();
   ctx.moveTo(borderRadius, 0);
   ctx.lineTo(cols * blockSize - borderRadius, 0);
