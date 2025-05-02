@@ -81,7 +81,7 @@ export const useAudio = create<AudioState>((set, get) => ({
       }
       
       successSound.currentTime = 0;
-      successSound.volume = 0.42; // Ensure volume is set to 30% lower than original
+      successSound.volume = 0.15; // Significantly reduced volume for success sound
       successSound.play().catch(error => {
         console.log("Success sound play prevented:", error);
       });
