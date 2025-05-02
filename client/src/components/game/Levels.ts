@@ -100,16 +100,16 @@ export const Levels = [
     [1, 1, 1, 1, 1, 1, 1, 1], // Full floor
   ],
   
-  // Level 9: Column Collapse (fixed to ensure all blocks have matching pairs)
+  // Level 9: Balanced Split (completely redesigned to be beatable)
   [
     [0, 0, 0, 0, 0, 0, 0, 0],
-    [2, 3, 4, 5, 5, 4, 3, 2],
-    [6, 7, 8, 0, 0, 8, 7, 6],
-    [9, 3, 0, 0, 0, 0, 3, 9],
-    [6, 0, 0, 1, 1, 0, 0, 6],
-    [0, 0, 1, 0, 0, 1, 0, 0],
+    [0, 2, 3, 4, 4, 3, 2, 0],
+    [0, 5, 6, 7, 7, 6, 5, 0],
     [0, 0, 0, 0, 0, 0, 0, 0],
-    [1, 0, 0, 1, 1, 0, 0, 1], // Split floor
+    [9, 0, 0, 0, 0, 0, 0, 9],
+    [8, 0, 0, 0, 0, 0, 0, 8],
+    [0, 0, 0, 0, 0, 0, 0, 0],
+    [1, 1, 1, 0, 0, 1, 1, 1], // Floor with center gap
   ],
   
   // Level 10: The Grand Finale (fixed to ensure all blocks have matching pairs)
