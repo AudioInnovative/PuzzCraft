@@ -21,12 +21,14 @@ interface PuzznicState {
   gamePhase: GamePhase;
   level: number;
   maxLevel: number;
+  completedLevels: number[]; // Track which levels have been completed
   score: number;
   moveCount: number;
   timeLeft: number;
   board: (BlockType | null)[][];
   selectedBlockPos: { x: number, y: number } | null;
   timerId?: NodeJS.Timeout;
+  showLevelSelector: boolean; // Flag to show/hide level selector
   
   // Level data
   currentLevelData: number[][];
@@ -71,11 +73,13 @@ export const usePuzznic = create<PuzznicState>()(
     gamePhase: "ready" as GamePhase,
     level: 1,
     maxLevel: Levels.length,
+    completedLevels: [] as number[], // Initially no levels are completed
     score: 0,
     moveCount: 0,
     timeLeft: 180, // 3 minutes per level
     board: [] as (BlockType | null)[][], 
     selectedBlockPos: null,
+    showLevelSelector: false, // Level selector is initially hidden
     currentLevelData: [] as number[][],
     blockTypes: 6, // Default number of block types
     currentEditingBlockType: 2, // Start with block type 2 (type 1 is usually reserved for floors)
@@ -546,7 +550,14 @@ export const usePuzznic = create<PuzznicState>()(
       }
       
       if (!nonFixedBlocksRemaining) {
-        // Level complete!
+        // Level complete! Add to completed levels if not already there
+        const { completedLevels } = get();
+        if (!completedLevels.includes(level)) {
+          // Make a copy of completedLevels array and add current level
+          const updatedCompletedLevels = [...completedLevels, level];
+          set({ completedLevels: updatedCompletedLevels });
+        }
+
         if (level === maxLevel) {
           // Game won!
           set({ gamePhase: "game_won" });
