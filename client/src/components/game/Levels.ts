@@ -100,15 +100,15 @@ export const Levels = [
     [1, 1, 1, 1, 1, 1, 1, 1], // Full floor
   ],
   
-  // Level 9: Fortress Challenge (same layout with shuffled blocks)
+  // Level 9: Fortress Challenge (fixed matching pairs issue)
   [
     [0, 0, 0, 0, 0, 0, 0, 0],
     [6, 0, 5, 0, 0, 3, 0, 6],
     [0, 9, 0, 1, 1, 0, 2, 0],
     [0, 0, 0, 0, 0, 0, 0, 0],
-    [4, 0, 1, 0, 0, 1, 0, 8],
+    [8, 0, 1, 0, 0, 1, 0, 8],
     [0, 0, 7, 0, 0, 3, 0, 0],
-    [5, 2, 0, 4, 7, 0, 9, 4],
+    [5, 2, 0, 4, 7, 0, 9, 2],
     [1, 0, 1, 0, 0, 1, 0, 1], // Floor with strategically placed gaps
   ],
   
