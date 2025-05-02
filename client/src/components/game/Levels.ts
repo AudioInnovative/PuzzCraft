@@ -112,15 +112,15 @@ export const Levels = [
     [1, 1, 1, 1, 1, 1, 1, 1], // Full floor
   ],
   
-  // Level 10: Final Challenge (exactly matching the reference image)
+  // Level 10: Grand Finale (completely new challenging design)
   [
     [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 1, 1, 1, 1, 1, 1, 0],
-    [0, 1, 2, 9, 0, 2, 1, 0],
-    [0, 1, 1, 0, 0, 1, 1, 0],
-    [0, 1, 0, 1, 1, 0, 1, 0],
-    [0, 1, 9, 0, 0, 3, 1, 0],
-    [0, 1, 8, 3, 9, 8, 1, 0],
-    [0, 1, 1, 1, 1, 1, 1, 0], // Square border of floor blocks
+    [9, 0, 6, 0, 0, 3, 0, 2],
+    [0, 4, 0, 5, 8, 0, 7, 0],
+    [7, 0, 1, 0, 0, 1, 0, 5],
+    [0, 1, 0, 3, 6, 0, 1, 0],
+    [2, 0, 1, 0, 0, 1, 0, 9],
+    [0, 8, 0, 4, 0, 0, 0, 0],
+    [1, 1, 1, 1, 1, 1, 1, 1], // Full floor along the bottom
   ],
 ];
