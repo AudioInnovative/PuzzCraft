@@ -54,32 +54,32 @@ function renderBlock(
   
   // Check if this is a floor block
   if (block.isFloor) {
-    // Draw floor block with a dark gray color 
-    ctx.fillStyle = '#333333'; // Dark gray background
+    // Draw floor block with a gray color (like NES Puzznic)
+    ctx.fillStyle = '#BBBBBB'; // Light gray
     ctx.fillRect(blockX, blockY, blockSize, blockSize);
     
-    // Create a diagonal striped pattern for floor
-    const stripeSize = blockSize / 10;
-    ctx.strokeStyle = '#444444'; // Slightly lighter gray for stripes
-    ctx.lineWidth = stripeSize;
+    // Add grid lines to match NES floor blocks
+    ctx.strokeStyle = '#999999';
+    ctx.lineWidth = 1;
     
-    // Draw diagonal stripes (45 degrees)
-    for (let i = -2 * blockSize; i < 2 * blockSize; i += 2 * stripeSize) {
+    // Draw grid pattern
+    const gridSize = blockSize / 4;
+    for (let i = 1; i < 4; i++) {
+      // Horizontal lines
       ctx.beginPath();
-      ctx.moveTo(blockX + i, blockY);
-      ctx.lineTo(blockX + i + blockSize, blockY + blockSize);
+      ctx.moveTo(blockX, blockY + i * gridSize);
+      ctx.lineTo(blockX + blockSize, blockY + i * gridSize);
+      ctx.stroke();
+      
+      // Vertical lines
+      ctx.beginPath();
+      ctx.moveTo(blockX + i * gridSize, blockY);
+      ctx.lineTo(blockX + i * gridSize, blockY + blockSize);
       ctx.stroke();
     }
     
-    // Add "FLOOR" text
-    ctx.fillStyle = '#777777'; // Medium gray text
-    ctx.font = `${blockSize * 0.25}px Arial`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText("FLOOR", blockX + blockSize/2, blockY + blockSize/2);
-    
     // Border
-    ctx.strokeStyle = '#555555';
+    ctx.strokeStyle = '#666666';
     ctx.lineWidth = 2;
     ctx.strokeRect(blockX, blockY, blockSize, blockSize);
   } else if (block.isFixed && !block.isFloor) {
