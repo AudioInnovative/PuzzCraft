@@ -249,12 +249,12 @@ export default function SimpleLevelEditor() {
                           onClick={() => {
                             console.log(`Clicked at visual row=${rowIndex}, col=${colIndex}, maps to game x=${gameX}, y=${gameY}`);
                             
-                            if (block && !block.isFloor) {
-                              // Remove existing block
+                            if (block) {
+                              // Remove existing block (including floor blocks)
                               removeEditorBlock(gameX, gameY);
                               playHit();
                               console.log(`Removed block at game position x=${gameX}, y=${gameY}`);
-                            } else if (selectedType && !(gameY === 0 && block?.isFloor)) {
+                            } else if (selectedType) {
                               // Place selected block
                               placeEditorBlock(gameX, gameY, selectedType);
                               playHit();
