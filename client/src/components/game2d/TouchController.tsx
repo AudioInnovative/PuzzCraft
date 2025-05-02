@@ -8,6 +8,8 @@ const MIN_SWIPE_DISTANCE = 30;
 export function TouchController() {
   const { moveSelectedBlock, selectBlock, selectedBlockPos } = usePuzznic();
   const touchStartRef = useRef<{ x: number, y: number } | null>(null);
+  // Track the last time we processed a swipe - moved to component level
+  const lastSwipeTimeRef = useRef<number>(0);
   const isMobile = useIsMobile();
   
   useEffect(() => {
@@ -22,9 +24,6 @@ export function TouchController() {
         };
       }
     };
-    
-    // Track the last time we processed a swipe
-    const lastSwipeTimeRef = useRef<number>(0);
     
     const handleTouchEnd = (e: TouchEvent) => {
       // If we have a touch start position (don't need to check selectedBlockPos here - let the moveSelectedBlock function check that)
