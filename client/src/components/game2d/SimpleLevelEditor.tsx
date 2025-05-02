@@ -7,16 +7,16 @@ const CELL_SIZE = 40;
 const GRID_SIZE = 8;
 const BLOCK_SYMBOLS = ["✚", "■", "●", "×", "★", "◆", "▲", "♦"];
 
-// Define block colors based on type (using NES Puzznic color palette) - same as in Board.tsx
+// Define block colors based on type (using modern gradient palette) - match the updated colors in Board.tsx
 const blockColors = [
-  "#FF0000", // Red (type 1, typically floor) 
-  "#00FF00", // Green (type 2)
-  "#0000FF", // Blue (type 3)
-  "#FFFF00", // Yellow (type 4)
-  "#FF00FF", // Magenta (type 5)
-  "#00FFFF", // Cyan (type 6)
-  "#FF8800", // Orange (type 7)
-  "#8800FF", // Purple (type 8)
+  "#FF5252", // Modern Red (type 1, typically floor)
+  "#4CAF50", // Modern Green (type 2)
+  "#448AFF", // Modern Blue (type 3)
+  "#FFC107", // Modern Amber (type 4)
+  "#E040FB", // Modern Purple (type 5)
+  "#18FFFF", // Modern Cyan (type 6)
+  "#FF9800", // Modern Orange (type 7)
+  "#7C4DFF", // Modern Deep Purple (type 8)
 ];
 
 export default function SimpleLevelEditor() {
@@ -70,13 +70,15 @@ export default function SimpleLevelEditor() {
   return (
     <div className="absolute inset-0 flex flex-col bg-black overflow-auto">
       {/* Header */}
-      <div className="bg-gray-900 text-white p-4 sticky top-0 z-10">
+      <div className="bg-gradient-to-r from-slate-900 via-gray-900 to-slate-900 text-white p-4 sticky top-0 z-10 shadow-lg border-b border-gray-800">
         <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-bold text-white">Simple Level Editor</h2>
-          <div className="flex space-x-3">
+          <h2 className="text-2xl font-bold text-white flex items-center">
+            <span className="mr-2 text-blue-400">✏️</span>Level Editor
+          </h2>
+          <div className="flex gap-3">
             <button 
               onClick={() => exitEditMode()}
-              className="bg-blue-600 text-white px-4 py-2 text-lg font-bold rounded-lg shadow-md active:translate-y-1"
+              className="bg-gradient-to-b from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 text-white px-5 py-2 text-lg font-bold rounded-xl shadow-md active:translate-y-1 transition-all"
             >
               Main Menu
             </button>
@@ -88,14 +90,14 @@ export default function SimpleLevelEditor() {
                   playHit();
                 }
               }}
-              className="bg-red-600 text-white px-4 py-2 text-lg font-bold rounded-lg shadow-md active:translate-y-1"
+              className="bg-gradient-to-b from-red-500 to-red-600 hover:from-red-400 hover:to-red-500 text-white px-5 py-2 text-lg font-bold rounded-xl shadow-md active:translate-y-1 transition-all"
             >
               Test Level
             </button>
             
             <button 
               onClick={handleSaveLevel}
-              className="bg-green-600 text-white px-4 py-2 text-lg font-bold rounded-lg shadow-md active:translate-y-1"
+              className="bg-gradient-to-b from-green-500 to-green-600 hover:from-green-400 hover:to-green-500 text-white px-5 py-2 text-lg font-bold rounded-xl shadow-md active:translate-y-1 transition-all"
             >
               Save
             </button>
@@ -104,9 +106,9 @@ export default function SimpleLevelEditor() {
       </div>
       
       {/* Main layout */}
-      <div className="flex flex-col md:flex-row flex-1 overflow-auto p-4 gap-4">
+      <div className="flex flex-col md:flex-row flex-1 overflow-auto p-4 gap-4 bg-gradient-to-b from-gray-900 to-black">
         {/* Sidebar */}
-        <div className="bg-gray-800 p-4 rounded-lg flex flex-col gap-4 md:w-80">
+        <div className="bg-gradient-to-b from-gray-800 to-gray-900 p-6 rounded-xl flex flex-col gap-4 md:w-80 shadow-lg border border-gray-700">
           <div className="text-white text-xl font-semibold text-center mb-2">Block Types</div>
           
           <div className="grid grid-cols-2 gap-4 place-items-center">
@@ -124,56 +126,59 @@ export default function SimpleLevelEditor() {
                 style={{ padding: '4px' }}
               >
                 {type === 1 ? (
-                  // Floor/ground block style (gray tile with grid)
+                  // Floor/ground block style with modern rounded corners
                   <div 
-                    className="w-full h-full rounded-md flex items-center justify-center relative"
+                    className="w-full h-full rounded-xl flex items-center justify-center relative shadow-md"
                     style={{ 
                       width: CELL_SIZE, 
                       height: CELL_SIZE,
-                      backgroundColor: '#d1d5db' // Gray color
+                      backgroundColor: '#BBBBBB', // Matching the color from the updated game
+                      overflow: 'hidden'
                     }}
                   >
-                    {/* Grid lines to match NES floor blocks */}
-                    <div className="absolute top-0 left-0 w-full h-full grid grid-cols-2 grid-rows-2">
-                      <div className="border-b border-r border-gray-500"></div>
-                      <div className="border-b border-gray-500"></div>
-                      <div className="border-r border-gray-500"></div>
+                    {/* Subtle gradient overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-white to-transparent opacity-30"></div>
+                    
+                    {/* Subtle grid lines */}
+                    <div className="absolute top-0 left-0 w-full h-full grid grid-cols-2 grid-rows-2 opacity-50">
+                      <div className="border-b border-r border-gray-600"></div>
+                      <div className="border-b border-gray-600"></div>
+                      <div className="border-r border-gray-600"></div>
                       <div></div>
                     </div>
+                    
                     {/* Border */}
-                    <div className="absolute inset-0 border-2 border-gray-600 rounded-md"></div>
+                    <div className="absolute inset-0 border border-gray-500 rounded-xl"></div>
                     
                     {/* Label */}
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-xs font-bold text-gray-700 bg-gray-300 px-1 rounded opacity-80">
+                      <span className="text-xs font-bold text-gray-700 bg-gray-200 px-2 py-0.5 rounded-full shadow-sm opacity-90">
                         FLOOR
                       </span>
                     </div>
                   </div>
                 ) : (
-                  // Regular colored blocks with 3D effect
+                  // Regular colored blocks with modern style
                   <div 
-                    className="w-full h-full rounded-md flex items-center justify-center relative overflow-hidden"
+                    className="w-full h-full rounded-xl flex items-center justify-center relative shadow-md overflow-hidden"
                     style={{ 
                       backgroundColor: getBlockColor(type),
                       width: CELL_SIZE, 
                       height: CELL_SIZE 
                     }}
                   >
-                    {/* 3D bevel effect - top/left highlight */}
-                    <div className="absolute top-0 left-0 right-0 h-[20%] bg-white opacity-40"></div>
-                    <div className="absolute top-0 left-0 bottom-0 w-[20%] bg-white opacity-40"></div>
+                    {/* Modern gradient overlay instead of flat bevels */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-white to-transparent opacity-30"></div>
                     
-                    {/* 3D bevel effect - bottom/right shadow */}
-                    <div className="absolute bottom-0 left-0 right-0 h-[20%] bg-black opacity-40"></div>
-                    <div className="absolute top-0 right-0 bottom-0 w-[20%] bg-black opacity-40"></div>
+                    {/* Subtle inner shadow effect at bottom */}
+                    <div className="absolute bottom-0 left-0 right-0 h-[10%] bg-black opacity-20"></div>
                     
                     {/* Block symbol with drop shadow */}
                     <div className="relative">
                       <span className="absolute text-black opacity-30 font-bold text-2xl" style={{top: '2px', left: '2px'}}>
                         {BLOCK_SYMBOLS[type-1]}
                       </span>
-                      <span className="text-white font-bold text-2xl relative">
+                      <span className="text-white font-bold text-2xl relative drop-shadow-md">
                         {BLOCK_SYMBOLS[type-1]}
                       </span>
                     </div>
@@ -190,7 +195,7 @@ export default function SimpleLevelEditor() {
               setMessage("Created new empty level");
               setTimeout(() => setMessage(null), 2000);
             }}
-            className="w-full bg-blue-600 text-white py-3 text-lg font-bold rounded-lg shadow-md active:translate-y-1 mt-4"
+            className="w-full bg-gradient-to-b from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 text-white py-3 text-lg font-bold rounded-xl shadow-md active:translate-y-1 mt-4 transition-all"
           >
             New Level
           </button>
@@ -220,9 +225,9 @@ export default function SimpleLevelEditor() {
         
         {/* Grid area */}
         <div className="flex-1 flex flex-col items-center overflow-auto p-4">
-          <div className="bg-gray-800 p-2 rounded-lg">
+          <div className="bg-gradient-to-b from-gray-800 to-gray-900 p-4 rounded-xl shadow-lg border border-gray-700">
             {/* The grid */}
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col gap-1.5">
               {Array.from({ length: GRID_SIZE }).map((_, rowIndex) => {
                 // Convert visual row to game row (y)
                 // Game Y=0 is at the bottom, but we display top-to-bottom
@@ -241,62 +246,65 @@ export default function SimpleLevelEditor() {
                         <div
                           key={`cell-${rowIndex}-${colIndex}`}
                           className={cn(
-                            "relative rounded-md flex items-center justify-center",
-                            "border border-gray-700",
-                            block ? "" : "bg-gray-700"
+                            "relative rounded-lg flex items-center justify-center transition-all",
+                            block ? "" : "bg-gradient-to-b from-gray-700 to-gray-800 hover:from-gray-600 hover:to-gray-700",
+                            "shadow-inner"
                           )}
-                          style={{ width: CELL_SIZE, height: CELL_SIZE }}
+                          style={{ 
+                            width: CELL_SIZE, 
+                            height: CELL_SIZE,
+                            border: block ? 'none' : '1px solid rgba(75, 85, 99, 0.4)'
+                          }}
                           onClick={() => {
-                            console.log(`Clicked at visual row=${rowIndex}, col=${colIndex}, maps to game x=${gameX}, y=${gameY}`);
-                            
                             if (block) {
                               // Remove existing block (including floor blocks)
                               removeEditorBlock(gameX, gameY);
                               playHit();
-                              console.log(`Removed block at game position x=${gameX}, y=${gameY}`);
                             } else if (selectedType) {
                               // Place selected block
                               placeEditorBlock(gameX, gameY, selectedType);
                               playHit();
-                              console.log(`Placed block type=${selectedType} at game position x=${gameX}, y=${gameY}`);
                             }
                           }}
                         >
                           {/* Display block if it exists */}
                           {block && (
                             block.type === 1 ? (
-                              // Type 1 blocks are always floor blocks - gray tile design
-                              <div className="w-full h-full rounded-md flex items-center justify-center bg-gray-300 relative">
-                                {/* Grid lines to match NES floor blocks */}
-                                <div className="absolute top-0 left-0 w-full h-full grid grid-cols-2 grid-rows-2">
-                                  <div className="border-b border-r border-gray-500"></div>
-                                  <div className="border-b border-gray-500"></div>
-                                  <div className="border-r border-gray-500"></div>
+                              // Type 1 blocks are floor blocks - modern style with rounded corners
+                              <div className="w-full h-full rounded-xl flex items-center justify-center relative shadow-md overflow-hidden"
+                                   style={{ backgroundColor: '#BBBBBB' }}>
+                                {/* Subtle gradient overlay */}
+                                <div className="absolute inset-0 bg-gradient-to-b from-white to-transparent opacity-30"></div>
+                                
+                                {/* Subtle grid pattern */}
+                                <div className="absolute top-0 left-0 w-full h-full grid grid-cols-2 grid-rows-2 opacity-50">
+                                  <div className="border-b border-r border-gray-600"></div>
+                                  <div className="border-b border-gray-600"></div>
+                                  <div className="border-r border-gray-600"></div>
                                   <div></div>
                                 </div>
+                                
                                 {/* Border */}
-                                <div className="absolute inset-0 border-2 border-gray-600 rounded-md"></div>
+                                <div className="absolute inset-0 border border-gray-500 rounded-xl"></div>
                               </div>
                             ) : (
-                              // Regular blocks with 3D effect
+                              // Regular blocks with modern style
                               <div
-                                className="w-full h-full rounded-md flex items-center justify-center relative overflow-hidden"
+                                className="w-full h-full rounded-xl flex items-center justify-center relative shadow-md overflow-hidden"
                                 style={{ backgroundColor: getBlockColor(block.type) }}
                               >
-                                {/* 3D bevel effect - top/left highlight */}
-                                <div className="absolute top-0 left-0 right-0 h-[20%] bg-white opacity-40 clip-polygon"></div>
-                                <div className="absolute top-0 left-0 bottom-0 w-[20%] bg-white opacity-40 clip-polygon"></div>
+                                {/* Modern gradient overlay */}
+                                <div className="absolute inset-0 bg-gradient-to-b from-white to-transparent opacity-30"></div>
                                 
-                                {/* 3D bevel effect - bottom/right shadow */}
-                                <div className="absolute bottom-0 left-0 right-0 h-[20%] bg-black opacity-40 clip-polygon"></div>
-                                <div className="absolute top-0 right-0 bottom-0 w-[20%] bg-black opacity-40 clip-polygon"></div>
+                                {/* Subtle inner shadow effect at bottom */}
+                                <div className="absolute bottom-0 left-0 right-0 h-[10%] bg-black opacity-20"></div>
                                 
                                 {/* Block symbol with drop shadow for better readability */}
                                 <div className="relative">
-                                  <span className="absolute text-black opacity-30 font-bold" style={{top: '2px', left: '2px'}}>
+                                  <span className="absolute text-black opacity-30 font-bold" style={{top: '1px', left: '1px'}}>
                                     {BLOCK_SYMBOLS[block.type-1]}
                                   </span>
-                                  <span className="text-white font-bold relative">
+                                  <span className="text-white font-bold relative drop-shadow-md">
                                     {BLOCK_SYMBOLS[block.type-1]}
                                   </span>
                                 </div>
