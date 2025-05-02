@@ -3,18 +3,18 @@ import { usePuzznic } from '../../lib/stores/usePuzznic';
 import { useAudio } from '../../lib/stores/useAudio';
 import { BlockType } from '../../lib/stores/usePuzznic';
 
-// Define block colors based on type (using a futuristic neon palette)
+// Define block colors based on type (using an ultra-vibrant futuristic neon palette)
 const blockColors = [
-  "#FF355E", // Neon Pink
-  "#39FF14", // Neon Green
-  "#00FFFF", // Neon Cyan
-  "#FFF01F", // Neon Yellow
-  "#E600FF", // Neon Purple
-  "#00FFFF", // Neon Aqua
-  "#FF8C00", // Neon Orange
-  "#9D00FF", // Neon Violet
-  "#FF00FF", // Neon Magenta
-  "#00BFFF", // Neon Sky Blue
+  "#FF005E", // Intense Neon Pink
+  "#00FF33", // Electric Neon Green
+  "#00FFFF", // Brilliant Cyan
+  "#FFFF00", // Vivid Yellow
+  "#FF00FF", // Vibrant Magenta
+  "#4D4DFF", // Electric Blue
+  "#FF7700", // Blazing Orange
+  "#AA00FF", // Deep Purple
+  "#FF0099", // Hot Pink
+  "#00DDFF", // Bright Aqua
 ];
 
 // Define block symbols based on original Puzznic
@@ -309,10 +309,9 @@ function renderBlock(
     ctx.closePath();
     ctx.stroke();
   } else {
-    // Regular game blocks with futuristic neon glowing style
+    // Regular game blocks with futuristic neon glowing style - no symbols, just rich colors
     // Get color based on block type (1-indexed)
     const color = blockColors[(block.type - 1) % blockColors.length];
-    const symbol = blockSymbols[(block.type - 1) % blockSymbols.length];
     
     // Convert hex to RGB for glow
     let r = 255, g = 255, b = 255;
@@ -322,10 +321,10 @@ function renderBlock(
       b = parseInt(color.substring(5, 7), 16);
     }
     
-    let radius = blockSize * 0.15; // Rounded corner radius
+    let radius = blockSize * 0.2; // Slightly larger rounded corner radius for modern look
     
     // Draw a darker base underlying block for better contrast
-    ctx.fillStyle = `rgb(${Math.floor(r*0.3)}, ${Math.floor(g*0.3)}, ${Math.floor(b*0.3)})`;
+    ctx.fillStyle = `rgb(${Math.floor(r*0.2)}, ${Math.floor(g*0.2)}, ${Math.floor(b*0.2)})`;
     ctx.beginPath();
     ctx.moveTo(blockX + radius, blockY);
     ctx.lineTo(blockX + blockSize - radius, blockY);
@@ -339,7 +338,8 @@ function renderBlock(
     ctx.closePath();
     ctx.fill();
     
-    // Draw main block with specified color
+    // Draw main block with enriched color (make it more vibrant)
+    // Increase saturation by using the original color at full opacity
     ctx.fillStyle = color;
     const inset = 2; // Small inset to create a border effect
     ctx.beginPath();
@@ -355,14 +355,14 @@ function renderBlock(
     ctx.closePath();
     ctx.fill();
     
-    // Add futuristic gradient overlay
+    // Add enhanced gradient overlay with more vibrant center - brightens the color
     const gradient = ctx.createRadialGradient(
       blockX + blockSize / 2, blockY + blockSize / 2, 0,
-      blockX + blockSize / 2, blockY + blockSize / 2, blockSize / 1.5
+      blockX + blockSize / 2, blockY + blockSize / 2, blockSize
     );
-    gradient.addColorStop(0, `rgba(${r}, ${g}, ${b}, 0.9)`);
-    gradient.addColorStop(0.6, `rgba(${r}, ${g}, ${b}, 0.6)`);
-    gradient.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0.2)`);
+    gradient.addColorStop(0, `rgba(255, 255, 255, 0.4)`); // White center for more vibrancy
+    gradient.addColorStop(0.5, `rgba(${r}, ${g}, ${b}, 0.9)`); // Almost pure color at near full opacity
+    gradient.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0.3)`);
     
     // Apply gradient with inner rounded corners
     ctx.fillStyle = gradient;
@@ -380,37 +380,51 @@ function renderBlock(
     ctx.fill();
     
     // Add tech-style grid pattern (very subtle)
-    ctx.strokeStyle = `rgba(255, 255, 255, 0.15)`;
-    ctx.lineWidth = 0.5;
+    ctx.strokeStyle = `rgba(255, 255, 255, 0.2)`; // Slightly more visible grid
+    ctx.lineWidth = 0.7;
     
     ctx.save();
     ctx.clip(); // Use current path as clip
     
     // Draw a simple tech grid
     const gridSize = blockSize / 5;
-    for (let i = 0; i < 6; i++) {
+    
+    // Horizontal lines
+    for (let i = 1; i < 5; i++) {
       ctx.beginPath();
       ctx.moveTo(blockX, blockY + i * gridSize);
       ctx.lineTo(blockX + blockSize, blockY + i * gridSize);
       ctx.stroke();
     }
     
-    for (let i = 0; i < 6; i++) {
+    // Vertical lines
+    for (let i = 1; i < 5; i++) {
       ctx.beginPath();
       ctx.moveTo(blockX + i * gridSize, blockY);
       ctx.lineTo(blockX + i * gridSize, blockY + blockSize);
       ctx.stroke();
     }
     
+    // Add subtle highlight arc for visual interest
+    ctx.fillStyle = `rgba(255, 255, 255, 0.15)`;
+    ctx.beginPath();
+    ctx.arc(
+      blockX + blockSize / 2,
+      blockY + blockSize / 2,
+      blockSize / 3,
+      0, Math.PI * 2
+    );
+    ctx.fill();
+    
     ctx.restore();
     
-    // Draw glowing border with color matching the block
-    ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, 0.8)`;
+    // Draw glowing border with enhanced color matching the block
+    ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, 1.0)`; // Full opacity for more vibrant borders
     ctx.lineWidth = 2;
     
-    // Add inner glow effect
-    ctx.shadowColor = `rgba(${r}, ${g}, ${b}, 0.8)`;
-    ctx.shadowBlur = 5;
+    // Add stronger glow effect
+    ctx.shadowColor = `rgba(${r}, ${g}, ${b}, 1.0)`;
+    ctx.shadowBlur = 10; // Increased blur for more pronounced glow
     ctx.shadowOffsetX = 0;
     ctx.shadowOffsetY = 0;
     
@@ -426,24 +440,6 @@ function renderBlock(
     ctx.quadraticCurveTo(blockX, blockY, blockX + radius, blockY);
     ctx.closePath();
     ctx.stroke();
-    
-    // Reset shadow to draw the symbol
-    ctx.shadowColor = 'transparent';
-    ctx.shadowBlur = 0;
-    
-    // Draw block symbol with glow
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-    ctx.font = `bold ${blockSize * 0.5}px Arial`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    
-    // Add text glow effect
-    ctx.shadowColor = `rgba(${r}, ${g}, ${b}, 0.8)`;
-    ctx.shadowBlur = 6;
-    ctx.shadowOffsetX = 0;
-    ctx.shadowOffsetY = 0;
-    
-    ctx.fillText(symbol, blockX + blockSize / 2, blockY + blockSize / 2);
   }
   
   // Reset opacity
