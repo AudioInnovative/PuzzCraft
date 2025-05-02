@@ -33,7 +33,7 @@ export const useAudio = create<AudioState>((set, get) => ({
   moveSound: null,
   matchSound: null,
   fallSound: null,
-  isMuted: true, // Start muted by default
+  isMuted: false, // Start with sound enabled
   
   setBackgroundMusic: (music) => set({ backgroundMusic: music }),
   setHitSound: (sound) => set({ hitSound: sound }),
@@ -98,7 +98,7 @@ export const useAudio = create<AudioState>((set, get) => ({
       
       // Clone the sound to allow overlapping playback
       const soundClone = moveSound.cloneNode() as HTMLAudioElement;
-      soundClone.volume = 0.2; // Lower volume for move sound
+      soundClone.volume = 0.15; // Lower volume for move sound
       soundClone.play().catch(error => {
         console.log("Move sound play prevented:", error);
       });
@@ -116,7 +116,7 @@ export const useAudio = create<AudioState>((set, get) => ({
       
       // Clone the sound to allow overlapping playback
       const soundClone = matchSound.cloneNode() as HTMLAudioElement;
-      soundClone.volume = 0.4; // Higher volume for match sound
+      soundClone.volume = 0.3; // Medium volume for match sound
       soundClone.play().catch(error => {
         console.log("Match sound play prevented:", error);
       });
@@ -134,7 +134,7 @@ export const useAudio = create<AudioState>((set, get) => ({
       
       // Clone the sound to allow overlapping playback
       const soundClone = fallSound.cloneNode() as HTMLAudioElement;
-      soundClone.volume = 0.25; // Medium volume for fall sound
+      soundClone.volume = 0.2; // Lower volume for fall sound
       soundClone.play().catch(error => {
         console.log("Fall sound play prevented:", error);
       });

@@ -33,15 +33,15 @@ export default function Game2D() {
     const successSound = new Audio("/sounds/success.mp3");
     successSound.volume = 0.6;
     
-    // New sound effects 
+    // New sound effects with appropriate volumes
     const moveSound = new Audio("/sounds/move.mp3");
-    moveSound.volume = 0.2;
+    moveSound.volume = 0.15; // Quieter click for moving blocks
     
     const matchSound = new Audio("/sounds/match.mp3");
-    matchSound.volume = 0.4;
+    matchSound.volume = 0.3; // Medium volume for matching blocks
     
     const fallSound = new Audio("/sounds/fall.mp3");
-    fallSound.volume = 0.25;
+    fallSound.volume = 0.2; // Lower volume for falling blocks
     
     // Set the audio in the store
     setBackgroundMusic(backgroundMusic);
