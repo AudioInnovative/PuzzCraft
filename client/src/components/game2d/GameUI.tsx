@@ -105,7 +105,13 @@ export default function GameUI2D() {
       {gamePhase === "ready" && (
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="bg-black p-8 border-4 border-cyan-600 text-center w-4/5 max-w-md">
-            <h2 className="text-4xl font-bold text-cyan-300 mb-6 font-mono tracking-wider">PUZZNIC</h2>
+            <div className="flex justify-center items-center mb-4">
+              <img 
+                src="/images/puzzcraft_logo.jpg" 
+                alt="PuzzCraft Logo" 
+                className="w-64 mx-auto" 
+              />
+            </div>
             <div className="bg-blue-900 border-2 border-blue-700 p-4 mb-6">
               <p className="text-xl text-white mb-4">MATCH THE BLOCKS TO CLEAR THE LEVEL!</p>
             </div>
