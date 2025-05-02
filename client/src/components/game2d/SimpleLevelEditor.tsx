@@ -105,10 +105,10 @@ export default function SimpleLevelEditor() {
       {/* Main layout */}
       <div className="flex flex-col md:flex-row flex-1 overflow-auto p-4 gap-4">
         {/* Sidebar */}
-        <div className="bg-gray-800 p-4 rounded-lg flex flex-col gap-4 md:w-60">
+        <div className="bg-gray-800 p-4 rounded-lg flex flex-col gap-4 md:w-80">
           <div className="text-white text-xl font-semibold text-center mb-2">Block Types</div>
           
-          <div className="grid grid-cols-2 md:grid-cols-1 gap-4">
+          <div className="grid grid-cols-2 gap-4 place-items-center">
             {blockTypes.map(type => (
               <button 
                 key={type}
@@ -117,13 +117,18 @@ export default function SimpleLevelEditor() {
                   playHit();
                 }}
                 className={cn(
-                  "h-16 cursor-pointer rounded-lg flex items-center justify-center shadow-md",
+                  "cursor-pointer rounded-lg flex items-center justify-center shadow-md",
                   selectedType === type ? "ring-4 ring-white bg-gray-600" : "bg-gray-700 hover:ring-2 hover:ring-gray-400"
                 )}
+                style={{ padding: '4px' }}
               >
                 <div 
-                  className="w-12 h-12 rounded-md flex items-center justify-center relative overflow-hidden"
-                  style={{ backgroundColor: getBlockColor(type) }}
+                  className="w-full h-full rounded-md flex items-center justify-center relative overflow-hidden"
+                  style={{ 
+                    backgroundColor: getBlockColor(type),
+                    width: CELL_SIZE, 
+                    height: CELL_SIZE 
+                  }}
                 >
                   {/* 3D bevel effect - top/left highlight */}
                   <div className="absolute top-0 left-0 right-0 h-[20%] bg-white opacity-40"></div>
