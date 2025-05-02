@@ -97,21 +97,11 @@ function renderBlock(
     // Use futuristic version of floor blocks with rounded corners
     let radius = blockSize * 0.2; // Same radius as regular blocks
     
-    // Draw shadow for 3D effect
-    ctx.fillStyle = '#222222'; // Very dark shadow
-    const shadowOffset = 4;
-    ctx.beginPath();
-    ctx.moveTo(blockX + radius + shadowOffset, blockY + shadowOffset);
-    ctx.lineTo(blockX + blockSize - radius + shadowOffset, blockY + shadowOffset);
-    ctx.quadraticCurveTo(blockX + blockSize + shadowOffset, blockY + shadowOffset, blockX + blockSize + shadowOffset, blockY + radius + shadowOffset);
-    ctx.lineTo(blockX + blockSize + shadowOffset, blockY + blockSize - radius + shadowOffset);
-    ctx.quadraticCurveTo(blockX + blockSize + shadowOffset, blockY + blockSize + shadowOffset, blockX + blockSize - radius + shadowOffset, blockY + blockSize + shadowOffset);
-    ctx.lineTo(blockX + radius + shadowOffset, blockY + blockSize + shadowOffset);
-    ctx.quadraticCurveTo(blockX + shadowOffset, blockY + blockSize + shadowOffset, blockX + shadowOffset, blockY + blockSize - radius + shadowOffset);
-    ctx.lineTo(blockX + shadowOffset, blockY + radius + shadowOffset);
-    ctx.quadraticCurveTo(blockX + shadowOffset, blockY + shadowOffset, blockX + radius + shadowOffset, blockY + shadowOffset);
-    ctx.closePath();
-    ctx.fill();
+    // Draw shadow effect directly on the canvas
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 3;
+    ctx.shadowOffsetY = 3;
     
     // Draw base floor block with a darker metallic color
     ctx.fillStyle = '#333333'; // Very dark gray base
@@ -128,43 +118,38 @@ function renderBlock(
     ctx.closePath();
     ctx.fill();
     
-    // Draw top surface with inset
-    const inset = 3;
-    ctx.fillStyle = '#454545'; // Slightly lighter gray for top surface
-    ctx.beginPath();
-    ctx.moveTo(blockX + radius, blockY + inset);
-    ctx.lineTo(blockX + blockSize - radius, blockY + inset);
-    ctx.quadraticCurveTo(blockX + blockSize - inset, blockY + inset, blockX + blockSize - inset, blockY + radius);
-    ctx.lineTo(blockX + blockSize - inset, blockY + blockSize - radius);
-    ctx.quadraticCurveTo(blockX + blockSize - inset, blockY + blockSize - inset, blockX + blockSize - radius, blockY + blockSize - inset);
-    ctx.lineTo(blockX + radius, blockY + blockSize - inset);
-    ctx.quadraticCurveTo(blockX + inset, blockY + blockSize - inset, blockX + inset, blockY + blockSize - radius);
-    ctx.lineTo(blockX + inset, blockY + radius);
-    ctx.quadraticCurveTo(blockX + inset, blockY + inset, blockX + radius, blockY + inset);
-    ctx.closePath();
-    ctx.fill();
+    // Reset shadow for main shape
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
     
-    // Add 3D effect with metallic gradient
-    const gradient = ctx.createLinearGradient(
+    // Add 3D bevel effect with metallic gradient
+    const bevelGradient = ctx.createLinearGradient(
       blockX, blockY, 
       blockX + blockSize, blockY + blockSize
     );
-    gradient.addColorStop(0, 'rgba(100, 100, 100, 0.6)'); // Lighter on top-left
-    gradient.addColorStop(0.5, 'rgba(70, 70, 70, 0.5)');
-    gradient.addColorStop(1, 'rgba(40, 40, 40, 0.7)'); // Darker on bottom-right
     
-    // Apply 3D gradient with inner rounded corners
-    ctx.fillStyle = gradient;
+    // Gradient goes from lighter to darker for 3D effect
+    bevelGradient.addColorStop(0, '#666666'); // Top-left light
+    bevelGradient.addColorStop(0.5, '#555555'); // Mid
+    bevelGradient.addColorStop(1, '#333333'); // Bottom-right shadow
+    
+    // Apply gradient to fill entire block solidly
+    ctx.fillStyle = bevelGradient;
+    
+    // Redraw with slightly smaller size to create bevel
+    const bevel = 2;
     ctx.beginPath();
-    ctx.moveTo(blockX + radius, blockY + inset);
-    ctx.lineTo(blockX + blockSize - radius, blockY + inset);
-    ctx.quadraticCurveTo(blockX + blockSize - inset, blockY + inset, blockX + blockSize - inset, blockY + radius);
-    ctx.lineTo(blockX + blockSize - inset, blockY + blockSize - radius);
-    ctx.quadraticCurveTo(blockX + blockSize - inset, blockY + blockSize - inset, blockX + blockSize - radius, blockY + blockSize - inset);
-    ctx.lineTo(blockX + radius, blockY + blockSize - inset);
-    ctx.quadraticCurveTo(blockX + inset, blockY + blockSize - inset, blockX + inset, blockY + blockSize - radius);
-    ctx.lineTo(blockX + inset, blockY + radius);
-    ctx.quadraticCurveTo(blockX + inset, blockY + inset, blockX + radius, blockY + inset);
+    ctx.moveTo(blockX + radius, blockY + bevel);
+    ctx.lineTo(blockX + blockSize - radius, blockY + bevel);
+    ctx.quadraticCurveTo(blockX + blockSize - bevel, blockY + bevel, blockX + blockSize - bevel, blockY + radius);
+    ctx.lineTo(blockX + blockSize - bevel, blockY + blockSize - radius);
+    ctx.quadraticCurveTo(blockX + blockSize - bevel, blockY + blockSize - bevel, blockX + blockSize - radius, blockY + blockSize - bevel);
+    ctx.lineTo(blockX + radius, blockY + blockSize - bevel);
+    ctx.quadraticCurveTo(blockX + bevel, blockY + blockSize - bevel, blockX + bevel, blockY + blockSize - radius);
+    ctx.lineTo(blockX + bevel, blockY + radius);
+    ctx.quadraticCurveTo(blockX + bevel, blockY + bevel, blockX + radius, blockY + bevel);
     ctx.closePath();
     ctx.fill();
     
@@ -194,8 +179,8 @@ function renderBlock(
     
     // Add glowing dots at intersections
     ctx.fillStyle = 'rgba(0, 150, 255, 0.4)';
-    for (let i = 0; i <= 5; i++) {
-      for (let j = 0; j <= 5; j++) {
+    for (let i = 1; i < 5; i++) {
+      for (let j = 1; j < 5; j++) {
         ctx.beginPath();
         ctx.arc(
           blockX + i * gridSize, 
@@ -238,21 +223,11 @@ function renderBlock(
     // Wall blocks with futuristic tech style and 3D effect
     let radius = blockSize * 0.2; // Match radius with other blocks
     
-    // Draw shadow for 3D effect
-    ctx.fillStyle = '#131C24'; // Very dark shadow for wall blocks
-    const shadowOffset = 4;
-    ctx.beginPath();
-    ctx.moveTo(blockX + radius + shadowOffset, blockY + shadowOffset);
-    ctx.lineTo(blockX + blockSize - radius + shadowOffset, blockY + shadowOffset);
-    ctx.quadraticCurveTo(blockX + blockSize + shadowOffset, blockY + shadowOffset, blockX + blockSize + shadowOffset, blockY + radius + shadowOffset);
-    ctx.lineTo(blockX + blockSize + shadowOffset, blockY + blockSize - radius + shadowOffset);
-    ctx.quadraticCurveTo(blockX + blockSize + shadowOffset, blockY + blockSize + shadowOffset, blockX + blockSize - radius + shadowOffset, blockY + blockSize + shadowOffset);
-    ctx.lineTo(blockX + radius + shadowOffset, blockY + blockSize + shadowOffset);
-    ctx.quadraticCurveTo(blockX + shadowOffset, blockY + blockSize + shadowOffset, blockX + shadowOffset, blockY + blockSize - radius + shadowOffset);
-    ctx.lineTo(blockX + shadowOffset, blockY + radius + shadowOffset);
-    ctx.quadraticCurveTo(blockX + shadowOffset, blockY + shadowOffset, blockX + radius + shadowOffset, blockY + shadowOffset);
-    ctx.closePath();
-    ctx.fill();
+    // Draw shadow effect directly on the canvas
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 3;
+    ctx.shadowOffsetY = 3;
     
     // Draw base wall block with a dark metallic blue
     ctx.fillStyle = '#1A2530'; // Very dark blue base
@@ -269,43 +244,38 @@ function renderBlock(
     ctx.closePath();
     ctx.fill();
     
-    // Draw top surface with inset
-    const inset = 3;
-    ctx.fillStyle = '#2A3B4A'; // Slightly lighter blue for top surface
-    ctx.beginPath();
-    ctx.moveTo(blockX + radius, blockY + inset);
-    ctx.lineTo(blockX + blockSize - radius, blockY + inset);
-    ctx.quadraticCurveTo(blockX + blockSize - inset, blockY + inset, blockX + blockSize - inset, blockY + radius);
-    ctx.lineTo(blockX + blockSize - inset, blockY + blockSize - radius);
-    ctx.quadraticCurveTo(blockX + blockSize - inset, blockY + blockSize - inset, blockX + blockSize - radius, blockY + blockSize - inset);
-    ctx.lineTo(blockX + radius, blockY + blockSize - inset);
-    ctx.quadraticCurveTo(blockX + inset, blockY + blockSize - inset, blockX + inset, blockY + blockSize - radius);
-    ctx.lineTo(blockX + inset, blockY + radius);
-    ctx.quadraticCurveTo(blockX + inset, blockY + inset, blockX + radius, blockY + inset);
-    ctx.closePath();
-    ctx.fill();
+    // Reset shadow for main shape
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
     
-    // Add 3D effect with futuristic tech gradient
-    const gradient = ctx.createLinearGradient(
+    // Add 3D bevel effect with tech gradient
+    const bevelGradient = ctx.createLinearGradient(
       blockX, blockY, 
       blockX + blockSize, blockY + blockSize
     );
-    gradient.addColorStop(0, 'rgba(60, 90, 120, 0.7)'); // Lighter on top-left
-    gradient.addColorStop(0.5, 'rgba(40, 70, 100, 0.6)');
-    gradient.addColorStop(1, 'rgba(20, 40, 60, 0.7)'); // Darker on bottom-right
     
-    // Apply 3D gradient with inner rounded corners
-    ctx.fillStyle = gradient;
+    // Gradient goes from lighter to darker for 3D effect
+    bevelGradient.addColorStop(0, '#304760'); // Top-left light
+    bevelGradient.addColorStop(0.5, '#253850'); // Mid
+    bevelGradient.addColorStop(1, '#1A2530'); // Bottom-right shadow
+    
+    // Apply gradient to fill entire block solidly
+    ctx.fillStyle = bevelGradient;
+    
+    // Redraw with slightly smaller size to create bevel
+    const bevel = 2;
     ctx.beginPath();
-    ctx.moveTo(blockX + radius, blockY + inset);
-    ctx.lineTo(blockX + blockSize - radius, blockY + inset);
-    ctx.quadraticCurveTo(blockX + blockSize - inset, blockY + inset, blockX + blockSize - inset, blockY + radius);
-    ctx.lineTo(blockX + blockSize - inset, blockY + blockSize - radius);
-    ctx.quadraticCurveTo(blockX + blockSize - inset, blockY + blockSize - inset, blockX + blockSize - radius, blockY + blockSize - inset);
-    ctx.lineTo(blockX + radius, blockY + blockSize - inset);
-    ctx.quadraticCurveTo(blockX + inset, blockY + blockSize - inset, blockX + inset, blockY + blockSize - radius);
-    ctx.lineTo(blockX + inset, blockY + radius);
-    ctx.quadraticCurveTo(blockX + inset, blockY + inset, blockX + radius, blockY + inset);
+    ctx.moveTo(blockX + radius, blockY + bevel);
+    ctx.lineTo(blockX + blockSize - radius, blockY + bevel);
+    ctx.quadraticCurveTo(blockX + blockSize - bevel, blockY + bevel, blockX + blockSize - bevel, blockY + radius);
+    ctx.lineTo(blockX + blockSize - bevel, blockY + blockSize - radius);
+    ctx.quadraticCurveTo(blockX + blockSize - bevel, blockY + blockSize - bevel, blockX + blockSize - radius, blockY + blockSize - bevel);
+    ctx.lineTo(blockX + radius, blockY + blockSize - bevel);
+    ctx.quadraticCurveTo(blockX + bevel, blockY + blockSize - bevel, blockX + bevel, blockY + blockSize - radius);
+    ctx.lineTo(blockX + bevel, blockY + radius);
+    ctx.quadraticCurveTo(blockX + bevel, blockY + bevel, blockX + radius, blockY + bevel);
     ctx.closePath();
     ctx.fill();
     
@@ -424,26 +394,15 @@ function renderBlock(
     
     let radius = blockSize * 0.2; // Slightly larger rounded corner radius for modern look
     
-    // Draw a much darker base underlying block (shadow) for 3D effect
-    ctx.fillStyle = `rgb(${Math.floor(r*0.1)}, ${Math.floor(g*0.1)}, ${Math.floor(b*0.1)})`;
+    // Draw shadow effect directly on the canvas rather than as another shape
+    // to prevent overlapping issues
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 3;
+    ctx.shadowOffsetY = 3;
     
-    // Offset slightly to create a 3D shadow effect
-    const shadowOffset = 4;
-    ctx.beginPath();
-    ctx.moveTo(blockX + radius + shadowOffset, blockY + shadowOffset);
-    ctx.lineTo(blockX + blockSize - radius + shadowOffset, blockY + shadowOffset);
-    ctx.quadraticCurveTo(blockX + blockSize + shadowOffset, blockY + shadowOffset, blockX + blockSize + shadowOffset, blockY + radius + shadowOffset);
-    ctx.lineTo(blockX + blockSize + shadowOffset, blockY + blockSize - radius + shadowOffset);
-    ctx.quadraticCurveTo(blockX + blockSize + shadowOffset, blockY + blockSize + shadowOffset, blockX + blockSize - radius + shadowOffset, blockY + blockSize + shadowOffset);
-    ctx.lineTo(blockX + radius + shadowOffset, blockY + blockSize + shadowOffset);
-    ctx.quadraticCurveTo(blockX + shadowOffset, blockY + blockSize + shadowOffset, blockX + shadowOffset, blockY + blockSize - radius + shadowOffset);
-    ctx.lineTo(blockX + shadowOffset, blockY + radius + shadowOffset);
-    ctx.quadraticCurveTo(blockX + shadowOffset, blockY + shadowOffset, blockX + radius + shadowOffset, blockY + shadowOffset);
-    ctx.closePath();
-    ctx.fill();
-    
-    // Draw darker base block (bottom layer)
-    ctx.fillStyle = `rgb(${Math.floor(r*0.15)}, ${Math.floor(g*0.15)}, ${Math.floor(b*0.15)})`;
+    // Draw base block with darker but still rich color
+    ctx.fillStyle = `rgb(${Math.floor(r*0.4)}, ${Math.floor(g*0.4)}, ${Math.floor(b*0.4)})`;
     ctx.beginPath();
     ctx.moveTo(blockX + radius, blockY);
     ctx.lineTo(blockX + blockSize - radius, blockY);
@@ -457,44 +416,38 @@ function renderBlock(
     ctx.closePath();
     ctx.fill();
     
-    // Draw main block with darker but still rich color
-    // Use a darker version of the original color
-    ctx.fillStyle = `rgb(${Math.floor(r*0.6)}, ${Math.floor(g*0.6)}, ${Math.floor(b*0.6)})`;
-    const inset = 3; // Slightly larger inset for more pronounced 3D effect
-    ctx.beginPath();
-    ctx.moveTo(blockX + radius, blockY + inset);
-    ctx.lineTo(blockX + blockSize - radius, blockY + inset);
-    ctx.quadraticCurveTo(blockX + blockSize - inset, blockY + inset, blockX + blockSize - inset, blockY + radius);
-    ctx.lineTo(blockX + blockSize - inset, blockY + blockSize - radius);
-    ctx.quadraticCurveTo(blockX + blockSize - inset, blockY + blockSize - inset, blockX + blockSize - radius, blockY + blockSize - inset);
-    ctx.lineTo(blockX + radius, blockY + blockSize - inset);
-    ctx.quadraticCurveTo(blockX + inset, blockY + blockSize - inset, blockX + inset, blockY + blockSize - radius);
-    ctx.lineTo(blockX + inset, blockY + radius);
-    ctx.quadraticCurveTo(blockX + inset, blockY + inset, blockX + radius, blockY + inset);
-    ctx.closePath();
-    ctx.fill();
+    // Reset shadow for main shape
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
     
-    // Add 3D effect gradients - top left to bottom right lighting
-    const topGradient = ctx.createLinearGradient(
+    // Add a 3D bevel effect with gradient
+    const bevelGradient = ctx.createLinearGradient(
       blockX, blockY, 
       blockX + blockSize, blockY + blockSize
     );
-    topGradient.addColorStop(0, `rgba(${r}, ${g}, ${b}, 0.6)`); // Lighter on top-left
-    topGradient.addColorStop(0.3, `rgba(${Math.floor(r*0.5)}, ${Math.floor(g*0.5)}, ${Math.floor(b*0.5)}, 0.6)`);
-    topGradient.addColorStop(1, `rgba(${Math.floor(r*0.3)}, ${Math.floor(g*0.3)}, ${Math.floor(b*0.3)}, 0.6)`); // Darker on bottom-right
     
-    // Apply 3D gradient with inner rounded corners
-    ctx.fillStyle = topGradient;
+    // Gradient goes from lighter to darker for 3D effect
+    bevelGradient.addColorStop(0, `rgb(${Math.min(255, Math.floor(r*0.9))}, ${Math.min(255, Math.floor(g*0.9))}, ${Math.min(255, Math.floor(b*0.9))})`); // Top-left light
+    bevelGradient.addColorStop(0.5, `rgb(${Math.floor(r*0.7)}, ${Math.floor(g*0.7)}, ${Math.floor(b*0.7)})`); // Mid
+    bevelGradient.addColorStop(1, `rgb(${Math.floor(r*0.3)}, ${Math.floor(g*0.3)}, ${Math.floor(b*0.3)})`); // Bottom-right shadow
+    
+    // Apply gradient to fill entire block solidly
+    ctx.fillStyle = bevelGradient;
+    
+    // Redraw with slightly smaller size to create bevel
+    const bevel = 2;
     ctx.beginPath();
-    ctx.moveTo(blockX + radius, blockY + inset);
-    ctx.lineTo(blockX + blockSize - radius, blockY + inset);
-    ctx.quadraticCurveTo(blockX + blockSize - inset, blockY + inset, blockX + blockSize - inset, blockY + radius);
-    ctx.lineTo(blockX + blockSize - inset, blockY + blockSize - radius);
-    ctx.quadraticCurveTo(blockX + blockSize - inset, blockY + blockSize - inset, blockX + blockSize - radius, blockY + blockSize - inset);
-    ctx.lineTo(blockX + radius, blockY + blockSize - inset);
-    ctx.quadraticCurveTo(blockX + inset, blockY + blockSize - inset, blockX + inset, blockY + blockSize - radius);
-    ctx.lineTo(blockX + inset, blockY + radius);
-    ctx.quadraticCurveTo(blockX + inset, blockY + inset, blockX + radius, blockY + inset);
+    ctx.moveTo(blockX + radius, blockY + bevel);
+    ctx.lineTo(blockX + blockSize - radius, blockY + bevel);
+    ctx.quadraticCurveTo(blockX + blockSize - bevel, blockY + bevel, blockX + blockSize - bevel, blockY + radius);
+    ctx.lineTo(blockX + blockSize - bevel, blockY + blockSize - radius);
+    ctx.quadraticCurveTo(blockX + blockSize - bevel, blockY + blockSize - bevel, blockX + blockSize - radius, blockY + blockSize - bevel);
+    ctx.lineTo(blockX + radius, blockY + blockSize - bevel);
+    ctx.quadraticCurveTo(blockX + bevel, blockY + blockSize - bevel, blockX + bevel, blockY + blockSize - radius);
+    ctx.lineTo(blockX + bevel, blockY + radius);
+    ctx.quadraticCurveTo(blockX + bevel, blockY + bevel, blockX + radius, blockY + bevel);
     ctx.closePath();
     ctx.fill();
     
