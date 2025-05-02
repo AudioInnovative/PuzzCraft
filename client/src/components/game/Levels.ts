@@ -112,15 +112,15 @@ export const Levels = [
     [1, 1, 1, 1, 1, 1, 1, 1], // Full floor
   ],
   
-  // Level 10: Hollow Square (exactly matching provided screenshot)
+  // Level 10: Final Challenge (exactly matching the reference image)
   [
     [0, 0, 0, 0, 0, 0, 0, 0],
-    [1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 0, 2, 9, 0, 2, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 1, 1, 0, 0, 1],
-    [1, 0, 9, 0, 3, 7, 0, 1],
-    [1, 0, 7, 3, 4, 4, 0, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1], // Floor squares forming a hollow square
+    [0, 1, 1, 1, 1, 1, 1, 0],
+    [0, 1, 2, 9, 0, 2, 1, 0],
+    [0, 1, 1, 0, 0, 1, 1, 0],
+    [0, 1, 0, 1, 1, 0, 1, 0],
+    [0, 1, 9, 0, 0, 3, 1, 0],
+    [0, 1, 8, 3, 9, 8, 1, 0],
+    [0, 1, 1, 1, 1, 1, 1, 0], // Square border of floor blocks
   ],
 ];
