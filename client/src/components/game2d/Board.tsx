@@ -46,24 +46,79 @@ function renderBlock(
   // Set opacity for matched blocks
   ctx.globalAlpha = block.matched ? 0.5 : 1.0;
   
-  // Draw block shadow if selected
+  // Reset shadow properties before drawing each block
+  ctx.shadowColor = 'transparent';
+  ctx.shadowBlur = 0;
+  ctx.shadowOffsetX = 0;
+  ctx.shadowOffsetY = 0;
+  
+  // Draw block shadow/glow if selected
   if (isSelected) {
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-    ctx.fillRect(blockX - 2, blockY - 2, blockSize + 4, blockSize + 4);
+    // Bright glow for selected blocks
+    ctx.shadowColor = 'rgba(255, 255, 255, 0.8)';
+    ctx.shadowBlur = 15;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+  } else {
+    // Subtle shadow for regular blocks
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+    ctx.shadowBlur = 5;
+    ctx.shadowOffsetX = 2;
+    ctx.shadowOffsetY = 2;
   }
   
   // Simply check if this is a floor block (type 1)
   if (block.type === 1) {
-    // Draw floor block with a gray color (like NES Puzznic)
-    ctx.fillStyle = '#BBBBBB'; // Light gray
-    ctx.fillRect(blockX, blockY, blockSize, blockSize);
+    // Use modern version of floor blocks with rounded corners
+    let radius = blockSize * 0.15; // Same radius as other blocks for consistency
     
-    // Add grid lines to match NES floor blocks
-    ctx.strokeStyle = '#999999';
-    ctx.lineWidth = 1;
+    // Draw floor block with a gray color (modernized)
+    ctx.fillStyle = '#BBBBBB'; // Light gray
+    
+    // Draw with rounded corners
+    ctx.beginPath();
+    ctx.moveTo(blockX + radius, blockY);
+    ctx.lineTo(blockX + blockSize - radius, blockY);
+    ctx.quadraticCurveTo(blockX + blockSize, blockY, blockX + blockSize, blockY + radius);
+    ctx.lineTo(blockX + blockSize, blockY + blockSize - radius);
+    ctx.quadraticCurveTo(blockX + blockSize, blockY + blockSize, blockX + blockSize - radius, blockY + blockSize);
+    ctx.lineTo(blockX + radius, blockY + blockSize);
+    ctx.quadraticCurveTo(blockX, blockY + blockSize, blockX, blockY + blockSize - radius);
+    ctx.lineTo(blockX, blockY + radius);
+    ctx.quadraticCurveTo(blockX, blockY, blockX + radius, blockY);
+    ctx.closePath();
+    ctx.fill();
+    
+    // Add subtle gradient
+    const gradient = ctx.createLinearGradient(blockX, blockY, blockX, blockY + blockSize);
+    gradient.addColorStop(0, 'rgba(255, 255, 255, 0.2)');
+    gradient.addColorStop(1, 'rgba(0, 0, 0, 0.1)');
+    
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.moveTo(blockX + radius, blockY);
+    ctx.lineTo(blockX + blockSize - radius, blockY);
+    ctx.quadraticCurveTo(blockX + blockSize, blockY, blockX + blockSize, blockY + radius);
+    ctx.lineTo(blockX + blockSize, blockY + blockSize - radius);
+    ctx.quadraticCurveTo(blockX + blockSize, blockY + blockSize, blockX + blockSize - radius, blockY + blockSize);
+    ctx.lineTo(blockX + radius, blockY + blockSize);
+    ctx.quadraticCurveTo(blockX, blockY + blockSize, blockX, blockY + blockSize - radius);
+    ctx.lineTo(blockX, blockY + radius);
+    ctx.quadraticCurveTo(blockX, blockY, blockX + radius, blockY);
+    ctx.closePath();
+    ctx.fill();
+    
+    // Add grid lines to match floor blocks (but more subtle)
+    ctx.strokeStyle = 'rgba(153, 153, 153, 0.5)';
+    ctx.lineWidth = 0.5;
     
     // Draw grid pattern
     const gridSize = blockSize / 4;
+    
+    // Use clipping to ensure grid lines don't extend beyond rounded corners
+    ctx.save();
+    ctx.clip();
+    
     for (let i = 1; i < 4; i++) {
       // Horizontal lines
       ctx.beginPath();
@@ -78,19 +133,70 @@ function renderBlock(
       ctx.stroke();
     }
     
-    // Border
-    ctx.strokeStyle = '#666666';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(blockX, blockY, blockSize, blockSize);
-  } else if (block.isFixed && block.type !== 1) {
-    // Wall blocks - blue/gray like in NES Puzznic
-    ctx.fillStyle = '#6688AA'; // Blue-gray
-    ctx.fillRect(blockX, blockY, blockSize, blockSize);
+    ctx.restore();
     
-    // Add subtle texture to wall blocks
-    const lineSize = blockSize / 4;
-    ctx.strokeStyle = '#556677';
+    // Border
+    ctx.strokeStyle = 'rgba(102, 102, 102, 0.7)';
     ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(blockX + radius, blockY);
+    ctx.lineTo(blockX + blockSize - radius, blockY);
+    ctx.quadraticCurveTo(blockX + blockSize, blockY, blockX + blockSize, blockY + radius);
+    ctx.lineTo(blockX + blockSize, blockY + blockSize - radius);
+    ctx.quadraticCurveTo(blockX + blockSize, blockY + blockSize, blockX + blockSize - radius, blockY + blockSize);
+    ctx.lineTo(blockX + radius, blockY + blockSize);
+    ctx.quadraticCurveTo(blockX, blockY + blockSize, blockX, blockY + blockSize - radius);
+    ctx.lineTo(blockX, blockY + radius);
+    ctx.quadraticCurveTo(blockX, blockY, blockX + radius, blockY);
+    ctx.closePath();
+    ctx.stroke();
+  } else if (block.isFixed && block.type !== 1) {
+    // Wall blocks with modern style
+    let radius = blockSize * 0.15; // Same radius as other blocks
+    
+    // Draw wall block with rounded corners
+    ctx.fillStyle = '#6688AA'; // Blue-gray color
+    
+    ctx.beginPath();
+    ctx.moveTo(blockX + radius, blockY);
+    ctx.lineTo(blockX + blockSize - radius, blockY);
+    ctx.quadraticCurveTo(blockX + blockSize, blockY, blockX + blockSize, blockY + radius);
+    ctx.lineTo(blockX + blockSize, blockY + blockSize - radius);
+    ctx.quadraticCurveTo(blockX + blockSize, blockY + blockSize, blockX + blockSize - radius, blockY + blockSize);
+    ctx.lineTo(blockX + radius, blockY + blockSize);
+    ctx.quadraticCurveTo(blockX, blockY + blockSize, blockX, blockY + blockSize - radius);
+    ctx.lineTo(blockX, blockY + radius);
+    ctx.quadraticCurveTo(blockX, blockY, blockX + radius, blockY);
+    ctx.closePath();
+    ctx.fill();
+    
+    // Add subtle gradient
+    const gradient = ctx.createLinearGradient(blockX, blockY, blockX, blockY + blockSize);
+    gradient.addColorStop(0, 'rgba(255, 255, 255, 0.2)');
+    gradient.addColorStop(1, 'rgba(0, 0, 0, 0.1)');
+    
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.moveTo(blockX + radius, blockY);
+    ctx.lineTo(blockX + blockSize - radius, blockY);
+    ctx.quadraticCurveTo(blockX + blockSize, blockY, blockX + blockSize, blockY + radius);
+    ctx.lineTo(blockX + blockSize, blockY + blockSize - radius);
+    ctx.quadraticCurveTo(blockX + blockSize, blockY + blockSize, blockX + blockSize - radius, blockY + blockSize);
+    ctx.lineTo(blockX + radius, blockY + blockSize);
+    ctx.quadraticCurveTo(blockX, blockY + blockSize, blockX, blockY + blockSize - radius);
+    ctx.lineTo(blockX, blockY + radius);
+    ctx.quadraticCurveTo(blockX, blockY, blockX + radius, blockY);
+    ctx.closePath();
+    ctx.fill();
+    
+    // Add texture lines to wall blocks (but clipped to the rounded shape)
+    const lineSize = blockSize / 4;
+    ctx.strokeStyle = 'rgba(85, 102, 119, 0.6)';
+    ctx.lineWidth = 0.8;
+    
+    // Use clipping to ensure lines don't extend beyond rounded corners
+    ctx.save();
+    ctx.clip();
     
     for (let i = 1; i < 4; i++) {
       // Horizontal lines only - like the original
@@ -100,46 +206,83 @@ function renderBlock(
       ctx.stroke();
     }
     
+    ctx.restore();
+    
     // Border
-    ctx.strokeStyle = '#445566';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(blockX, blockY, blockSize, blockSize);
+    ctx.strokeStyle = 'rgba(68, 85, 102, 0.7)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(blockX + radius, blockY);
+    ctx.lineTo(blockX + blockSize - radius, blockY);
+    ctx.quadraticCurveTo(blockX + blockSize, blockY, blockX + blockSize, blockY + radius);
+    ctx.lineTo(blockX + blockSize, blockY + blockSize - radius);
+    ctx.quadraticCurveTo(blockX + blockSize, blockY + blockSize, blockX + blockSize - radius, blockY + blockSize);
+    ctx.lineTo(blockX + radius, blockY + blockSize);
+    ctx.quadraticCurveTo(blockX, blockY + blockSize, blockX, blockY + blockSize - radius);
+    ctx.lineTo(blockX, blockY + radius);
+    ctx.quadraticCurveTo(blockX, blockY, blockX + radius, blockY);
+    ctx.closePath();
+    ctx.stroke();
   } else {
     // Regular game blocks
     // Get color based on block type (1-indexed)
     const color = blockColors[(block.type - 1) % blockColors.length];
     const symbol = blockSymbols[(block.type - 1) % blockSymbols.length];
     
-    // Draw block background (dark version for NES style)
+    // Draw block with rounded corners for modern look
+    let radius = blockSize * 0.15; // Rounded corner radius
+    
     ctx.fillStyle = color;
-    ctx.fillRect(blockX, blockY, blockSize, blockSize);
-    
-    // Draw highlight (for NES-style bevel effect)
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
     ctx.beginPath();
-    ctx.moveTo(blockX, blockY);
-    ctx.lineTo(blockX + blockSize, blockY);
-    ctx.lineTo(blockX + blockSize - blockSize/6, blockY + blockSize/6);
-    ctx.lineTo(blockX + blockSize/6, blockY + blockSize/6);
-    ctx.lineTo(blockX, blockY);
+    ctx.moveTo(blockX + radius, blockY);
+    ctx.lineTo(blockX + blockSize - radius, blockY);
+    ctx.quadraticCurveTo(blockX + blockSize, blockY, blockX + blockSize, blockY + radius);
+    ctx.lineTo(blockX + blockSize, blockY + blockSize - radius);
+    ctx.quadraticCurveTo(blockX + blockSize, blockY + blockSize, blockX + blockSize - radius, blockY + blockSize);
+    ctx.lineTo(blockX + radius, blockY + blockSize);
+    ctx.quadraticCurveTo(blockX, blockY + blockSize, blockX, blockY + blockSize - radius);
+    ctx.lineTo(blockX, blockY + radius);
+    ctx.quadraticCurveTo(blockX, blockY, blockX + radius, blockY);
+    ctx.closePath();
     ctx.fill();
     
-    // Draw shadow (for NES-style bevel effect)
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+    // Draw modern subtle gradient overlay instead of bevel
+    const gradient = ctx.createLinearGradient(blockX, blockY, blockX, blockY + blockSize);
+    gradient.addColorStop(0, 'rgba(255, 255, 255, 0.4)');
+    gradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.1)');
+    gradient.addColorStop(1, 'rgba(0, 0, 0, 0.2)');
+    
+    // Apply gradient with rounded corners
+    ctx.fillStyle = gradient;
     ctx.beginPath();
-    ctx.moveTo(blockX, blockY + blockSize);
-    ctx.lineTo(blockX + blockSize, blockY + blockSize);
-    ctx.lineTo(blockX + blockSize, blockY);
-    ctx.lineTo(blockX + blockSize - blockSize/6, blockY + blockSize/6);
-    ctx.lineTo(blockX + blockSize - blockSize/6, blockY + blockSize - blockSize/6);
-    ctx.lineTo(blockX + blockSize/6, blockY + blockSize - blockSize/6);
-    ctx.lineTo(blockX, blockY + blockSize);
+    // Using the same radius as defined above
+    ctx.moveTo(blockX + radius, blockY);
+    ctx.lineTo(blockX + blockSize - radius, blockY);
+    ctx.quadraticCurveTo(blockX + blockSize, blockY, blockX + blockSize, blockY + radius);
+    ctx.lineTo(blockX + blockSize, blockY + blockSize - radius);
+    ctx.quadraticCurveTo(blockX + blockSize, blockY + blockSize, blockX + blockSize - radius, blockY + blockSize);
+    ctx.lineTo(blockX + radius, blockY + blockSize);
+    ctx.quadraticCurveTo(blockX, blockY + blockSize, blockX, blockY + blockSize - radius);
+    ctx.lineTo(blockX, blockY + radius);
+    ctx.quadraticCurveTo(blockX, blockY, blockX + radius, blockY);
+    ctx.closePath();
     ctx.fill();
     
-    // Draw block border
-    ctx.strokeStyle = 'rgba(0, 0, 0, 0.7)';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(blockX, blockY, blockSize, blockSize);
+    // Draw border with rounded corners
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(blockX + radius, blockY);
+    ctx.lineTo(blockX + blockSize - radius, blockY);
+    ctx.quadraticCurveTo(blockX + blockSize, blockY, blockX + blockSize, blockY + radius);
+    ctx.lineTo(blockX + blockSize, blockY + blockSize - radius);
+    ctx.quadraticCurveTo(blockX + blockSize, blockY + blockSize, blockX + blockSize - radius, blockY + blockSize);
+    ctx.lineTo(blockX + radius, blockY + blockSize);
+    ctx.quadraticCurveTo(blockX, blockY + blockSize, blockX, blockY + blockSize - radius);
+    ctx.lineTo(blockX, blockY + radius);
+    ctx.quadraticCurveTo(blockX, blockY, blockX + radius, blockY);
+    ctx.closePath();
+    ctx.stroke();
     
     // Draw block symbol (with slight shadow for readability)
     ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
@@ -156,52 +299,79 @@ function renderBlock(
   ctx.globalAlpha = 1.0;
 }
 
-// Render the game board (background and border) in NES Puzznic style
+// Render the game board (background and border) in modern style
 function renderGameBoard(
   ctx: CanvasRenderingContext2D,
   blockSize: number,
   rows: number,
   cols: number
 ) {
-  // Draw blue background (like the original NES Puzznic)
-  ctx.fillStyle = '#5588AA'; // Blue background color similar to NES Puzznic
+  // Create modern gradient background
+  const gradient = ctx.createLinearGradient(0, 0, 0, rows * blockSize);
+  gradient.addColorStop(0, '#4A7DA5'); // Darker blue at top
+  gradient.addColorStop(1, '#86B5D9'); // Lighter blue at bottom
+  
+  // Apply gradient to background
+  ctx.fillStyle = gradient;
   ctx.fillRect(0, 0, cols * blockSize, rows * blockSize);
   
-  // Draw subtle brick pattern in background
-  const brickSize = blockSize / 3;
+  // Add subtle patterns for depth
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)'; // Very subtle white lines
+  ctx.lineWidth = 0.5;
   
-  // Draw a more subtle grid pattern instead of the brick pattern that's creating blue lines
-  ctx.strokeStyle = 'rgba(65, 105, 150, 0.3)'; // Much lighter blue, semi-transparent
-  ctx.lineWidth = 0.5; // Thinner lines
-  
-  // Draw grid pattern
+  // Draw a modern grid pattern
   for (let y = 0; y < rows; y++) {
     for (let x = 0; x < cols; x++) {
       const patternX = x * blockSize;
       const patternY = y * blockSize;
       
-      // Draw vertical grid lines (only inside each cell)
-      for (let i = 1; i < 3; i++) {
-        ctx.beginPath();
-        ctx.moveTo(patternX + (i * blockSize/3), patternY);
-        ctx.lineTo(patternX + (i * blockSize/3), patternY + blockSize);
-        ctx.stroke();
-      }
+      // Draw grid dots instead of full lines for a more modern look
+      const dotSpacing = blockSize / 8;
       
-      // Draw horizontal grid lines (only inside each cell)
-      for (let i = 1; i < 3; i++) {
-        ctx.beginPath();
-        ctx.moveTo(patternX, patternY + (i * blockSize/3));
-        ctx.lineTo(patternX + blockSize, patternY + (i * blockSize/3));
-        ctx.stroke();
+      for (let i = 1; i < 8; i += 2) {
+        for (let j = 1; j < 8; j += 2) {
+          ctx.beginPath();
+          ctx.arc(
+            patternX + i * dotSpacing, 
+            patternY + j * dotSpacing, 
+            0.5, 0, Math.PI * 2
+          );
+          ctx.fill();
+        }
       }
     }
   }
   
-  // Draw board border
-  ctx.strokeStyle = '#000000';
-  ctx.lineWidth = 3;
-  ctx.strokeRect(0, 0, cols * blockSize, rows * blockSize);
+  // Draw a more modern border with rounded corners and shadow
+  const borderWidth = 3;
+  const borderRadius = 8;
+  
+  // Add shadow to the board
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+  ctx.shadowBlur = 15;
+  ctx.shadowOffsetX = 0;
+  ctx.shadowOffsetY = 5;
+  
+  // Draw border as a filled rounded rectangle slightly bigger than the board
+  ctx.fillStyle = '#2D5F88';
+  ctx.beginPath();
+  ctx.moveTo(borderRadius, 0);
+  ctx.lineTo(cols * blockSize - borderRadius, 0);
+  ctx.quadraticCurveTo(cols * blockSize, 0, cols * blockSize, borderRadius);
+  ctx.lineTo(cols * blockSize, rows * blockSize - borderRadius);
+  ctx.quadraticCurveTo(cols * blockSize, rows * blockSize, cols * blockSize - borderRadius, rows * blockSize);
+  ctx.lineTo(borderRadius, rows * blockSize);
+  ctx.quadraticCurveTo(0, rows * blockSize, 0, rows * blockSize - borderRadius);
+  ctx.lineTo(0, borderRadius);
+  ctx.quadraticCurveTo(0, 0, borderRadius, 0);
+  ctx.closePath();
+  ctx.stroke();
+  
+  // Reset shadow
+  ctx.shadowColor = 'transparent';
+  ctx.shadowBlur = 0;
+  ctx.shadowOffsetX = 0;
+  ctx.shadowOffsetY = 0;
 }
 
 const BLOCK_SIZE = 60; // Size of each block in pixels
