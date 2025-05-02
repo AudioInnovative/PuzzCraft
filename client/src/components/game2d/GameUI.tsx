@@ -31,8 +31,8 @@ export default function GameUI2D() {
       
       {/* Game HUD styled like original Puzznic - now on the left side with fixed width */}
       <div className="absolute top-0 left-0 bottom-0 flex flex-col items-start p-2 bg-black w-[100px] border-r border-gray-700">
-        {/* Game stats - timer removed */}
-        <GamePanel title="Score" value={score.toString()} />
+        {/* Game stats - score removed, move counter added */}
+        <GamePanel title="Moves" value={moveCount.toString()} />
         <GamePanel title="Level" value={`${level}-${maxLevel}`} />
         
         {/* Controls help */}
@@ -141,8 +141,6 @@ export default function GameUI2D() {
             <div className="bg-blue-900 border-2 border-blue-700 p-4 mb-6">
               <p className="text-2xl text-yellow-300 mb-6 font-mono">ALL BLOCKS MATCHED!</p>
               <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-left mb-4">
-                <p className="text-white font-mono">SCORE:</p>
-                <p className="text-cyan-300 font-mono text-right">{score}</p>
                 <p className="text-white font-mono">MOVES:</p>
                 <p className="text-cyan-300 font-mono text-right">{moveCount}</p>
               </div>
@@ -191,8 +189,6 @@ export default function GameUI2D() {
             <div className="bg-blue-900 border-2 border-blue-700 p-4 mb-6">
               <p className="text-2xl text-white mb-6 font-mono">LEVEL FAILED!</p>
               <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-left mb-4">
-                <p className="text-white font-mono">SCORE:</p>
-                <p className="text-cyan-300 font-mono text-right">{score}</p>
                 <p className="text-white font-mono">MOVES:</p>
                 <p className="text-cyan-300 font-mono text-right">{moveCount}</p>
               </div>
@@ -241,8 +237,6 @@ export default function GameUI2D() {
             <div className="bg-blue-900 border-2 border-blue-700 p-4 mb-6">
               <p className="text-2xl text-cyan-300 mb-6 font-mono">ALL LEVELS COMPLETED!</p>
               <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-left mb-4">
-                <p className="text-white font-mono">FINAL SCORE:</p>
-                <p className="text-cyan-300 font-mono text-right">{score}</p>
                 <p className="text-white font-mono">TOTAL MOVES:</p>
                 <p className="text-cyan-300 font-mono text-right">{moveCount}</p>
               </div>
