@@ -841,9 +841,13 @@ export function Board2D({ width, height }: BoardProps) {
       style={{ 
         width: '100%', 
         height: '100%',
-        background: '#000000', // Black background like NES games
+        background: '#000000', // Black background
         touchAction: 'none', // Prevent browser handling of touch gestures (like scrolling)
-        cursor: selectedBlockPos ? 'move' : 'pointer' // Show move cursor when a block is selected
+        cursor: selectedBlockPos 
+          ? 'move' 
+          : gamePhase === "editing"
+            ? 'crosshair'
+            : `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><circle cx="16" cy="16" r="8" fill="%2300BBFF" fill-opacity="0.3" /><circle cx="16" cy="16" r="4" fill="%2300BBFF" /><circle cx="16" cy="16" r="12" stroke="%2300BBFF" stroke-width="2" fill="none" stroke-opacity="0.5" /></svg>') 16 16, auto`
       }}
     />
   );
