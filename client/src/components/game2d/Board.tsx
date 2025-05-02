@@ -288,8 +288,8 @@ export function Board2D({ width, height }: BoardProps) {
       // In editor mode, clicking places or removes blocks
       const blockExists = board[gameY] && board[gameY][gridX] !== null;
       
-      if (blockExists && board[gameY][gridX]?.type !== 1) {
-        // Remove existing block if it's not a floor block (type 1)
+      if (blockExists) {
+        // Remove existing block (all blocks can be removed in editor)
         removeEditorBlock(gridX, gameY);
       } else if (!blockExists) {
         // Place new block if position is empty

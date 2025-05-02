@@ -633,13 +633,8 @@ export const usePuzznic = create<PuzznicState>()(
     },
     
     createEmptyLevel: () => {
-      // Create an 8x8 empty grid with a floor at the bottom
+      // Create an 8x8 completely empty grid
       const emptyLevel: number[][] = Array(8).fill(0).map(() => Array(8).fill(0));
-      
-      // Add floor blocks at the bottom row
-      for (let x = 0; x < 8; x++) {
-        emptyLevel[7][x] = 1; // Type 1 is typically floor blocks
-      }
       
       // Create a board from this level data
       const rows = emptyLevel.length;
@@ -693,10 +688,7 @@ export const usePuzznic = create<PuzznicState>()(
       
       // Check if position is valid
       if (y >= 0 && y < newBoard.length && x >= 0 && x < newBoard[0].length) {
-        // Don't allow placing blocks on the floor row
-        if (y === 0 && newBoard[y][x]?.isFloor) {
-          return;
-        }
+        // Allow placing any blocks anywhere in the editor
         
         // Place new block or replace existing one
         newBoard[y][x] = {
@@ -732,10 +724,7 @@ export const usePuzznic = create<PuzznicState>()(
       
       // Check if position is valid
       if (y >= 0 && y < newBoard.length && x >= 0 && x < newBoard[0].length) {
-        // Don't allow removing floor blocks (type 1)
-        if (newBoard[y][x]?.type === 1) {
-          return;
-        }
+        // All block types can be removed in editor
         
         // Remove block
         newBoard[y][x] = null;
