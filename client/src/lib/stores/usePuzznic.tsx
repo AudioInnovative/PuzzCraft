@@ -707,8 +707,8 @@ export const usePuzznic = create<PuzznicState>()(
           selected: false,
           matched: false,
           falling: false,
-          isFixed: blockType === 1, // Fixed if it's a floor block
-          isFloor: blockType === 1  // Set isFloor true if blockType is 1
+          isFixed: blockType === 1, // Floor blocks (type 1) are fixed
+          isFloor: blockType === 1  // Floor blocks (type 1) have isFloor=true
         };
         
         set({ board: newBoard });
@@ -732,8 +732,8 @@ export const usePuzznic = create<PuzznicState>()(
       
       // Check if position is valid
       if (y >= 0 && y < newBoard.length && x >= 0 && x < newBoard[0].length) {
-        // Don't allow removing floor blocks
-        if (newBoard[y][x]?.isFloor) {
+        // Don't allow removing floor blocks (type 1)
+        if (newBoard[y][x]?.type === 1) {
           return;
         }
         
@@ -787,8 +787,8 @@ export const usePuzznic = create<PuzznicState>()(
           for (let x = 0; x < cols; x++) {
             const value = levelData[levelY][x];
             if (value > 0) {
-              // Floor blocks are at the bottom (gameY=0) and are type 1
-              const isFloor = gameY === 0 && value === 1;
+              // Any block of type 1 is a floor block
+              const isFloor = value === 1;
               
               board[gameY][x] = {
                 id: gameY * cols + x,

@@ -52,13 +52,8 @@ function renderBlock(
     ctx.fillRect(blockX - 2, blockY - 2, blockSize + 4, blockSize + 4);
   }
   
-  // Check if this is a floor block (either by property or type)
-  if (block.isFloor || block.type === 1) {
-    // If it's type 1 but not marked as floor, update its properties
-    if (block.type === 1 && !block.isFloor) {
-      block.isFloor = true;
-      block.isFixed = true;
-    }
+  // Simply check if this is a floor block (type 1)
+  if (block.type === 1) {
     // Draw floor block with a gray color (like NES Puzznic)
     ctx.fillStyle = '#BBBBBB'; // Light gray
     ctx.fillRect(blockX, blockY, blockSize, blockSize);
@@ -293,8 +288,8 @@ export function Board2D({ width, height }: BoardProps) {
       // In editor mode, clicking places or removes blocks
       const blockExists = board[gameY] && board[gameY][gridX] !== null;
       
-      if (blockExists && !board[gameY][gridX]?.isFloor) {
-        // Remove existing block if it's not a floor block
+      if (blockExists && board[gameY][gridX]?.type !== 1) {
+        // Remove existing block if it's not a floor block (type 1)
         removeEditorBlock(gridX, gameY);
       } else if (!blockExists) {
         // Place new block if position is empty
