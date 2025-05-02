@@ -112,15 +112,15 @@ export const Levels = [
     [1, 1, 1, 1, 1, 1, 1, 1], // Full floor
   ],
   
-  // Level 10: The Ultimate Challenge (completely redesigned finale)
+  // Level 10: Hollow Square (exactly matching provided screenshot)
   [
     [0, 0, 0, 0, 0, 0, 0, 0],
-    [8, 0, 9, 0, 0, 7, 0, 6],
-    [0, 2, 0, 1, 1, 0, 3, 0],
-    [4, 0, 1, 0, 0, 1, 0, 5],
-    [0, 0, 0, 5, 4, 0, 0, 0],
-    [6, 0, 1, 0, 0, 1, 0, 8],
-    [0, 3, 0, 2, 9, 0, 7, 0],
-    [1, 0, 1, 0, 0, 1, 0, 1], // Strategic floor gaps
+    [1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 0, 2, 9, 0, 2, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 1, 1, 0, 0, 1],
+    [1, 0, 9, 0, 3, 7, 0, 1],
+    [1, 0, 7, 3, 4, 4, 0, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1], // Floor squares forming a hollow square
   ],
 ];
