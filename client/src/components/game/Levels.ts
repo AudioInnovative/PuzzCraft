@@ -100,16 +100,16 @@ export const Levels = [
     [1, 1, 1, 1, 1, 1, 1, 1], // Full floor
   ],
   
-  // Level 9: Balanced Split (completely redesigned to be beatable)
+  // Level 9: Bridge Challenge (completely redesigned with no auto-matches)
   [
     [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 2, 3, 4, 4, 3, 2, 0],
-    [0, 5, 6, 7, 7, 6, 5, 0],
+    [2, 0, 3, 0, 0, 4, 0, 5],
     [0, 0, 0, 0, 0, 0, 0, 0],
-    [9, 0, 0, 0, 0, 0, 0, 9],
-    [8, 0, 0, 0, 0, 0, 0, 8],
+    [0, 6, 0, 1, 1, 0, 7, 0],
     [0, 0, 0, 0, 0, 0, 0, 0],
-    [1, 1, 1, 0, 0, 1, 1, 1], // Floor with center gap
+    [5, 0, 4, 0, 0, 3, 0, 2],
+    [0, 7, 0, 0, 0, 0, 6, 0],
+    [1, 1, 1, 0, 0, 1, 1, 1], // Floor with gap
   ],
   
   // Level 10: The Grand Finale (fixed to ensure all blocks have matching pairs)
