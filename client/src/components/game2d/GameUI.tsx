@@ -14,7 +14,8 @@ export default function GameUI2D() {
     nextLevel,
     enterEditMode,
     exitEditMode,
-    isTestingCustomLevel
+    isTestingCustomLevel,
+    skipToLevel
   } = usePuzznic();
   const isMobile = useIsMobile();
   
@@ -82,6 +83,23 @@ export default function GameUI2D() {
               </button>
             )}
             
+            {/* Temporary Skip Level button */}
+            <button 
+              className="bg-yellow-600 hover:bg-yellow-800 text-white text-xs font-bold py-1 px-2 pointer-events-auto border border-white uppercase w-full"
+              onClick={() => {
+                // Show prompt to choose level
+                const targetLevel = window.prompt("Enter level number to skip to (1-" + maxLevel + "):", level.toString());
+                if (targetLevel) {
+                  const levelNum = parseInt(targetLevel, 10);
+                  if (!isNaN(levelNum) && levelNum >= 1 && levelNum <= maxLevel) {
+                    skipToLevel(levelNum);
+                  }
+                }
+              }}
+            >
+              Skip Level
+            </button>
+
             {/* Restart button */}
             <button 
               className="bg-red-600 hover:bg-red-800 text-white text-xs font-bold py-1 px-2 pointer-events-auto border border-white uppercase w-full"

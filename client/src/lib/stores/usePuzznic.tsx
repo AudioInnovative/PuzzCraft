@@ -49,6 +49,7 @@ interface PuzznicState {
   updateGameState: () => void;
   restartLevel: () => void;
   nextLevel: () => void;
+  skipToLevel: (targetLevel: number) => void; // Added for temporary level skipping
   decrementTime: () => void;
   
   // Editor-specific actions
@@ -577,6 +578,23 @@ export const usePuzznic = create<PuzznicState>()(
       set((state) => ({ 
         level: Math.min(state.level + 1, state.maxLevel)
       }));
+      
+      const { initGame } = get();
+      initGame();
+      
+      // Start game with the initial gravity
+      setTimeout(() => {
+        const { startGame } = get();
+        startGame();
+      }, 300);
+    },
+    
+    // Skip to specific level (temporary function for testing)
+    skipToLevel: (targetLevel: number) => {
+      // Ensure the level is within bounds
+      const levelToSet = Math.max(1, Math.min(targetLevel, get().maxLevel));
+      
+      set({ level: levelToSet });
       
       const { initGame } = get();
       initGame();
