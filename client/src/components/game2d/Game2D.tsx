@@ -64,11 +64,21 @@ export default function Game2D() {
 
   const { gamePhase } = usePuzznic();
   
+  // Calculate game area width, accounting for the score panel on the left
+  // We'll reserve about 100px for the score panel
+  const SCORE_PANEL_WIDTH = 100;
+
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden' }}>
       {gamePhase !== "editing" && (
         <>
-          <Board2D width={dimensions.width} height={dimensions.height} />
+          {/* Position the game board with a left margin to account for the score panel */}
+          <div className="ml-[100px]">
+            <Board2D 
+              width={dimensions.width - SCORE_PANEL_WIDTH} 
+              height={dimensions.height} 
+            />
+          </div>
           <KeyboardController />
           <TouchController />
           <GameUI2D />

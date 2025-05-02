@@ -27,29 +27,60 @@ export default function GameUI2D() {
     <div className="absolute inset-0 pointer-events-none">
       {/* Level Editor Component removed: now using SimpleLevelEditor in Game2D */}
       
-      {/* Game HUD styled like original Puzznic - more compact */}
-      <div className="absolute top-0 left-0 right-0 flex justify-between items-start p-1 bg-black/80">
-        <div className="flex flex-row gap-4 px-2">
-          <GamePanel title="Score" value={score.toString()} />
-          <GamePanel title="Level" value={`${level}-${maxLevel}`} />
-          <GamePanel 
-            title="Time" 
-            value={formatTime(timeLeft)} 
-            alert={timeLeft <= 30}
-          />
-        </div>
+      {/* Game HUD styled like original Puzznic - now on the left side with fixed width */}
+      <div className="absolute top-0 left-0 bottom-0 flex flex-col items-start p-2 bg-black w-[100px] border-r border-gray-700">
+        {/* Game stats */}
+        <GamePanel title="Score" value={score.toString()} />
+        <GamePanel title="Level" value={`${level}-${maxLevel}`} />
+        <GamePanel 
+          title="Time" 
+          value={formatTime(timeLeft)} 
+          alert={timeLeft <= 30}
+        />
         
-        {/* Right-side utility panel */}
-        <div className="w-28 flex flex-col items-end px-2">
-          {gamePhase === "ready" && (
-            <button 
-              className="bg-purple-600 hover:bg-purple-800 text-white text-xs font-bold py-1 px-2 pointer-events-auto border border-white uppercase mb-1"
-              onClick={() => enterEditMode()}
-            >
-              Level Editor
-            </button>
-          )}
-        </div>
+        {/* Controls help */}
+        {gamePhase === "playing" && (
+          <div className="mt-4 pt-2 border-t border-gray-700 w-full">
+            <h3 className="text-xs uppercase font-bold text-white mb-1">Controls</h3>
+            <div className="text-xs text-cyan-300">
+              {isMobile ? (
+                <>
+                  <p className="mb-1">• Tap to select</p>
+                  <p className="mb-1">• Swipe to move</p>
+                  <p className="mb-1">• Hold to restart</p>
+                </>
+              ) : (
+                <>
+                  <p className="mb-1">• Click to select</p>
+                  <p className="mb-1">• Drag to move</p>
+                  <p className="mb-1">• Space to select</p>
+                  <p className="mb-1">• ← → to move</p>
+                  <p className="mb-1">• R to restart</p>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+        
+        {/* Utility buttons */}
+        {gamePhase === "ready" && (
+          <button 
+            className="bg-purple-600 hover:bg-purple-800 text-white text-xs font-bold py-1 px-2 pointer-events-auto border border-white uppercase mt-2 w-full"
+            onClick={() => enterEditMode()}
+          >
+            Editor
+          </button>
+        )}
+        
+        {/* Restart button during gameplay */}
+        {gamePhase === "playing" && (
+          <button 
+            className="bg-red-600 hover:bg-red-800 text-white text-xs font-bold py-1 px-2 pointer-events-auto border border-white uppercase mt-auto w-full"
+            onClick={() => restartLevel()}
+          >
+            Restart
+          </button>
+        )}
       </div>
       
       {/* Game messages */}
@@ -171,22 +202,8 @@ export default function GameUI2D() {
         </div>
       )}
       
-      {/* Help text during gameplay */}
-      {gamePhase === "playing" && (
-        <div className="absolute bottom-0 left-0 right-0 flex justify-center">
-          <div className="bg-black p-1 px-2 text-center w-full">
-            {isMobile ? (
-              <p className="text-sm text-cyan-300 font-mono uppercase">
-                Tap: Select • Swipe: Move • Hold: Restart
-              </p>
-            ) : (
-              <p className="text-sm text-cyan-300 font-mono uppercase">
-                ← → Move • Space: Select • R: Restart
-              </p>
-            )}
-          </div>
-        </div>
-      )}
+      {/* Help text during gameplay - moved to the sidebar */}
+      {/* We don't need a separate help bar now that we have a persistent sidebar */}
     </div>
   );
 }
