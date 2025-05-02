@@ -25,7 +25,7 @@ export default function Game2D() {
     // Load audio elements
     const backgroundMusic = new Audio("/sounds/background.mp3");
     backgroundMusic.loop = true;
-    backgroundMusic.volume = 0.4;
+    backgroundMusic.volume = 0.15; // Reduced volume substantially
     
     const hitSound = new Audio("/sounds/hit.mp3");
     hitSound.volume = 0.5;

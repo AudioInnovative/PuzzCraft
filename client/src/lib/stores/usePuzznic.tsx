@@ -271,13 +271,7 @@ export const usePuzznic = create<PuzznicState>()(
           // Update selection
           newBoard[y][newX].selected = true;
           
-          // Play move sound
-          try {
-            const { playMove } = require("../../lib/stores/useAudio").useAudio.getState();
-            playMove();
-          } catch (err) {
-            console.log("Failed to play move sound:", err);
-          }
+          // Move sound is now handled by SoundManager component
           
           set({ 
             board: newBoard,
@@ -365,13 +359,7 @@ export const usePuzznic = create<PuzznicState>()(
       }
       
       if (matchFound) {
-        // Play match sound
-        try {
-          const { playMatch } = require("../../lib/stores/useAudio").useAudio.getState();
-          playMatch();
-        } catch (err) {
-          console.log("Failed to play match sound:", err);
-        }
+        // Match sound is now handled by SoundManager component
         
         // Update board and score
         set({ 
@@ -459,15 +447,7 @@ export const usePuzznic = create<PuzznicState>()(
           }
         }
         
-        // Play fall sound if any blocks will fall
-        if (anyBlocksMarkedForFalling) {
-          try {
-            const { playFall } = require("../../lib/stores/useAudio").useAudio.getState();
-            playFall();
-          } catch (err) {
-            console.log("Failed to play fall sound:", err);
-          }
-        }
+        // Fall sound is now handled by SoundManager component
         
         set({ board: newBoard });
         

@@ -3,8 +3,21 @@ import { useAudio } from "../../lib/stores/useAudio";
 import { usePuzznic } from "../../lib/stores/usePuzznic";
 
 export default function SoundManager2D() {
-  const { backgroundMusic, toggleMute, isMuted, playSuccess } = useAudio();
-  const { gamePhase } = usePuzznic();
+  const { 
+    backgroundMusic, 
+    toggleMute, 
+    isMuted, 
+    playSuccess,
+    playMove,
+    playMatch,
+    playFall
+  } = useAudio();
+  
+  const { 
+    gamePhase,
+    board,
+    moveCount
+  } = usePuzznic();
   
   // Play background music when game starts
   useEffect(() => {
@@ -31,6 +44,45 @@ export default function SoundManager2D() {
       playSuccess();
     }
   }, [gamePhase, playSuccess]);
+  
+  // Monitor move count to play move sound
+  useEffect(() => {
+    // Only play if not the initial state and game is active
+    if (moveCount > 0 && gamePhase === "playing") {
+      playMove();
+    }
+  }, [moveCount, gamePhase, playMove]);
+  
+  // Monitor board for matching and falling
+  useEffect(() => {
+    // Check if any blocks are matched
+    let hasMatch = false;
+    let hasFalling = false;
+    
+    for (let y = 0; y < board.length; y++) {
+      for (let x = 0; x < board[0].length; x++) {
+        if (board[y][x] !== null) {
+          if (board[y][x]!.matched) {
+            hasMatch = true;
+            break;
+          }
+          if (board[y][x]!.falling) {
+            hasFalling = true;
+            break;
+          }
+        }
+      }
+      if (hasMatch || hasFalling) break;
+    }
+    
+    if (hasMatch && gamePhase === "playing") {
+      playMatch();
+    }
+    
+    if (hasFalling && gamePhase === "playing") {
+      playFall();
+    }
+  }, [board, gamePhase, playMatch, playFall]);
   
   return (
     <div className="absolute top-4 right-4">
