@@ -431,7 +431,11 @@ export const usePuzznic = create<PuzznicState>()(
         for (let y = 1; y < newBoard.length; y++) {
           for (let x = 0; x < newBoard[0].length; x++) {
             // Only make blocks fall if they're not fixed and have empty space below
-            if (newBoard[y][x] !== null && newBoard[y-1][x] === null && !newBoard[y][x]!.isFixed) {
+            // Ensuring that any block with type 1 (floor block) at y=0 is fixed
+            if (newBoard[y][x] !== null && 
+                newBoard[y-1][x] === null && 
+                !newBoard[y][x]!.isFixed && 
+                !(newBoard[y][x]!.type === 1 && y === 0)) {
               newBoard[y][x]!.falling = true;
             }
           }
@@ -454,13 +458,18 @@ export const usePuzznic = create<PuzznicState>()(
           // Move blocks down - in our system, moving down means y decreases
           for (let y = 1; y < updatedBoard.length; y++) {
             for (let x = 0; x < updatedBoard[0].length; x++) {
-              if (updatedBoard[y][x] !== null && updatedBoard[y][x]!.falling && updatedBoard[y-1][x] === null) {
+              // Added an extra check to prevent type 1 blocks at the bottom from falling
+              if (updatedBoard[y][x] !== null && 
+                  updatedBoard[y][x]!.falling && 
+                  updatedBoard[y-1][x] === null &&
+                  !(updatedBoard[y][x]!.type === 1 && y === 0)) {
                 // Move block down (decrease y)
                 updatedBoard[y-1][x] = { 
                   ...updatedBoard[y][x]!, 
                   y: y-1,  // Update the y coordinate to match new position
                   falling: false,
-                  isFloor: false // A falling block can't be a floor block
+                  isFixed: updatedBoard[y][x]!.isFixed,  // Preserve fixed status
+                  isFloor: updatedBoard[y][x]!.isFloor   // Preserve floor status
                 };
                 updatedBoard[y][x] = null;
               } else if (updatedBoard[y][x] !== null && updatedBoard[y][x]!.falling) {
@@ -814,7 +823,8 @@ export const usePuzznic = create<PuzznicState>()(
           for (let x = 0; x < cols; x++) {
             const value = levelData[levelY][x];
             if (value > 0) {
-              // Floor blocks are at the bottom (gameY=0) and are type 1
+              // Always treat type 1 blocks at the bottom row (y=0) as fixed floor blocks
+              // This is crucial for level testing to prevent floor blocks from falling
               const isFloor = gameY === 0 && value === 1;
               
               board[gameY][x] = {
@@ -825,10 +835,19 @@ export const usePuzznic = create<PuzznicState>()(
                 selected: false,
                 matched: false,
                 falling: false,
-                isFixed: isFloor,
-                isFloor: isFloor
+                isFixed: isFloor, // Mark floor blocks as fixed so they don't fall
+                isFloor: isFloor  // Also explicitly mark them as floor blocks for visual treatment
               };
             }
+          }
+        }
+        
+        // Ensure all type 1 blocks at the bottom row are explicitly marked as fixed and floor
+        // This is an extra safeguard, especially for testing custom levels
+        for (let x = 0; x < cols; x++) {
+          if (board[0][x] !== null && board[0][x]!.type === 1) {
+            board[0][x]!.isFixed = true;
+            board[0][x]!.isFloor = true;
           }
         }
         
