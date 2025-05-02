@@ -656,8 +656,8 @@ export const usePuzznic = create<PuzznicState>()(
         for (let x = 0; x < cols; x++) {
           const value = emptyLevel[levelY][x];
           if (value > 0) {
-            // Any block of type 1 is a floor block
-            const isFloor = value === 1;
+            // Floor blocks are at the bottom (gameY=0) and are type 1
+            const isFloor = gameY === 0 && value === 1;
             
             board[gameY][x] = {
               id: gameY * cols + x,
