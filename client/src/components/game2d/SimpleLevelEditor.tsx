@@ -228,28 +228,44 @@ export default function SimpleLevelEditor() {
                         >
                           {/* Display block if it exists */}
                           {block && (
-                            <div
-                              className="w-full h-full rounded-md flex items-center justify-center relative overflow-hidden"
-                              style={{ backgroundColor: getBlockColor(block.type) }}
-                            >
-                              {/* 3D bevel effect - top/left highlight */}
-                              <div className="absolute top-0 left-0 right-0 h-[20%] bg-white opacity-40 clip-polygon"></div>
-                              <div className="absolute top-0 left-0 bottom-0 w-[20%] bg-white opacity-40 clip-polygon"></div>
-                              
-                              {/* 3D bevel effect - bottom/right shadow */}
-                              <div className="absolute bottom-0 left-0 right-0 h-[20%] bg-black opacity-40 clip-polygon"></div>
-                              <div className="absolute top-0 right-0 bottom-0 w-[20%] bg-black opacity-40 clip-polygon"></div>
-                              
-                              {/* Block symbol with drop shadow for better readability */}
-                              <div className="relative">
-                                <span className="absolute text-black opacity-30 font-bold" style={{top: '2px', left: '2px'}}>
-                                  {BLOCK_SYMBOLS[block.type-1]}
-                                </span>
-                                <span className="text-white font-bold relative">
-                                  {BLOCK_SYMBOLS[block.type-1]}
-                                </span>
+                            block.isFloor ? (
+                              // Floor blocks - gray tile design
+                              <div className="w-full h-full rounded-md flex items-center justify-center bg-gray-300 relative">
+                                {/* Grid lines to match NES floor blocks */}
+                                <div className="absolute top-0 left-0 w-full h-full grid grid-cols-2 grid-rows-2">
+                                  <div className="border-b border-r border-gray-500"></div>
+                                  <div className="border-b border-gray-500"></div>
+                                  <div className="border-r border-gray-500"></div>
+                                  <div></div>
+                                </div>
+                                {/* Border */}
+                                <div className="absolute inset-0 border-2 border-gray-600 rounded-md"></div>
                               </div>
-                            </div>
+                            ) : (
+                              // Regular blocks with 3D effect
+                              <div
+                                className="w-full h-full rounded-md flex items-center justify-center relative overflow-hidden"
+                                style={{ backgroundColor: getBlockColor(block.type) }}
+                              >
+                                {/* 3D bevel effect - top/left highlight */}
+                                <div className="absolute top-0 left-0 right-0 h-[20%] bg-white opacity-40 clip-polygon"></div>
+                                <div className="absolute top-0 left-0 bottom-0 w-[20%] bg-white opacity-40 clip-polygon"></div>
+                                
+                                {/* 3D bevel effect - bottom/right shadow */}
+                                <div className="absolute bottom-0 left-0 right-0 h-[20%] bg-black opacity-40 clip-polygon"></div>
+                                <div className="absolute top-0 right-0 bottom-0 w-[20%] bg-black opacity-40 clip-polygon"></div>
+                                
+                                {/* Block symbol with drop shadow for better readability */}
+                                <div className="relative">
+                                  <span className="absolute text-black opacity-30 font-bold" style={{top: '2px', left: '2px'}}>
+                                    {BLOCK_SYMBOLS[block.type-1]}
+                                  </span>
+                                  <span className="text-white font-bold relative">
+                                    {BLOCK_SYMBOLS[block.type-1]}
+                                  </span>
+                                </div>
+                              </div>
+                            )
                           )}
                           
                           {/* Display coordinates for debugging */}
