@@ -707,8 +707,8 @@ export const usePuzznic = create<PuzznicState>()(
           selected: false,
           matched: false,
           falling: false,
-          isFixed: false,
-          isFloor: false
+          isFixed: blockType === 1, // Fixed if it's a floor block
+          isFloor: blockType === 1  // Set isFloor true if blockType is 1
         };
         
         set({ board: newBoard });
