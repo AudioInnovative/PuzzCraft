@@ -100,16 +100,16 @@ export const Levels = [
     [1, 1, 1, 1, 1, 1, 1, 1], // Full floor
   ],
   
-  // Level 9: Fortress Challenge (completely reshuffled with verified matching pairs)
+  // Level 9: Zigzag Puzzle (completely new design)
   [
     [0, 0, 0, 0, 0, 0, 0, 0],
-    [3, 0, 9, 0, 0, 2, 0, 5],
-    [0, 7, 0, 1, 1, 0, 4, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [6, 0, 1, 0, 0, 1, 0, 9],
-    [0, 0, 8, 0, 0, 6, 0, 0],
-    [5, 3, 0, 8, 2, 0, 7, 4],
-    [1, 0, 1, 0, 0, 1, 0, 1], // Floor with strategically placed gaps
+    [0, 7, 0, 6, 4, 0, 2, 0],
+    [3, 0, 5, 0, 0, 9, 0, 8],
+    [0, 1, 0, 0, 0, 0, 1, 0],
+    [0, 0, 1, 0, 0, 1, 0, 0],
+    [5, 0, 0, 2, 7, 0, 0, 3],
+    [0, 6, 8, 0, 0, 4, 9, 0],
+    [1, 1, 1, 1, 1, 1, 1, 1], // Full floor
   ],
   
   // Level 10: The Grand Finale (fixed to ensure all blocks have matching pairs)
