@@ -29,14 +29,9 @@ export default function GameUI2D() {
       
       {/* Game HUD styled like original Puzznic - now on the left side with fixed width */}
       <div className="absolute top-0 left-0 bottom-0 flex flex-col items-start p-2 bg-black w-[100px] border-r border-gray-700">
-        {/* Game stats */}
+        {/* Game stats - timer removed */}
         <GamePanel title="Score" value={score.toString()} />
         <GamePanel title="Level" value={`${level}-${maxLevel}`} />
-        <GamePanel 
-          title="Time" 
-          value={formatTime(timeLeft)} 
-          alert={timeLeft <= 30}
-        />
         
         {/* Controls help */}
         {gamePhase === "playing" && (
@@ -127,8 +122,6 @@ export default function GameUI2D() {
                 <p className="text-cyan-300 font-mono text-right">{score}</p>
                 <p className="text-white font-mono">MOVES:</p>
                 <p className="text-cyan-300 font-mono text-right">{moveCount}</p>
-                <p className="text-white font-mono">TIME:</p>
-                <p className="text-cyan-300 font-mono text-right">{formatTime(timeLeft)}</p>
               </div>
             </div>
             <div className="animate-pulse">
@@ -148,7 +141,7 @@ export default function GameUI2D() {
           <div className="bg-black p-8 border-4 border-red-600 text-center w-4/5 max-w-md">
             <h2 className="text-4xl font-bold text-red-500 mb-6 font-mono uppercase tracking-wider">GAME OVER</h2>
             <div className="bg-blue-900 border-2 border-blue-700 p-4 mb-6">
-              <p className="text-2xl text-white mb-6 font-mono">TIME'S UP!</p>
+              <p className="text-2xl text-white mb-6 font-mono">LEVEL FAILED!</p>
               <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-left mb-4">
                 <p className="text-white font-mono">SCORE:</p>
                 <p className="text-cyan-300 font-mono text-right">{score}</p>

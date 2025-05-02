@@ -204,15 +204,8 @@ export const usePuzznic = create<PuzznicState>()(
     startGame: () => {
       set({ gamePhase: "playing" });
       
-      // Start the timer
-      const timer = setInterval(() => {
-        const { decrementTime } = get();
-        decrementTime();
-      }, 1000);
-      
-      // Store the timer ID so we can clear it later
-      set({ timerId: timer });
-      
+      // Timer functionality removed - no time limit
+
       // Apply gravity immediately when the game starts
       setTimeout(() => {
         const { applyGravity } = get();
@@ -565,18 +558,11 @@ export const usePuzznic = create<PuzznicState>()(
       }, 300);
     },
     
-    // Decrement time left
+    // Timer function - disabled
     decrementTime: () => {
-      const { timeLeft, gamePhase } = get();
-      
-      if (gamePhase !== "playing") return;
-      
-      if (timeLeft > 0) {
-        set({ timeLeft: timeLeft - 1 });
-      } else {
-        // Time's up! Game over
-        set({ gamePhase: "game_over" });
-      }
+      // Timer functionality removed - no time limit
+      // This function is kept as a stub to maintain existing function signatures
+      return;
     },
     
     // Editor mode functions
