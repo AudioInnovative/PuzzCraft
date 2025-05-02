@@ -344,6 +344,9 @@ export const usePuzznic = create<PuzznicState>()(
         });
         
         // Remove matched blocks after delay
+        // Use consistent delay for all animations
+        const ANIMATION_DELAY = 300;
+        
         setTimeout(() => {
           const { board } = get();
           const updatedBoard = board.map(row => row.map(block => 
@@ -353,8 +356,6 @@ export const usePuzznic = create<PuzznicState>()(
           set({ board: updatedBoard });
           
           // Apply gravity after removing blocks
-          // Use consistent delay for all animations
-          const ANIMATION_DELAY = 300;
           setTimeout(() => {
             const { applyGravity } = get();
             applyGravity();
@@ -618,6 +619,7 @@ export const usePuzznic = create<PuzznicState>()(
       });
       
       // Start the game with the test level
+      const ANIMATION_DELAY = 300;
       setTimeout(() => {
         const { startGame } = get();
         startGame();
@@ -625,7 +627,7 @@ export const usePuzznic = create<PuzznicState>()(
         // Load the test level
         const { loadUserLevel } = get();
         loadUserLevel(testLevelIndex);
-      }, 100);
+      }, ANIMATION_DELAY);
       
       return true;
     },
