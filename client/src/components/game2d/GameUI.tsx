@@ -27,9 +27,9 @@ export default function GameUI2D() {
     <div className="absolute inset-0 pointer-events-none">
       {/* Level Editor Component removed: now using SimpleLevelEditor in Game2D */}
       
-      {/* Game HUD styled like original Puzznic */}
-      <div className="absolute top-0 left-0 right-0 flex justify-between items-start p-2 bg-black/80">
-        <div className="flex flex-col gap-2">
+      {/* Game HUD styled like original Puzznic - more compact */}
+      <div className="absolute top-0 left-0 right-0 flex justify-between items-start p-1 bg-black/80">
+        <div className="flex flex-row gap-4 px-2">
           <GamePanel title="Score" value={score.toString()} />
           <GamePanel title="Level" value={`${level}-${maxLevel}`} />
           <GamePanel 
@@ -40,10 +40,10 @@ export default function GameUI2D() {
         </div>
         
         {/* Right-side utility panel */}
-        <div className="w-28 flex flex-col items-end">
+        <div className="w-28 flex flex-col items-end px-2">
           {gamePhase === "ready" && (
             <button 
-              className="bg-purple-600 hover:bg-purple-800 text-white text-xs font-bold py-1 px-2 pointer-events-auto border-2 border-white uppercase mb-2"
+              className="bg-purple-600 hover:bg-purple-800 text-white text-xs font-bold py-1 px-2 pointer-events-auto border border-white uppercase mb-1"
               onClick={() => enterEditMode()}
             >
               Level Editor
