@@ -134,13 +134,16 @@ export default function GameUI2D() {
                 <div key={`block-${item.type}`} className="flex items-center gap-1">
                   {/* Block color indicator with glow effect */}
                   <div 
-                    className="w-4 h-4 rounded-sm" 
+                    className="w-4 h-4 rounded-sm flex items-center justify-center" 
                     style={{ 
                       backgroundColor: getColorForType(item.type),
                       boxShadow: `0 0 4px ${getColorForType(item.type)}`,
                       border: '1px solid rgba(255, 255, 255, 0.4)'
                     }}
-                  />
+                  >
+                    {/* TEMPORARY: Add type number for debugging */}
+                    <span className="text-[8px] text-white font-bold">{item.type}</span>
+                  </div>
                   {/* Block count */}
                   <span className="text-xs text-white font-mono">× {item.count}</span>
                 </div>
