@@ -10,7 +10,14 @@ import { usePuzznic } from '../../lib/stores/usePuzznic';
 
 export default function Game2D() {
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
-  const { setBackgroundMusic, setHitSound, setSuccessSound } = useAudio();
+  const { 
+    setBackgroundMusic, 
+    setHitSound, 
+    setSuccessSound,
+    setMoveSound,
+    setMatchSound,
+    setFallSound
+  } = useAudio();
   const { initGame } = usePuzznic();
 
   // Initialize sounds and game
@@ -26,10 +33,23 @@ export default function Game2D() {
     const successSound = new Audio("/sounds/success.mp3");
     successSound.volume = 0.6;
     
+    // New sound effects 
+    const moveSound = new Audio("/sounds/move.mp3");
+    moveSound.volume = 0.2;
+    
+    const matchSound = new Audio("/sounds/match.mp3");
+    matchSound.volume = 0.4;
+    
+    const fallSound = new Audio("/sounds/fall.mp3");
+    fallSound.volume = 0.25;
+    
     // Set the audio in the store
     setBackgroundMusic(backgroundMusic);
     setHitSound(hitSound);
     setSuccessSound(successSound);
+    setMoveSound(moveSound);
+    setMatchSound(matchSound);
+    setFallSound(fallSound);
     
     // Initialize game
     initGame();
@@ -38,8 +58,11 @@ export default function Game2D() {
       backgroundMusic.pause();
       hitSound.pause();
       successSound.pause();
+      moveSound.pause();
+      matchSound.pause();
+      fallSound.pause();
     };
-  }, [setBackgroundMusic, setHitSound, setSuccessSound, initGame]);
+  }, [setBackgroundMusic, setHitSound, setSuccessSound, setMoveSound, setMatchSound, setFallSound, initGame]);
 
   // Update dimensions on window resize
   useEffect(() => {

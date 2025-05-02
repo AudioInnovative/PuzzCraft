@@ -271,6 +271,14 @@ export const usePuzznic = create<PuzznicState>()(
           // Update selection
           newBoard[y][newX].selected = true;
           
+          // Play move sound
+          try {
+            const { playMove } = require("../../lib/stores/useAudio").useAudio.getState();
+            playMove();
+          } catch (err) {
+            console.log("Failed to play move sound:", err);
+          }
+          
           set({ 
             board: newBoard,
             selectedBlockPos: { x: newX, y },
@@ -357,6 +365,14 @@ export const usePuzznic = create<PuzznicState>()(
       }
       
       if (matchFound) {
+        // Play match sound
+        try {
+          const { playMatch } = require("../../lib/stores/useAudio").useAudio.getState();
+          playMatch();
+        } catch (err) {
+          console.log("Failed to play match sound:", err);
+        }
+        
         // Update board and score
         set({ 
           board: newBoard,
@@ -427,6 +443,8 @@ export const usePuzznic = create<PuzznicState>()(
       
       if (blocksFalling) {
         // Mark blocks that should fall
+        let anyBlocksMarkedForFalling = false;
+        
         for (let y = 1; y < newBoard.length; y++) {
           for (let x = 0; x < newBoard[0].length; x++) {
             // Only make blocks fall if they're not fixed and have empty space below
@@ -436,7 +454,18 @@ export const usePuzznic = create<PuzznicState>()(
                 !newBoard[y][x]!.isFixed && 
                 newBoard[y][x]!.type !== 1) {  // Type 1 blocks never fall
               newBoard[y][x]!.falling = true;
+              anyBlocksMarkedForFalling = true;
             }
+          }
+        }
+        
+        // Play fall sound if any blocks will fall
+        if (anyBlocksMarkedForFalling) {
+          try {
+            const { playFall } = require("../../lib/stores/useAudio").useAudio.getState();
+            playFall();
+          } catch (err) {
+            console.log("Failed to play fall sound:", err);
           }
         }
         
