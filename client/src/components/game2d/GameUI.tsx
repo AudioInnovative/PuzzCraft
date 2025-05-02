@@ -3,18 +3,18 @@ import { usePuzznic, BlockType } from "../../lib/stores/usePuzznic";
 import { GamePanel } from "../ui/game-panel";
 import { useIsMobile } from "../../hooks/use-is-mobile";
 
-// Color map for block counter display - matching the actual game blocks
-const blockColors = [
-  "#777777", // Type 1 - Floor blocks (gray)
-  "#FF005E", // Type 2 - Intense Neon Pink
-  "#00FF33", // Type 3 - Electric Neon Green
-  "#00FFFF", // Type 4 - Brilliant Cyan
-  "#FFFF00", // Type 5 - Vivid Yellow
-  "#FF00FF", // Type 6 - Vibrant Magenta
-  "#4D4DFF", // Type 7 - Electric Blue
-  "#FF7700", // Type 8 - Blazing Orange
-  "#AA00FF"  // Type 9 - Deep Purple
-];
+// Color map for block counter display - using exact colors from Board.tsx in same order
+const blockColors: Record<number, string> = {
+  1: "#777777", // Floor blocks (gray)
+  2: "#FF005E", // Intense Neon Pink
+  3: "#00FF33", // Electric Neon Green
+  4: "#00FFFF", // Brilliant Cyan
+  5: "#FFFF00", // Vivid Yellow
+  6: "#FF00FF", // Vibrant Magenta
+  7: "#4D4DFF", // Electric Blue
+  8: "#FF7700", // Blazing Orange
+  9: "#AA00FF"  // Deep Purple
+};
 
 // Interface for block counter
 interface BlockCount {
@@ -105,8 +105,8 @@ export default function GameUI2D() {
                   <div 
                     className="w-4 h-4 rounded-sm" 
                     style={{ 
-                      backgroundColor: blockColors[item.type - 1],
-                      boxShadow: `0 0 4px ${blockColors[item.type - 1]}`,
+                      backgroundColor: blockColors[item.type as keyof typeof blockColors],
+                      boxShadow: `0 0 4px ${blockColors[item.type as keyof typeof blockColors]}`,
                       border: '1px solid rgba(255, 255, 255, 0.4)'
                     }}
                   />
