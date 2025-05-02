@@ -844,10 +844,10 @@ export function Board2D({ width, height }: BoardProps) {
         background: '#000000', // Black background
         touchAction: 'none', // Prevent browser handling of touch gestures (like scrolling)
         cursor: selectedBlockPos 
-          ? 'move' 
+          ? `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><circle cx="16" cy="16" r="3" fill="%23FFFFFF" /><path d="M16 4 L16 10 M16 22 L16 28 M4 16 L10 16 M22 16 L28 16" stroke="%23FFFFFF" stroke-width="2" /><path d="M16 4 L16 10 M16 22 L16 28 M4 16 L10 16 M22 16 L28 16" stroke="%2300FFFF" stroke-width="1.5" /><circle cx="16" cy="16" r="14" stroke="%2300FFFF" stroke-width="2" stroke-dasharray="3,3" fill="none" /></svg>') 16 16, auto`
           : gamePhase === "editing"
-            ? 'crosshair'
-            : `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><circle cx="16" cy="16" r="8" fill="%2300BBFF" fill-opacity="0.3" /><circle cx="16" cy="16" r="4" fill="%2300BBFF" /><circle cx="16" cy="16" r="12" stroke="%2300BBFF" stroke-width="2" fill="none" stroke-opacity="0.5" /></svg>') 16 16, auto`
+            ? `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><circle cx="16" cy="16" r="3" fill="%23FF00FF" /><path d="M8 16 L24 16 M16 8 L16 24" stroke="%23FFFFFF" stroke-width="2" /><path d="M8 16 L24 16 M16 8 L16 24" stroke="%23FF00FF" stroke-width="1.5" /><circle cx="16" cy="16" r="12" stroke="%23FF00FF" stroke-width="2" fill="none" /></svg>') 16 16, auto`
+            : `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><circle cx="16" cy="16" r="3" fill="%23FFFFFF" /><circle cx="16" cy="16" r="6" stroke="%23FFFFFF" stroke-width="2" fill="none" /><circle cx="16" cy="16" r="12" stroke="%2300FFFF" stroke-width="2" fill="none" /><circle cx="16" cy="16" r="6" stroke="%2300FFFF" stroke-width="1.5" fill="none" /></svg>') 16 16, auto`
       }}
     />
   );
