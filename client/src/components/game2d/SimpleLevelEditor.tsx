@@ -7,16 +7,16 @@ const CELL_SIZE = 40;
 const GRID_SIZE = 8;
 const BLOCK_SYMBOLS = ["✚", "■", "●", "×", "★", "◆", "▲", "♦"];
 
-// Define block colors based on type (using modern gradient palette) - match the updated colors in Board.tsx
+// Match the game's block colors exactly
 const blockColors = [
-  "#FF5252", // Modern Red (type 1, typically floor)
-  "#4CAF50", // Modern Green (type 2)
-  "#448AFF", // Modern Blue (type 3)
-  "#FFC107", // Modern Amber (type 4)
-  "#E040FB", // Modern Purple (type 5)
-  "#18FFFF", // Modern Cyan (type 6)
-  "#FF9800", // Modern Orange (type 7)
-  "#7C4DFF", // Modern Deep Purple (type 8)
+  "#FF0000", // Vivid Red (type 1, typically floor)
+  "#00FF00", // Bright Green (type 2)
+  "#00FFFF", // Brilliant Cyan (type 3)
+  "#FFFF00", // Vivid Yellow (type 4)
+  "#FF00FF", // Vibrant Magenta (type 5)
+  "#4D4DFF", // Electric Blue (type 6)
+  "#FF7700", // Blazing Orange (type 7)
+  "#AA00FF", // Deep Purple (type 8)
 ];
 
 export default function SimpleLevelEditor() {
@@ -158,30 +158,40 @@ export default function SimpleLevelEditor() {
                     </div>
                   </div>
                 ) : (
-                  // Regular colored blocks with modern style
+                  // Regular colored blocks with 3D solid style matching the game
                   <div 
                     className="w-full h-full rounded-xl flex items-center justify-center relative shadow-md overflow-hidden"
                     style={{ 
-                      backgroundColor: getBlockColor(type),
                       width: CELL_SIZE, 
-                      height: CELL_SIZE 
+                      height: CELL_SIZE
                     }}
                   >
-                    {/* Modern gradient overlay instead of flat bevels */}
-                    <div className="absolute inset-0 bg-gradient-to-b from-white to-transparent opacity-30"></div>
+                    {/* Base darker color */}
+                    <div className="absolute inset-0" 
+                      style={{ 
+                        backgroundColor: `rgb(${parseInt(getBlockColor(type).substring(1, 3), 16) * 0.4}, ${parseInt(getBlockColor(type).substring(3, 5), 16) * 0.4}, ${parseInt(getBlockColor(type).substring(5, 7), 16) * 0.4})`,
+                        borderRadius: '8px'
+                      }}
+                    />
                     
-                    {/* Subtle inner shadow effect at bottom */}
-                    <div className="absolute bottom-0 left-0 right-0 h-[10%] bg-black opacity-20"></div>
+                    {/* Inner 3D bevel effect */}
+                    <div className="absolute inset-0 m-[2px] rounded-lg"
+                      style={{ 
+                        background: `linear-gradient(135deg, 
+                          rgb(${Math.min(255, parseInt(getBlockColor(type).substring(1, 3), 16) * 0.9)}, ${Math.min(255, parseInt(getBlockColor(type).substring(3, 5), 16) * 0.9)}, ${Math.min(255, parseInt(getBlockColor(type).substring(5, 7), 16) * 0.9)}) 0%, 
+                          rgb(${parseInt(getBlockColor(type).substring(1, 3), 16) * 0.7}, ${parseInt(getBlockColor(type).substring(3, 5), 16) * 0.7}, ${parseInt(getBlockColor(type).substring(5, 7), 16) * 0.7}) 50%, 
+                          rgb(${parseInt(getBlockColor(type).substring(1, 3), 16) * 0.3}, ${parseInt(getBlockColor(type).substring(3, 5), 16) * 0.3}, ${parseInt(getBlockColor(type).substring(5, 7), 16) * 0.3}) 100%)`,
+                      }}
+                    />
                     
-                    {/* Block symbol with drop shadow */}
-                    <div className="relative">
-                      <span className="absolute text-black opacity-30 font-bold text-2xl" style={{top: '2px', left: '2px'}}>
-                        {BLOCK_SYMBOLS[type-1]}
-                      </span>
-                      <span className="text-white font-bold text-2xl relative drop-shadow-md">
-                        {BLOCK_SYMBOLS[type-1]}
-                      </span>
-                    </div>
+                    {/* Subtle top highlight for 3D effect */}
+                    <div className="absolute top-0 left-0 right-0 h-1/3 rounded-t-lg opacity-30"
+                      style={{ 
+                        background: `linear-gradient(to bottom, 
+                          rgba(255, 255, 255, 0.3) 0%, 
+                          rgba(255, 255, 255, 0) 100%)`,
+                      }}
+                    />
                   </div>
                 )}
               </button>
@@ -287,26 +297,36 @@ export default function SimpleLevelEditor() {
                                 <div className="absolute inset-0 border border-gray-500 rounded-xl"></div>
                               </div>
                             ) : (
-                              // Regular blocks with modern style
-                              <div
+                              // Regular colored blocks with 3D solid style matching the game
+                              <div 
                                 className="w-full h-full rounded-xl flex items-center justify-center relative shadow-md overflow-hidden"
-                                style={{ backgroundColor: getBlockColor(block.type) }}
                               >
-                                {/* Modern gradient overlay */}
-                                <div className="absolute inset-0 bg-gradient-to-b from-white to-transparent opacity-30"></div>
+                                {/* Base darker color */}
+                                <div className="absolute inset-0" 
+                                  style={{ 
+                                    backgroundColor: `rgb(${parseInt(getBlockColor(block.type).substring(1, 3), 16) * 0.4}, ${parseInt(getBlockColor(block.type).substring(3, 5), 16) * 0.4}, ${parseInt(getBlockColor(block.type).substring(5, 7), 16) * 0.4})`,
+                                    borderRadius: '8px'
+                                  }}
+                                />
                                 
-                                {/* Subtle inner shadow effect at bottom */}
-                                <div className="absolute bottom-0 left-0 right-0 h-[10%] bg-black opacity-20"></div>
+                                {/* Inner 3D bevel effect */}
+                                <div className="absolute inset-0 m-[2px] rounded-lg"
+                                  style={{ 
+                                    background: `linear-gradient(135deg, 
+                                      rgb(${Math.min(255, parseInt(getBlockColor(block.type).substring(1, 3), 16) * 0.9)}, ${Math.min(255, parseInt(getBlockColor(block.type).substring(3, 5), 16) * 0.9)}, ${Math.min(255, parseInt(getBlockColor(block.type).substring(5, 7), 16) * 0.9)}) 0%, 
+                                      rgb(${parseInt(getBlockColor(block.type).substring(1, 3), 16) * 0.7}, ${parseInt(getBlockColor(block.type).substring(3, 5), 16) * 0.7}, ${parseInt(getBlockColor(block.type).substring(5, 7), 16) * 0.7}) 50%, 
+                                      rgb(${parseInt(getBlockColor(block.type).substring(1, 3), 16) * 0.3}, ${parseInt(getBlockColor(block.type).substring(3, 5), 16) * 0.3}, ${parseInt(getBlockColor(block.type).substring(5, 7), 16) * 0.3}) 100%)`,
+                                  }}
+                                />
                                 
-                                {/* Block symbol with drop shadow for better readability */}
-                                <div className="relative">
-                                  <span className="absolute text-black opacity-30 font-bold" style={{top: '1px', left: '1px'}}>
-                                    {BLOCK_SYMBOLS[block.type-1]}
-                                  </span>
-                                  <span className="text-white font-bold relative drop-shadow-md">
-                                    {BLOCK_SYMBOLS[block.type-1]}
-                                  </span>
-                                </div>
+                                {/* Subtle top highlight for 3D effect */}
+                                <div className="absolute top-0 left-0 right-0 h-1/3 rounded-t-lg opacity-30"
+                                  style={{ 
+                                    background: `linear-gradient(to bottom, 
+                                      rgba(255, 255, 255, 0.3) 0%, 
+                                      rgba(255, 255, 255, 0) 100%)`,
+                                  }}
+                                />
                               </div>
                             )
                           )}
