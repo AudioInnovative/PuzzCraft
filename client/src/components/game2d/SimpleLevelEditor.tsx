@@ -74,9 +74,9 @@ export default function SimpleLevelEditor() {
           <div className="flex space-x-3">
             <button 
               onClick={() => exitEditMode()}
-              className="bg-red-600 text-white px-4 py-2 text-lg font-bold rounded-lg shadow-md active:translate-y-1"
+              className="bg-blue-600 text-white px-4 py-2 text-lg font-bold rounded-lg shadow-md active:translate-y-1"
             >
-              Exit
+              Main Menu
             </button>
             
             <button 
@@ -86,7 +86,7 @@ export default function SimpleLevelEditor() {
                   playHit();
                 }
               }}
-              className="bg-blue-600 text-white px-4 py-2 text-lg font-bold rounded-lg shadow-md active:translate-y-1"
+              className="bg-red-600 text-white px-4 py-2 text-lg font-bold rounded-lg shadow-md active:translate-y-1"
             >
               Test Level
             </button>

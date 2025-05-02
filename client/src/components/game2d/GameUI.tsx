@@ -13,6 +13,7 @@ export default function GameUI2D() {
     restartLevel,
     nextLevel,
     enterEditMode,
+    exitEditMode,
     isTestingCustomLevel
   } = usePuzznic();
   const isMobile = useIsMobile();
@@ -88,6 +89,14 @@ export default function GameUI2D() {
             >
               Restart
             </button>
+            
+            {/* Main Menu button */}
+            <button 
+              className="bg-blue-600 hover:bg-blue-800 text-white text-xs font-bold py-1 px-2 pointer-events-auto border border-white uppercase w-full"
+              onClick={() => exitEditMode()} 
+            >
+              Main Menu
+            </button>
           </div>
         )}
       </div>
@@ -155,12 +164,20 @@ export default function GameUI2D() {
                   </button>
                 </>
               ) : (
-                <button 
-                  className="bg-green-600 hover:bg-green-800 text-white font-bold py-2 px-8 pointer-events-auto border-2 border-white uppercase font-mono"
-                  onClick={() => nextLevel()}
-                >
-                  Next Level
-                </button>
+                <>
+                  <button 
+                    className="bg-green-600 hover:bg-green-800 text-white font-bold py-2 px-4 pointer-events-auto border-2 border-white uppercase font-mono"
+                    onClick={() => nextLevel()}
+                  >
+                    Next Level
+                  </button>
+                  <button 
+                    className="bg-blue-600 hover:bg-blue-800 text-white font-bold py-2 px-4 pointer-events-auto border-2 border-white uppercase font-mono"
+                    onClick={() => exitEditMode()}
+                  >
+                    Main Menu
+                  </button>
+                </>
               )}
             </div>
           </div>
@@ -199,16 +216,16 @@ export default function GameUI2D() {
               ) : (
                 <>
                   <button 
-                    className="bg-blue-600 hover:bg-blue-800 text-white font-bold py-2 px-4 pointer-events-auto border-2 border-white uppercase font-mono"
+                    className="bg-red-600 hover:bg-red-800 text-white font-bold py-2 px-4 pointer-events-auto border-2 border-white uppercase font-mono"
                     onClick={() => restartLevel()}
                   >
                     Retry
                   </button>
                   <button 
-                    className="bg-green-600 hover:bg-green-800 text-white font-bold py-2 px-4 pointer-events-auto border-2 border-white uppercase font-mono"
-                    onClick={() => nextLevel()}
+                    className="bg-blue-600 hover:bg-blue-800 text-white font-bold py-2 px-4 pointer-events-auto border-2 border-white uppercase font-mono"
+                    onClick={() => exitEditMode()}
                   >
-                    New Game
+                    Main Menu
                   </button>
                 </>
               )}
@@ -230,15 +247,21 @@ export default function GameUI2D() {
                 <p className="text-cyan-300 font-mono text-right">{moveCount}</p>
               </div>
             </div>
-            <div className="animate-pulse">
+            <div className="animate-pulse flex justify-center space-x-4">
               <button 
-                className="bg-green-600 hover:bg-green-800 text-white font-bold py-2 px-8 pointer-events-auto border-2 border-white uppercase font-mono"
+                className="bg-green-600 hover:bg-green-800 text-white font-bold py-2 px-4 pointer-events-auto border-2 border-white uppercase font-mono"
                 onClick={() => {
                   // Restart from level 1
                   nextLevel();
                 }}
               >
                 Play Again
+              </button>
+              <button 
+                className="bg-blue-600 hover:bg-blue-800 text-white font-bold py-2 px-4 pointer-events-auto border-2 border-white uppercase font-mono"
+                onClick={() => exitEditMode()}
+              >
+                Main Menu
               </button>
             </div>
           </div>
