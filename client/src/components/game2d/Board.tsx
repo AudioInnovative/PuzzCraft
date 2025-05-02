@@ -169,31 +169,30 @@ function renderGameBoard(
   
   // Draw subtle brick pattern in background
   const brickSize = blockSize / 3;
-  ctx.strokeStyle = '#4477AA';
-  ctx.lineWidth = 1;
   
-  // Horizontal brick pattern lines
+  // Draw a more subtle grid pattern instead of the brick pattern that's creating blue lines
+  ctx.strokeStyle = 'rgba(65, 105, 150, 0.3)'; // Much lighter blue, semi-transparent
+  ctx.lineWidth = 0.5; // Thinner lines
+  
+  // Draw grid pattern
   for (let y = 0; y < rows; y++) {
     for (let x = 0; x < cols; x++) {
-      // Only draw pattern where there's no block (for a subtle effect)
       const patternX = x * blockSize;
       const patternY = y * blockSize;
       
-      // Draw horizontal lines of the brick pattern
+      // Draw vertical grid lines (only inside each cell)
       for (let i = 1; i < 3; i++) {
         ctx.beginPath();
-        ctx.moveTo(patternX, patternY + i * brickSize);
-        ctx.lineTo(patternX + blockSize, patternY + i * brickSize);
+        ctx.moveTo(patternX + (i * blockSize/3), patternY);
+        ctx.lineTo(patternX + (i * blockSize/3), patternY + blockSize);
         ctx.stroke();
       }
       
-      // Draw vertical lines (with offset for brick pattern)
-      for (let i = 0; i < 4; i++) {
-        // Offset every other row to create brick effect
-        const offsetX = (y % 2 === 0) ? 0 : brickSize / 2;
+      // Draw horizontal grid lines (only inside each cell)
+      for (let i = 1; i < 3; i++) {
         ctx.beginPath();
-        ctx.moveTo(patternX + i * brickSize + offsetX, patternY);
-        ctx.lineTo(patternX + i * brickSize + offsetX, patternY + blockSize);
+        ctx.moveTo(patternX, patternY + (i * blockSize/3));
+        ctx.lineTo(patternX + blockSize, patternY + (i * blockSize/3));
         ctx.stroke();
       }
     }
