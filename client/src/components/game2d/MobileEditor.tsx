@@ -31,9 +31,10 @@ export default function MobileEditor() {
   const { playHit } = useAudio();
   const isMobile = useIsMobile();
   
-  // Grid configuration
+  // Grid configuration with compact cells on mobile to fit everything on one screen
   const GRID_SIZE = 8;
-  const CELL_SIZE = isMobile ? 40 : 40; // Size in pixels
+  const CELL_SIZE = isMobile ? 30 : 40; // Compact size on mobile to fit the entire grid
+  const PALETTE_BLOCK_SIZE = isMobile ? 30 : 40; // Size of blocks in the palette
   
   const [selectedType, setSelectedType] = useState<number>(1);
   const [message, setMessage] = useState<string | null>(null);
@@ -57,13 +58,13 @@ export default function MobileEditor() {
     return blockColors[(type - 1) % blockColors.length];
   };
   
-  // Render a block with the appropriate style
+  // Render a block with simplified style for better mobile performance
   const renderBlock = (type: number, size: number) => {
     if (type === 1) {
-      // Floor block
+      // Floor block - simplified
       return (
         <div 
-          className="rounded-xl flex items-center justify-center relative shadow-md"
+          className="rounded-lg flex items-center justify-center relative shadow-sm"
           style={{ 
             width: size, 
             height: size,
@@ -71,64 +72,36 @@ export default function MobileEditor() {
             overflow: 'hidden'
           }}
         >
-          {/* Subtle gradient overlay */}
+          {/* Simplified style for mobile performance */}
           <div className="absolute inset-0 bg-gradient-to-b from-white to-transparent opacity-30"></div>
-          
-          {/* Subtle grid lines */}
-          <div className="absolute top-0 left-0 w-full h-full grid grid-cols-2 grid-rows-2 opacity-50">
-            <div className="border-b border-r border-gray-600"></div>
-            <div className="border-b border-gray-600"></div>
-            <div className="border-r border-gray-600"></div>
-            <div></div>
-          </div>
-          
-          {/* Border */}
-          <div className="absolute inset-0 border border-gray-500 rounded-xl"></div>
-          
-          {isMobile ? null : (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-xs font-bold text-gray-700 bg-gray-200 px-1 py-0.5 rounded-full opacity-80">
-                FLOOR
-              </span>
-            </div>
-          )}
+          <div className="absolute inset-0 border border-gray-500 rounded-lg"></div>
         </div>
       );
     }
     
-    // Colored blocks
+    // Colored blocks - simplified for performance and smaller screens
     return (
       <div 
-        className="rounded-xl flex items-center justify-center relative shadow-md overflow-hidden"
+        className="rounded-lg flex items-center justify-center relative shadow-sm overflow-hidden"
         style={{ 
           width: size, 
           height: size
         }}
       >
-        {/* Base darker color */}
+        {/* Base color with simpler style */}
         <div className="absolute inset-0" 
           style={{ 
             backgroundColor: `rgb(${parseInt(getBlockColor(type).substring(1, 3), 16) * 0.4}, ${parseInt(getBlockColor(type).substring(3, 5), 16) * 0.4}, ${parseInt(getBlockColor(type).substring(5, 7), 16) * 0.4})`,
-            borderRadius: '8px'
+            borderRadius: '6px'
           }}
         />
         
-        {/* Inner 3D bevel effect */}
-        <div className="absolute inset-0 m-[2px] rounded-lg"
+        {/* Simplified gradient effect */}
+        <div className="absolute inset-0 m-[1px] rounded-lg"
           style={{ 
             background: `linear-gradient(135deg, 
               rgb(${Math.min(255, parseInt(getBlockColor(type).substring(1, 3), 16) * 0.9)}, ${Math.min(255, parseInt(getBlockColor(type).substring(3, 5), 16) * 0.9)}, ${Math.min(255, parseInt(getBlockColor(type).substring(5, 7), 16) * 0.9)}) 0%, 
-              rgb(${parseInt(getBlockColor(type).substring(1, 3), 16) * 0.7}, ${parseInt(getBlockColor(type).substring(3, 5), 16) * 0.7}, ${parseInt(getBlockColor(type).substring(5, 7), 16) * 0.7}) 50%, 
-              rgb(${parseInt(getBlockColor(type).substring(1, 3), 16) * 0.3}, ${parseInt(getBlockColor(type).substring(3, 5), 16) * 0.3}, ${parseInt(getBlockColor(type).substring(5, 7), 16) * 0.3}) 100%)`,
-          }}
-        />
-        
-        {/* Top highlight */}
-        <div className="absolute top-0 left-0 right-0 h-1/3 rounded-t-lg opacity-30"
-          style={{ 
-            background: `linear-gradient(to bottom, 
-              rgba(255, 255, 255, 0.3) 0%, 
-              rgba(255, 255, 255, 0) 100%)`,
+              rgb(${parseInt(getBlockColor(type).substring(1, 3), 16) * 0.4}, ${parseInt(getBlockColor(type).substring(3, 5), 16) * 0.4}, ${parseInt(getBlockColor(type).substring(5, 7), 16) * 0.4}) 100%)`,
           }}
         />
       </div>
@@ -136,83 +109,80 @@ export default function MobileEditor() {
   };
   
   return (
-    <div className="absolute inset-0 flex flex-col bg-black overflow-auto">
-      {/* Header */}
-      <div className="bg-black p-3 sticky top-0 z-20 border-b-4 border-cyan-600">
-        <div className={cn(
-          "flex items-center",
-          isMobile ? "flex-col gap-2" : "justify-between"
-        )}>
-          <h2 className="text-xl font-bold text-cyan-300 font-mono tracking-wider">
-            LEVEL EDITOR
-          </h2>
+    <div className="absolute inset-0 flex flex-col bg-black overflow-hidden">
+      {/* Super compact header for mobile */}
+      <div className="bg-black p-2 sticky top-0 z-20 border-b-2 border-cyan-600">
+        <div className="flex flex-col gap-1">
+          {/* Title and primary buttons in one row */}
+          <div className="flex justify-between items-center">
+            <h2 className="text-lg font-bold text-cyan-300 font-mono">EDITOR</h2>
+            
+            <div className="flex gap-1">
+              <button 
+                onClick={() => exitEditMode()}
+                className="bg-blue-600 text-white font-bold py-1 px-2 border border-white text-xs"
+              >
+                MENU
+              </button>
+              
+              <button 
+                onClick={handleSaveLevel}
+                className="bg-green-600 text-white font-bold py-1 px-2 border border-white text-xs"
+              >
+                SAVE
+              </button>
+              
+              <button 
+                onClick={() => {
+                  const success = testLevel();
+                  if (success) playHit();
+                }}
+                className="bg-red-600 text-white font-bold py-1 px-2 border border-white text-xs"
+              >
+                TEST
+              </button>
+            </div>
+          </div>
           
-          {/* Editor controls - responsive layout */}
-          <div className="flex flex-wrap gap-2 justify-center">
-            <button 
-              onClick={() => exitEditMode()}
-              className="bg-blue-600 hover:bg-blue-800 text-white font-bold py-1 px-3 border-2 border-white text-sm"
-            >
-              MAIN MENU
-            </button>
-            
-            <button 
-              onClick={() => {
-                const success = testLevel();
-                if (success) {
-                  playHit();
-                }
-              }}
-              className="bg-red-600 hover:bg-red-800 text-white font-bold py-1 px-3 border-2 border-white text-sm"
-            >
-              TEST
-            </button>
-            
-            <button 
-              onClick={handleSaveLevel}
-              className="bg-green-600 hover:bg-green-800 text-white font-bold py-1 px-3 border-2 border-white text-sm"
-            >
-              SAVE
-            </button>
-            
+          {/* Second row with less important buttons */}
+          <div className="flex justify-between gap-1">
             <button
               onClick={() => {
                 createEmptyLevel();
                 playHit();
-                setMessage("New level created");
-                setTimeout(() => setMessage(null), 2000);
+                setMessage("New level");
+                setTimeout(() => setMessage(null), 1500);
               }}
-              className="bg-purple-600 hover:bg-purple-800 text-white font-bold py-1 px-3 border-2 border-white text-sm"
+              className="bg-purple-600 text-white py-[2px] px-2 border border-white text-xs flex-1"
             >
               NEW
             </button>
             
             <button
               onClick={() => setShowBlockPalette(!showBlockPalette)}
-              className="bg-cyan-600 hover:bg-cyan-800 text-white font-bold py-1 px-3 border-2 border-white text-sm"
+              className="bg-cyan-600 text-white py-[2px] px-2 border border-white text-xs flex-1"
             >
               {showBlockPalette ? "HIDE BLOCKS" : "SHOW BLOCKS"}
             </button>
+            
+            {/* Message indicator - inline to save space */}
+            {message ? (
+              <div className="text-yellow-300 text-center py-[2px] px-2 bg-gray-900 text-xs animate-pulse flex-1">
+                {message}
+              </div>
+            ) : (
+              <div className="flex-1"></div> // Placeholder for layout consistency
+            )}
           </div>
         </div>
-        
-        {/* Message indicator */}
-        {message && (
-          <div className="mt-2 text-yellow-300 text-center p-1 bg-gray-900 font-mono text-sm animate-pulse">
-            {message}
-          </div>
-        )}
       </div>
       
-      {/* Mobile-optimized layout */}
-      <div className="flex flex-col flex-1 overflow-auto p-2 gap-2 bg-black">
-        {/* Block palette - collapsible on mobile */}
+      {/* Ultra-compact mobile layout with minimal spacing */}
+      <div className="flex flex-col flex-1 p-1 gap-1 bg-black overflow-hidden">
+        {/* Block palette - more compact on mobile */}
         {showBlockPalette && (
-          <div className={cn(
-            "bg-black px-2 py-3 flex flex-col gap-3 shadow-lg border-4 border-cyan-600",
-            isMobile ? "sticky top-[60px] z-10" : ""
-          )}>
-            <div className="grid grid-cols-4 sm:grid-cols-8 gap-3 place-items-center">
+          <div className="bg-black px-1 py-1 flex flex-col gap-1 shadow-md border-2 border-cyan-600 rounded">
+            <div className="grid grid-cols-8 gap-1 place-items-center">
               {blockTypes.map(type => (
                 <button 
                   key={type}
@@ -221,68 +191,54 @@ export default function MobileEditor() {
                     playHit();
                   }}
                   className={cn(
-                    "cursor-pointer flex items-center justify-center p-1",
-                    selectedType === type ? "ring-4 ring-white" : "hover:ring-2 hover:ring-gray-400",
+                    "cursor-pointer flex items-center justify-center",
+                    selectedType === type ? "ring-2 ring-white" : "",
                     type === 1 ? "bg-gray-800" : ""
                   )}
                 >
-                  {renderBlock(type, isMobile ? 45 : 40)}
+                  {renderBlock(type, PALETTE_BLOCK_SIZE)}
                 </button>
               ))}
-            </div>
-            
-            <div className="text-xs text-cyan-300 font-mono text-center">
-              {isMobile ? 
-                "TAP A BLOCK TYPE ABOVE, THEN TAP THE GRID BELOW TO PLACE IT" :
-                "SELECTED BLOCK TYPE: " + (selectedType === 1 ? "FLOOR" : `BLOCK ${selectedType}`)
-              }
             </div>
           </div>
         )}
         
-        {/* Grid area */}
-        <div className="flex-1 flex flex-col items-center overflow-auto pt-2">
-          <div className="bg-black p-3 shadow-lg border-4 border-cyan-600 rounded-md">
-            {/* The grid */}
-            <div className="flex flex-col gap-[2px]">
+        {/* Grid area - tightly packed */}
+        <div className="flex-1 flex flex-col items-center justify-center overflow-hidden">
+          <div className="bg-black p-1 shadow-md border-2 border-cyan-600 rounded">
+            {/* The grid with minimal spacing */}
+            <div className="flex flex-col gap-[1px]">
               {Array.from({ length: GRID_SIZE }).map((_, rowIndex) => {
                 // Convert visual row to game row (y)
                 const gameY = GRID_SIZE - rowIndex - 1;
                 
                 return (
-                  <div key={`row-${rowIndex}`} className="flex flex-row gap-[2px]">
+                  <div key={`row-${rowIndex}`} className="flex flex-row gap-[1px]">
                     {Array.from({ length: GRID_SIZE }).map((_, colIndex) => {
-                      // Game X is the same as visual column
                       const gameX = colIndex;
-                      
-                      // Get the block at this position
                       const block = board[gameY][gameX];
                       
                       return (
                         <div
                           key={`cell-${rowIndex}-${colIndex}`}
                           className={cn(
-                            "relative transition-all border border-gray-800",
-                            block ? "" : "bg-gray-900 hover:bg-gray-800"
+                            "relative border border-gray-800",
+                            block ? "" : "bg-gray-900"
                           )}
                           style={{ 
                             width: CELL_SIZE, 
                             height: CELL_SIZE
                           }}
                           onClick={() => {
-                            // On mobile, always place blocks, double tap to remove
                             if (block) {
-                              // Remove existing block
                               removeEditorBlock(gameX, gameY);
                               playHit();
                             } else {
-                              // Place selected block
                               placeEditorBlock(gameX, gameY, selectedType);
                               playHit();
                             }
                           }}
                         >
-                          {/* Display block if it exists */}
                           {block && renderBlock(block.type, CELL_SIZE)}
                         </div>
                       );
