@@ -21,6 +21,22 @@ const boardColors = [
   "#00DDFF", // Bright Aqua (index 9, type 11)
 ];
 
+// Helper function to safely get color for a block type
+const getColorForType = (type: number): string => {
+  if (type === 1) return floorColor;
+  
+  // For block types 2 and above, retrieve from boardColors (array is 0-indexed)
+  const index = type - 2;
+  
+  // Safety check to prevent array out of bounds
+  if (index >= 0 && index < boardColors.length) {
+    return boardColors[index];
+  }
+  
+  // Fallback color for any unexpected block types
+  return "#888888";
+};
+
 // Interface for block counter
 interface BlockCount {
   type: number;
@@ -120,8 +136,8 @@ export default function GameUI2D() {
                   <div 
                     className="w-4 h-4 rounded-sm" 
                     style={{ 
-                      backgroundColor: item.type === 1 ? floorColor : boardColors[(item.type - 2) % boardColors.length],
-                      boxShadow: `0 0 4px ${item.type === 1 ? floorColor : boardColors[(item.type - 2) % boardColors.length]}`,
+                      backgroundColor: getColorForType(item.type),
+                      boxShadow: `0 0 4px ${getColorForType(item.type)}`,
                       border: '1px solid rgba(255, 255, 255, 0.4)'
                     }}
                   />
