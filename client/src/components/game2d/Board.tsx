@@ -322,8 +322,8 @@ export function Board2D({ width, height }: BoardProps) {
     const currentTime = Date.now();
     const timeSinceLastMove = currentTime - lastMoveTimeRef.current;
     
-    // Don't allow moves more frequently than every 200ms
-    if (timeSinceLastMove < 200) return;
+    // Don't allow moves more frequently than every 500ms to ensure one space at a time
+    if (timeSinceLastMove < 500) return;
     
     const { x: startX } = dragStartRef.current;
     const diffX = e.clientX - startX;
@@ -343,14 +343,11 @@ export function Board2D({ width, height }: BoardProps) {
         playHitSound();
       }
       
-      // Update last move time to prevent rapid movements
+      // Update last move time - longer delay forces user to re-drag for next move
       lastMoveTimeRef.current = currentTime;
       
-      // Reset drag start position to current position for continuous dragging
-      dragStartRef.current = {
-        ...dragStartRef.current,
-        x: e.clientX
-      };
+      // Reset drag - this forces the user to release mouse and drag again for another move
+      dragStartRef.current = null;
     }
   };
   

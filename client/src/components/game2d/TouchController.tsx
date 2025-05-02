@@ -23,6 +23,9 @@ export function TouchController() {
       }
     };
     
+    // Track the last time we processed a swipe
+    const lastSwipeTimeRef = useRef<number>(0);
+    
     const handleTouchEnd = (e: TouchEvent) => {
       // If we have a touch start position (don't need to check selectedBlockPos here - let the moveSelectedBlock function check that)
       if (touchStartRef.current) {
@@ -36,9 +39,17 @@ export function TouchController() {
           const deltaX = touchEnd.x - touchStartRef.current.x;
           const deltaY = touchEnd.y - touchStartRef.current.y;
           
-          // Check if swipe was horizontal and long enough
-          if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > MIN_SWIPE_DISTANCE) {
-            // Swipe right or left
+          // Get current time to enforce a delay between moves
+          const currentTime = Date.now();
+          const timeSinceLastSwipe = currentTime - lastSwipeTimeRef.current;
+          
+          // Ensure we don't move too quickly (at least 500ms between swipes)
+          // and check if swipe was horizontal and long enough
+          if (timeSinceLastSwipe > 500 && 
+              Math.abs(deltaX) > Math.abs(deltaY) && 
+              Math.abs(deltaX) > MIN_SWIPE_DISTANCE) {
+            
+            // Swipe right or left - just one space at a time
             if (deltaX > 0) {
               moveSelectedBlock('right');
               console.log('Swipe right detected');
@@ -46,6 +57,9 @@ export function TouchController() {
               moveSelectedBlock('left');
               console.log('Swipe left detected');
             }
+            
+            // Update the last swipe time
+            lastSwipeTimeRef.current = currentTime;
           }
         }
       }
