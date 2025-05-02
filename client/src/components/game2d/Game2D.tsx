@@ -31,7 +31,7 @@ export default function Game2D() {
     hitSound.volume = 0.5;
     
     const successSound = new Audio("/sounds/success.mp3");
-    successSound.volume = 0.6;
+    successSound.volume = 0.42; // Reduced by 30% from 0.6
     
     // New sound effects with appropriate volumes
     const moveSound = new Audio("/sounds/move.mp3");

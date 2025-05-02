@@ -81,6 +81,7 @@ export const useAudio = create<AudioState>((set, get) => ({
       }
       
       successSound.currentTime = 0;
+      successSound.volume = 0.42; // Ensure volume is set to 30% lower than original
       successSound.play().catch(error => {
         console.log("Success sound play prevented:", error);
       });
@@ -126,7 +127,7 @@ export const useAudio = create<AudioState>((set, get) => ({
       
       // Create volume node with subtle volume
       const gainNode = audioContext.createGain();
-      gainNode.gain.setValueAtTime(0.04, audioContext.currentTime); // Lower volume for subtlety
+      gainNode.gain.setValueAtTime(0.034, audioContext.currentTime); // Lowered by 15% from 0.04
       gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.2); // Fade out
       
       // Connect nodes
