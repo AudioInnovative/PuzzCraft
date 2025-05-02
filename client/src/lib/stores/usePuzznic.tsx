@@ -544,12 +544,27 @@ export const usePuzznic = create<PuzznicState>()(
         clearInterval(timerId);
       }
       
-      // Create an empty level for editing
-      const { createEmptyLevel } = get();
-      createEmptyLevel();
+      // Check if we're returning from testing a custom level
+      const { isTestingCustomLevel, testLevelIndex, userLevels } = get();
       
-      // Set gamePhase to editing
-      set({ gamePhase: "editing" });
+      if (isTestingCustomLevel && testLevelIndex >= 0 && testLevelIndex < userLevels.length) {
+        // We're returning from a test session, so load the level we were testing
+        // First set the game phase to editing
+        set({ gamePhase: "editing" });
+        
+        // Then load the level we were testing
+        setTimeout(() => {
+          const { loadUserLevel } = get();
+          loadUserLevel(testLevelIndex);
+        }, 100);
+      } else {
+        // Standard editor entry - create an empty level
+        const { createEmptyLevel } = get();
+        createEmptyLevel();
+        
+        // Set gamePhase to editing
+        set({ gamePhase: "editing" });
+      }
     },
     
     exitEditMode: () => {
