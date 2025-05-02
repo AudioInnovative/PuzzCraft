@@ -264,8 +264,8 @@ export default function SimpleLevelEditor() {
                         >
                           {/* Display block if it exists */}
                           {block && (
-                            block.isFloor ? (
-                              // Floor blocks - gray tile design
+                            block.type === 1 ? (
+                              // Type 1 blocks are always floor blocks - gray tile design
                               <div className="w-full h-full rounded-md flex items-center justify-center bg-gray-300 relative">
                                 {/* Grid lines to match NES floor blocks */}
                                 <div className="absolute top-0 left-0 w-full h-full grid grid-cols-2 grid-rows-2">
