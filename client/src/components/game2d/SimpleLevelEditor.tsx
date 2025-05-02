@@ -1,11 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { usePuzznic } from '../../lib/stores/usePuzznic';
 import { cn } from '../../lib/utils';
 import { useAudio } from '../../lib/stores/useAudio';
+import { useIsMobile } from '../../hooks/use-is-mobile';
 
-const CELL_SIZE = 40;
+// Responsive cell size based on device
+const BASE_CELL_SIZE = 40;
+const MOBILE_CELL_SIZE = 50; // Larger for mobile
 const GRID_SIZE = 8;
-const BLOCK_SYMBOLS = ["✚", "■", "●", "×", "★", "◆", "▲", "♦"];
 
 // Match the game's block colors exactly
 const blockColors = [
@@ -36,10 +38,21 @@ export default function SimpleLevelEditor() {
   } = usePuzznic();
   
   const { playHit } = useAudio();
+  const isMobile = useIsMobile();
+  
+  // Use the appropriate cell size based on device type
+  const CELL_SIZE = isMobile ? MOBILE_CELL_SIZE : BASE_CELL_SIZE;
   
   const [selectedType, setSelectedType] = useState<number | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [isValid, setIsValid] = useState(true);
+  
+  // Automatically select the floor block type (1) on first render
+  useEffect(() => {
+    if (gamePhase === 'editing' && selectedType === null) {
+      setSelectedType(1);
+    }
+  }, [gamePhase, selectedType]);
   
   // Level validation is no longer required
   useEffect(() => {
