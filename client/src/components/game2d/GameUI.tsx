@@ -9,24 +9,24 @@ const floorColor = "#777777";
 // Import the exact same color array from Board.tsx to ensure perfect matching
 // These colors are applied with (blockType - 1) as the index
 const boardColors = [
-  "#FF005E", // Intense Neon Pink (index 0, type 2)
-  "#00FF33", // Electric Neon Green (index 1, type 3)
-  "#00FFFF", // Brilliant Cyan (index 2, type 4)
-  "#FFFF00", // Vivid Yellow (index 3, type 5)
-  "#FF00FF", // Vibrant Magenta (index 4, type 6)
-  "#4D4DFF", // Electric Blue (index 5, type 7)
-  "#FF7700", // Blazing Orange (index 6, type 8)
-  "#AA00FF", // Deep Purple (index 7, type 9)
-  "#FF0099", // Hot Pink (index 8, type 10)
-  "#00DDFF", // Bright Aqua (index 9, type 11)
+  "#FF005E", // Intense Neon Pink (type 2 uses index 1)
+  "#00FF33", // Electric Neon Green (type 3 uses index 2)
+  "#00FFFF", // Brilliant Cyan (type 4 uses index 3)
+  "#FFFF00", // Vivid Yellow (type 5 uses index 4)
+  "#FF00FF", // Vibrant Magenta (type 6 uses index 5)
+  "#4D4DFF", // Electric Blue (type 7 uses index 6)
+  "#FF7700", // Blazing Orange (type 8 uses index 7)
+  "#AA00FF", // Deep Purple (type 9 uses index 8)
+  "#FF0099", // Hot Pink (type 10 uses index 9)
+  "#00DDFF", // Bright Aqua (type 11 uses index 10)
 ];
 
 // Helper function to safely get color for a block type
 const getColorForType = (type: number): string => {
   if (type === 1) return floorColor;
   
-  // For block types 2 and above, retrieve from boardColors (array is 0-indexed)
-  const index = type - 2;
+  // Match the indexing in Board.tsx: (block.type - 1) % blockColors.length
+  const index = (type - 1) % boardColors.length;
   
   // Safety check to prevent array out of bounds
   if (index >= 0 && index < boardColors.length) {
