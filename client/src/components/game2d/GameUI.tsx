@@ -3,17 +3,17 @@ import { usePuzznic, BlockType } from "../../lib/stores/usePuzznic";
 import { GamePanel } from "../ui/game-panel";
 import { useIsMobile } from "../../hooks/use-is-mobile";
 
-// Color map for block counter display
+// Color map for block counter display - matching the actual game blocks
 const blockColors = [
   "#777777", // Type 1 - Floor blocks (gray)
-  "#FF5555", // Type 2 - Red
-  "#55FF55", // Type 3 - Green
-  "#5555FF", // Type 4 - Blue
-  "#FFFF55", // Type 5 - Yellow
-  "#FF55FF", // Type 6 - Magenta
-  "#55FFFF", // Type 7 - Cyan
-  "#FF9955", // Type 8 - Orange
-  "#AA55FF"  // Type 9 - Purple
+  "#FF005E", // Type 2 - Intense Neon Pink
+  "#00FF33", // Type 3 - Electric Neon Green
+  "#00FFFF", // Type 4 - Brilliant Cyan
+  "#FFFF00", // Type 5 - Vivid Yellow
+  "#FF00FF", // Type 6 - Vibrant Magenta
+  "#4D4DFF", // Type 7 - Electric Blue
+  "#FF7700", // Type 8 - Blazing Orange
+  "#AA00FF"  // Type 9 - Deep Purple
 ];
 
 // Interface for block counter
@@ -101,10 +101,14 @@ export default function GameUI2D() {
             <div className="flex flex-col gap-1">
               {blockCounts.map(item => (
                 <div key={`block-${item.type}`} className="flex items-center gap-1">
-                  {/* Block color indicator */}
+                  {/* Block color indicator with glow effect */}
                   <div 
-                    className="w-4 h-4 rounded-sm shadow-sm" 
-                    style={{ backgroundColor: blockColors[item.type - 1] }}
+                    className="w-4 h-4 rounded-sm" 
+                    style={{ 
+                      backgroundColor: blockColors[item.type - 1],
+                      boxShadow: `0 0 4px ${blockColors[item.type - 1]}`,
+                      border: '1px solid rgba(255, 255, 255, 0.4)'
+                    }}
                   />
                   {/* Block count */}
                   <span className="text-xs text-white font-mono">× {item.count}</span>
