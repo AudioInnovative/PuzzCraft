@@ -44,6 +44,7 @@ interface PuzznicState {
   moveSelectedBlock: (direction: 'left' | 'right') => void;
   checkMatches: () => void;
   boardHasBlocksThatCanFall: (board: (BlockType | null)[][]) => boolean;
+  boardHasAnyFallingBlocks: (board: (BlockType | null)[][]) => boolean;
   applyGravity: () => void;
   updateGameState: () => void;
   restartLevel: () => void;
@@ -170,9 +171,12 @@ export const usePuzznic = create<PuzznicState>()(
     
     // Select a block at given position
     selectBlock: (x, y) => {
-      const { board, gamePhase } = get();
+      const { board, gamePhase, boardHasBlocksThatCanFall, boardHasAnyFallingBlocks } = get();
       
       if (gamePhase !== "playing") return;
+      
+      // Don't allow selection if any blocks are falling or could fall
+      if (boardHasAnyFallingBlocks(board) || boardHasBlocksThatCanFall(board)) return;
       
       // Create a deep copy of the board
       const newBoard = board.map(row => row.map(block => 
@@ -220,9 +224,12 @@ export const usePuzznic = create<PuzznicState>()(
     
     // Move selected block
     moveSelectedBlock: (direction) => {
-      const { board, selectedBlockPos, gamePhase } = get();
+      const { board, selectedBlockPos, gamePhase, boardHasBlocksThatCanFall, boardHasAnyFallingBlocks } = get();
       
       if (gamePhase !== "playing" || !selectedBlockPos) return;
+      
+      // Don't allow movement if any blocks are falling or could fall
+      if (boardHasAnyFallingBlocks(board) || boardHasBlocksThatCanFall(board)) return;
       
       const { x, y } = selectedBlockPos;
       
@@ -297,10 +304,11 @@ export const usePuzznic = create<PuzznicState>()(
     
     // Check for matching blocks
     checkMatches: () => {
-      const { board, boardHasBlocksThatCanFall } = get();
+      const { board, boardHasBlocksThatCanFall, boardHasAnyFallingBlocks } = get();
       
-      // First check if any blocks can still fall - if so, don't do matching yet
-      if (boardHasBlocksThatCanFall(board)) {
+      // First check if any blocks can still fall or are currently falling
+      // If so, don't do matching yet
+      if (boardHasAnyFallingBlocks(board) || boardHasBlocksThatCanFall(board)) {
         // Continue applying gravity if blocks can still fall
         const { applyGravity } = get();
         applyGravity();
@@ -392,6 +400,18 @@ export const usePuzznic = create<PuzznicState>()(
         }
       }
       return false; // No more blocks can fall
+    },
+    
+    // Helper function to check if any blocks are currently falling
+    boardHasAnyFallingBlocks: (board: (BlockType | null)[][]) => {
+      for (let y = 0; y < board.length; y++) {
+        for (let x = 0; x < board[0].length; x++) {
+          if (board[y][x] !== null && board[y][x]!.falling) {
+            return true; // Found at least one falling block
+          }
+        }
+      }
+      return false; // No blocks are falling
     },
     
     // Apply gravity to make blocks fall (note: in our coordinate system, y=0 is at the bottom)
