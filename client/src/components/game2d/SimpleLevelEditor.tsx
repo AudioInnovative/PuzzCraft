@@ -212,12 +212,24 @@ export default function SimpleLevelEditor() {
                           {/* Display block if it exists */}
                           {block && (
                             <div
-                              className="w-full h-full rounded-md flex items-center justify-center"
-                              style={{ backgroundColor: getBlockColor(block.type) }}
+                              className={cn(
+                                "w-full h-full rounded-md flex items-center justify-center",
+                                block.isFloor ? "bg-gray-800 border-2 border-gray-600" : ""
+                              )}
+                              style={{ 
+                                backgroundColor: block.isFloor ? undefined : getBlockColor(block.type),
+                                backgroundImage: block.isFloor ? 
+                                  "repeating-linear-gradient(45deg, #333333, #333333 5px, #444444 5px, #444444 10px)" : 
+                                  undefined
+                              }}
                             >
-                              <span className="text-white font-bold">
-                                {BLOCK_SYMBOLS[block.type-1]}
-                              </span>
+                              {block.isFloor ? (
+                                <span className="text-gray-500 font-bold text-xs">FLOOR</span>
+                              ) : (
+                                <span className="text-white font-bold">
+                                  {BLOCK_SYMBOLS[block.type-1]}
+                                </span>
+                              )}
                             </div>
                           )}
                           
