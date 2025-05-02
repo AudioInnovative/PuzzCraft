@@ -3,18 +3,18 @@ import { usePuzznic } from '../../lib/stores/usePuzznic';
 import { useAudio } from '../../lib/stores/useAudio';
 import { BlockType } from '../../lib/stores/usePuzznic';
 
-// Define block colors based on type (using NES Puzznic color palette)
+// Define block colors based on type (using a modern gradient palette)
 const blockColors = [
-  "#FF0000", // Red
-  "#00FF00", // Green
-  "#0000FF", // Blue
-  "#FFFF00", // Yellow
-  "#FF00FF", // Magenta
-  "#00FFFF", // Cyan
-  "#FF8800", // Orange
-  "#8800FF", // Purple
-  "#FF00AA", // Pink
-  "#00AAFF", // Light Blue
+  "#FF5252", // Modern Red
+  "#4CAF50", // Modern Green
+  "#448AFF", // Modern Blue
+  "#FFC107", // Modern Amber
+  "#E040FB", // Modern Purple
+  "#18FFFF", // Modern Cyan
+  "#FF9800", // Modern Orange
+  "#7C4DFF", // Modern Deep Purple
+  "#F50057", // Modern Pink
+  "#00B0FF", // Modern Light Blue
 ];
 
 // Define block symbols based on original Puzznic
