@@ -189,6 +189,45 @@ export default function MobileEditor() {
       
       {/* Ultra-compact mobile layout with minimal spacing */}
       <div className="flex flex-col flex-1 p-1 gap-1 bg-black overflow-hidden">
+        {/* Level Selector - shows saved levels */}
+        {showLevelSelector && (
+          <div className="bg-black px-2 py-2 flex flex-col gap-2 shadow-md border-2 border-orange-600 rounded">
+            <div className="flex justify-between items-center">
+              <h3 className="text-sm font-bold text-orange-300">SAVED LEVELS</h3>
+              <button 
+                onClick={() => setShowLevelSelector(false)}
+                className="text-white text-xs bg-gray-700 px-2 py-1 rounded"
+              >
+                CLOSE
+              </button>
+            </div>
+            
+            <div className="grid grid-cols-4 gap-2">
+              {userLevels.length > 0 ? (
+                userLevels.map((_, index) => (
+                  <button
+                    key={`level-${index}`}
+                    onClick={() => {
+                      loadUserLevel(index);
+                      playHit();
+                      setShowLevelSelector(false);
+                      setMessage(`Loaded level ${index + 1}`);
+                      setTimeout(() => setMessage(null), 1500);
+                    }}
+                    className="bg-orange-800 hover:bg-orange-700 text-white py-2 text-center border border-orange-500"
+                  >
+                    Level {index + 1}
+                  </button>
+                ))
+              ) : (
+                <div className="col-span-4 text-gray-400 text-center py-4">
+                  No saved levels yet. Create and save a level first!
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+        
         {/* Block palette - more compact on mobile */}
         {showBlockPalette && (
           <div className="bg-black px-1 py-1 flex flex-col gap-1 shadow-md border-2 border-cyan-600 rounded">
