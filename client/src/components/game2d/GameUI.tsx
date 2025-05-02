@@ -108,13 +108,6 @@ export default function GameUI2D() {
             <h2 className="text-4xl font-bold text-cyan-300 mb-6 font-mono tracking-wider">PUZZNIC</h2>
             <div className="bg-blue-900 border-2 border-blue-700 p-4 mb-6">
               <p className="text-xl text-white mb-4">MATCH THE BLOCKS TO CLEAR THE LEVEL!</p>
-              <p className="text-white font-bold mb-3 uppercase">Controls:</p>
-              <p className="text-cyan-300 mb-1 font-mono">CLICK - SELECT BLOCK</p>
-              <p className="text-cyan-300 mb-1 font-mono">CLICK LEFT/RIGHT - MOVE BLOCK</p>
-              <p className="text-cyan-300 mb-1 font-mono">R - RESTART LEVEL</p>
-              {isMobile && (
-                <p className="text-yellow-300 mt-3 font-mono">TAP TO SELECT, TAP SIDES TO MOVE</p>
-              )}
             </div>
             <div className="flex justify-center space-x-4">
               <button 
