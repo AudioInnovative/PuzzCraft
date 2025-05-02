@@ -3,18 +3,29 @@ import { usePuzznic, BlockType } from "../../lib/stores/usePuzznic";
 import { GamePanel } from "../ui/game-panel";
 import { useIsMobile } from "../../hooks/use-is-mobile";
 
-// Color map for block counter display - using exact colors from Board.tsx in same order
+// Color map for block counter display - using exact colors from Board.tsx
+// Note: In Board.tsx, colors are accessed using (block.type - 1) as the index
+const boardColors = [
+  "#FF005E", // Intense Neon Pink (index 0 for type 2)
+  "#00FF33", // Electric Neon Green (index 1 for type 3)
+  "#00FFFF", // Brilliant Cyan (index 2 for type 4)
+  "#FFFF00", // Vivid Yellow (index 3 for type 5)
+  "#FF00FF", // Vibrant Magenta (index 4 for type 6)
+  "#4D4DFF", // Electric Blue (index 5 for type 7)
+  "#FF7700", // Blazing Orange (index 6 for type 8)
+  "#AA00FF", // Deep Purple (index 7 for type 9)
+  "#FF0099", // Hot Pink (index 8 for type 10)
+];
+
+// Create a color map that's indexed by block type
 const blockColors: Record<number, string> = {
-  1: "#777777", // Floor blocks (gray)
-  2: "#FF005E", // Intense Neon Pink
-  3: "#00FF33", // Electric Neon Green
-  4: "#00FFFF", // Brilliant Cyan
-  5: "#FFFF00", // Vivid Yellow
-  6: "#FF00FF", // Vibrant Magenta
-  7: "#4D4DFF", // Electric Blue
-  8: "#FF7700", // Blazing Orange
-  9: "#AA00FF"  // Deep Purple
-};
+  1: "#777777", // Floor blocks (gray) - special case
+}; 
+
+// Fill the color map with colors from boardColors array
+for (let i = 0; i < boardColors.length; i++) {
+  blockColors[i + 2] = boardColors[i]; // +2 because block types start at 2 (1 is floor)
+}
 
 // Interface for block counter
 interface BlockCount {
