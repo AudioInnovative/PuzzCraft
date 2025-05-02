@@ -28,16 +28,16 @@ export const Levels = [
     [1, 1, 1, 1, 1, 1, 1, 1], // Floor
   ],
   
-  // Level 3: Multiple platforms (fixed to ensure even pairs)
+  // Level 3: Grid with separated matching pairs (moved from Level 5)
   [
     [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 2, 3, 0, 0, 0],
+    [2, 0, 3, 0, 4, 0, 5, 0],
     [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 3, 4, 0, 2, 4, 0],
-    [0, 0, 0, 5, 5, 0, 0, 0],
-    [0, 6, 6, 0, 0, 7, 7, 0],
+    [6, 0, 2, 0, 3, 0, 4, 0],
     [0, 0, 0, 0, 0, 0, 0, 0],
-    [1, 1, 0, 1, 1, 0, 1, 1], // Floor with gaps
+    [5, 0, 6, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0],
+    [1, 1, 1, 1, 1, 1, 1, 1], // Floor
   ],
   
   // Level 4: More challenging arrangement with obstacles
@@ -52,15 +52,15 @@ export const Levels = [
     [1, 1, 1, 1, 1, 1, 1, 1], // Floor
   ],
   
-  // Level 5: Grid with separated matching pairs
+  // Level 5: Multiple platforms with gaps (moved from Level 3)
   [
     [0, 0, 0, 0, 0, 0, 0, 0],
-    [2, 0, 3, 0, 4, 0, 5, 0],
+    [0, 0, 0, 2, 3, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0],
-    [6, 0, 2, 0, 3, 0, 4, 0],
+    [0, 0, 3, 4, 0, 2, 4, 0],
+    [0, 0, 0, 5, 5, 0, 0, 0],
+    [0, 6, 6, 0, 0, 7, 7, 0],
     [0, 0, 0, 0, 0, 0, 0, 0],
-    [5, 0, 6, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [1, 1, 1, 1, 1, 1, 1, 1], // Floor
+    [1, 1, 0, 1, 1, 0, 1, 1], // Floor with gaps
   ],
 ];
