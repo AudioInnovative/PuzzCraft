@@ -3,29 +3,20 @@ import { usePuzznic, BlockType } from "../../lib/stores/usePuzznic";
 import { GamePanel } from "../ui/game-panel";
 import { useIsMobile } from "../../hooks/use-is-mobile";
 
-// Color map for block counter display - using exact colors from Board.tsx
-// Note: In Board.tsx, colors are accessed using (block.type - 1) as the index
-const boardColors = [
-  "#FF005E", // Intense Neon Pink (index 0 for type 2)
-  "#00FF33", // Electric Neon Green (index 1 for type 3)
-  "#00FFFF", // Brilliant Cyan (index 2 for type 4)
-  "#FFFF00", // Vivid Yellow (index 3 for type 5)
-  "#FF00FF", // Vibrant Magenta (index 4 for type 6)
-  "#4D4DFF", // Electric Blue (index 5 for type 7)
-  "#FF7700", // Blazing Orange (index 6 for type 8)
-  "#AA00FF", // Deep Purple (index 7 for type 9)
-  "#FF0099", // Hot Pink (index 8 for type 10)
-];
-
-// Create a color map that's indexed by block type
+// Direct mapping from block type number to color
+// This ensures a perfect 1:1 match between the actual game blocks and the color indicators
 const blockColors: Record<number, string> = {
-  1: "#777777", // Floor blocks (gray) - special case
-}; 
-
-// Fill the color map with colors from boardColors array
-for (let i = 0; i < boardColors.length; i++) {
-  blockColors[i + 2] = boardColors[i]; // +2 because block types start at 2 (1 is floor)
-}
+  1: "#777777", // Floor blocks (gray)
+  2: "#FF005E", // Intense Neon Pink
+  3: "#00FF33", // Electric Neon Green
+  4: "#00FFFF", // Brilliant Cyan
+  5: "#FFFF00", // Vivid Yellow
+  6: "#FF00FF", // Vibrant Magenta
+  7: "#4D4DFF", // Electric Blue
+  8: "#FF7700", // Blazing Orange
+  9: "#AA00FF", // Deep Purple
+  10: "#FF0099", // Hot Pink
+};
 
 // Interface for block counter
 interface BlockCount {
@@ -64,17 +55,25 @@ export default function GameUI2D() {
   // Count blocks of each type that remain on the board
   const updateBlockCounts = () => {
     const counts = new Map<number, number>();
+    const blockTypeMap = new Map<number, string>(); // Map to track types to colors
+
+    console.log("Updating block counts");
     
-    // Count blocks by type (excluding floor blocks)
+    // First scan: identify all blocks and their types on the board
     for (let y = 0; y < board.length; y++) {
       for (let x = 0; x < board[y].length; x++) {
         const block = board[y][x];
-        if (block && block.type > 1 && !block.matched) { // Skip empty cells, floor blocks, and matched blocks
-          const count = counts.get(block.type) || 0;
-          counts.set(block.type, count + 1);
+        if (block && block.type > 1) { // Skip empty cells and floor blocks
+          console.log(`Found block at [${x},${y}]: type=${block.type}, matched=${block.matched}`);
+          if (!block.matched) {
+            const count = counts.get(block.type) || 0;
+            counts.set(block.type, count + 1);
+          }
         }
       }
     }
+    
+    console.log("Block count map:", Object.fromEntries(counts));
     
     // Convert map to array sorted by block type
     const countsArray: BlockCount[] = [];
@@ -84,6 +83,8 @@ export default function GameUI2D() {
     
     // Sort by type
     countsArray.sort((a, b) => a.type - b.type);
+    
+    console.log("Block count array:", countsArray);
     
     setBlockCounts(countsArray);
   };
