@@ -162,7 +162,6 @@ export default function GameUI2D() {
                 <>
                   <p className="mb-1">• Tap to select</p>
                   <p className="mb-1">• Swipe to move</p>
-                  <p className="mb-1">• Hold to restart</p>
                 </>
               ) : (
                 <>

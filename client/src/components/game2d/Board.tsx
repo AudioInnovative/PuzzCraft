@@ -680,10 +680,6 @@ export function Board2D({ width, height }: BoardProps) {
     handlePointerSelect(e.clientX, e.clientY);
   };
   
-  // For long press detection (to restart level on mobile)
-  const touchTimeout = useRef<NodeJS.Timeout | null>(null);
-  const LONG_PRESS_DURATION = 800; // milliseconds
-  
   // Handle touch start event
   const handleCanvasTouch = (e: React.TouchEvent<HTMLCanvasElement>) => {
     if (e.touches.length === 1) {
@@ -692,28 +688,12 @@ export function Board2D({ width, height }: BoardProps) {
       
       // Handle block selection
       handlePointerSelect(e.touches[0].clientX, e.touches[0].clientY);
-      
-      // Set up long press detection
-      if (touchTimeout.current) {
-        clearTimeout(touchTimeout.current);
-      }
-      
-      touchTimeout.current = setTimeout(() => {
-        // Long press detected - restart level
-        const { restartLevel } = usePuzznic.getState();
-        restartLevel();
-        // Provide visual/audio feedback that restart occurred
-        playHitSound();
-      }, LONG_PRESS_DURATION);
     }
   };
   
-  // Handle touch end/cancel to clear the timeout
+  // Handle touch end/cancel (now much simpler)
   const handleTouchEnd = () => {
-    if (touchTimeout.current) {
-      clearTimeout(touchTimeout.current);
-      touchTimeout.current = null;
-    }
+    // No action needed since we removed the long press restart
   };
   
   // Function to render the current game state with animations
