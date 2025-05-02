@@ -28,7 +28,7 @@ export default function GameUI2D() {
       {/* Level Editor Component removed: now using SimpleLevelEditor in Game2D */}
       
       {/* Game HUD styled like original Puzznic */}
-      <div className="absolute top-0 left-0 right-0 flex justify-between items-start p-2 bg-black/80 border-b-4 border-blue-700">
+      <div className="absolute top-0 left-0 right-0 flex justify-between items-start p-2 bg-black/80">
         <div className="flex flex-col gap-2">
           <GamePanel title="Score" value={score.toString()} />
           <GamePanel title="Level" value={`${level}-${maxLevel}`} />
@@ -174,7 +174,7 @@ export default function GameUI2D() {
       {/* Help text during gameplay */}
       {gamePhase === "playing" && (
         <div className="absolute bottom-0 left-0 right-0 flex justify-center">
-          <div className="bg-black border-t-2 border-blue-700 p-1 px-2 text-center w-full">
+          <div className="bg-black p-1 px-2 text-center w-full">
             {isMobile ? (
               <p className="text-sm text-cyan-300 font-mono uppercase">
                 Tap: Select • Swipe: Move • Hold: Restart
