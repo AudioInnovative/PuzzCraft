@@ -53,7 +53,8 @@ export default function SimpleLevelEditor() {
   // Only render in editing mode
   if (gamePhase !== 'editing') return null;
   
-  const blockTypes = Array.from({ length: 7 }, (_, i) => i + 2);
+  // Include floor/ground block (type 1) and regular blocks (types 2-8)
+  const blockTypes = [1, ...Array.from({ length: 7 }, (_, i) => i + 2)];
   
   const handleSaveLevel = () => {
     saveUserLevel();
@@ -122,32 +123,62 @@ export default function SimpleLevelEditor() {
                 )}
                 style={{ padding: '4px' }}
               >
-                <div 
-                  className="w-full h-full rounded-md flex items-center justify-center relative overflow-hidden"
-                  style={{ 
-                    backgroundColor: getBlockColor(type),
-                    width: CELL_SIZE, 
-                    height: CELL_SIZE 
-                  }}
-                >
-                  {/* 3D bevel effect - top/left highlight */}
-                  <div className="absolute top-0 left-0 right-0 h-[20%] bg-white opacity-40"></div>
-                  <div className="absolute top-0 left-0 bottom-0 w-[20%] bg-white opacity-40"></div>
-                  
-                  {/* 3D bevel effect - bottom/right shadow */}
-                  <div className="absolute bottom-0 left-0 right-0 h-[20%] bg-black opacity-40"></div>
-                  <div className="absolute top-0 right-0 bottom-0 w-[20%] bg-black opacity-40"></div>
-                  
-                  {/* Block symbol with drop shadow */}
-                  <div className="relative">
-                    <span className="absolute text-black opacity-30 font-bold text-2xl" style={{top: '2px', left: '2px'}}>
-                      {BLOCK_SYMBOLS[type-1]}
-                    </span>
-                    <span className="text-white font-bold text-2xl relative">
-                      {BLOCK_SYMBOLS[type-1]}
-                    </span>
+                {type === 1 ? (
+                  // Floor/ground block style (gray tile with grid)
+                  <div 
+                    className="w-full h-full rounded-md flex items-center justify-center relative"
+                    style={{ 
+                      width: CELL_SIZE, 
+                      height: CELL_SIZE,
+                      backgroundColor: '#d1d5db' // Gray color
+                    }}
+                  >
+                    {/* Grid lines to match NES floor blocks */}
+                    <div className="absolute top-0 left-0 w-full h-full grid grid-cols-2 grid-rows-2">
+                      <div className="border-b border-r border-gray-500"></div>
+                      <div className="border-b border-gray-500"></div>
+                      <div className="border-r border-gray-500"></div>
+                      <div></div>
+                    </div>
+                    {/* Border */}
+                    <div className="absolute inset-0 border-2 border-gray-600 rounded-md"></div>
+                    
+                    {/* Label */}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-xs font-bold text-gray-700 bg-gray-300 px-1 rounded opacity-80">
+                        FLOOR
+                      </span>
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  // Regular colored blocks with 3D effect
+                  <div 
+                    className="w-full h-full rounded-md flex items-center justify-center relative overflow-hidden"
+                    style={{ 
+                      backgroundColor: getBlockColor(type),
+                      width: CELL_SIZE, 
+                      height: CELL_SIZE 
+                    }}
+                  >
+                    {/* 3D bevel effect - top/left highlight */}
+                    <div className="absolute top-0 left-0 right-0 h-[20%] bg-white opacity-40"></div>
+                    <div className="absolute top-0 left-0 bottom-0 w-[20%] bg-white opacity-40"></div>
+                    
+                    {/* 3D bevel effect - bottom/right shadow */}
+                    <div className="absolute bottom-0 left-0 right-0 h-[20%] bg-black opacity-40"></div>
+                    <div className="absolute top-0 right-0 bottom-0 w-[20%] bg-black opacity-40"></div>
+                    
+                    {/* Block symbol with drop shadow */}
+                    <div className="relative">
+                      <span className="absolute text-black opacity-30 font-bold text-2xl" style={{top: '2px', left: '2px'}}>
+                        {BLOCK_SYMBOLS[type-1]}
+                      </span>
+                      <span className="text-white font-bold text-2xl relative">
+                        {BLOCK_SYMBOLS[type-1]}
+                      </span>
+                    </div>
+                  </div>
+                )}
               </button>
             ))}
           </div>
