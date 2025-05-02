@@ -116,7 +116,7 @@ export const useAudio = create<AudioState>((set, get) => ({
       
       // Clone the sound to allow overlapping playback
       const soundClone = matchSound.cloneNode() as HTMLAudioElement;
-      soundClone.volume = 0.3; // Medium volume for match sound
+      soundClone.volume = 0.15; // Reduced volume for match sound
       soundClone.play().catch(error => {
         console.log("Match sound play prevented:", error);
       });

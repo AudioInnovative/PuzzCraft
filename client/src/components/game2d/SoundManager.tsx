@@ -79,9 +79,10 @@ export default function SoundManager2D() {
       playMatch();
     }
     
-    if (hasFalling && gamePhase === "playing") {
-      playFall();
-    }
+    // Falling sound disabled per user request
+    // if (hasFalling && gamePhase === "playing") {
+    //   playFall();
+    // }
   }, [board, gamePhase, playMatch, playFall]);
   
   return (
