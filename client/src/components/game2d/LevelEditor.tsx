@@ -137,11 +137,11 @@ export default function LevelEditor() {
               console.log(`Game pos: X=${gameX}, Y=${gameY}`);
               
               // Direct click-to-place/remove at game coordinates
-              if (cell !== null && !cell.isFloor) {
+              if (cell !== null) {
                 console.log(`Removing block at game X=${gameX}, Y=${gameY}`);
                 removeEditorBlock(gameX, gameY);
                 playHit();
-              } else if (selectedBlockType !== null && !(gameY === 0 && cell?.isFloor)) {
+              } else if (selectedBlockType !== null) {
                 console.log(`Placing block type ${selectedBlockType} at game X=${gameX}, Y=${gameY}`);
                 placeEditorBlock(gameX, gameY, selectedBlockType); 
                 playHit();
@@ -161,15 +161,9 @@ export default function LevelEditor() {
               e.dataTransfer.dropEffect = 'copy';
               
               // Add a visual indicator that drop is allowed
-              if (cell === null || (!cell.isFloor && gameY > 0)) {
-                // Cell is droppable
-                e.currentTarget.style.outline = '3px solid rgba(0,255,0,0.7)';
-                e.currentTarget.style.boxShadow = '0 0 10px rgba(0,255,0,0.5)';
-              } else {
-                // Cell is not droppable
-                e.currentTarget.style.outline = '3px solid rgba(255,0,0,0.7)';
-                e.currentTarget.style.boxShadow = '0 0 10px rgba(255,0,0,0.5)';
-              }
+              // All cells are droppable
+              e.currentTarget.style.outline = '3px solid rgba(0,255,0,0.7)';
+              e.currentTarget.style.boxShadow = '0 0 10px rgba(0,255,0,0.5)';
             }}
             onDragLeave={(e) => {
               // Remove visual indicators when leaving
@@ -192,19 +186,17 @@ export default function LevelEditor() {
                   console.log(`Drop at UI: row=${uiRow}, col=${uiCol}`);
                   console.log(`Game pos: X=${gameX}, Y=${gameY}`);
                   
-                  // Check if we can place a block here
-                  if (cell === null || (!cell.isFloor && gameY > 0)) {
-                    console.log(`Placing block type ${dragData.blockType} at X=${gameX}, Y=${gameY}`);
-                    placeEditorBlock(gameX, gameY, dragData.blockType);
-                    playHit();
+                  // Allow placing blocks anywhere
+                  console.log(`Placing block type ${dragData.blockType} at X=${gameX}, Y=${gameY}`);
+                  placeEditorBlock(gameX, gameY, dragData.blockType);
+                  playHit();
                     
-                    // Verify placement
-                    setTimeout(() => {
-                      const updatedCell = board[gameY][gameX];
-                      console.log(`After placement, cell at (${gameX},${gameY}) is:`, 
-                        updatedCell ? `Block type ${updatedCell.type}` : 'Empty');
-                    }, 100);
-                  }
+                  // Verify placement
+                  setTimeout(() => {
+                    const updatedCell = board[gameY][gameX];
+                    console.log(`After placement, cell at (${gameX},${gameY}) is:`, 
+                      updatedCell ? `Block type ${updatedCell.type}` : 'Empty');
+                  }, 100);
                 }
               } catch (error) {
                 console.error('Error parsing drag data:', error);
