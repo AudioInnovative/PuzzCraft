@@ -106,20 +106,40 @@ export const useAudio = create<AudioState>((set, get) => ({
   },
   
   playMatch: () => {
-    const { matchSound, isMuted } = get();
-    if (matchSound) {
-      // If sound is muted, don't play anything
-      if (isMuted) {
-        console.log("Match sound skipped (muted)");
-        return;
-      }
+    const { isMuted } = get();
+    
+    // If sound is muted, don't play anything
+    if (isMuted) {
+      console.log("Match sound skipped (muted)");
+      return;
+    }
+    
+    // Create Web Audio API context
+    try {
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
       
-      // Clone the sound to allow overlapping playback
-      const soundClone = matchSound.cloneNode() as HTMLAudioElement;
-      soundClone.volume = 0.12; // Laser sound at a subtle volume
-      soundClone.play().catch(error => {
-        console.log("Match sound play prevented:", error);
-      });
+      // Create oscillator for laser-like sound
+      const oscillator = audioContext.createOscillator();
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(880, audioContext.currentTime); // Starting frequency
+      oscillator.frequency.exponentialRampToValueAtTime(2200, audioContext.currentTime + 0.15); // Ending frequency
+      
+      // Create volume node
+      const gainNode = audioContext.createGain();
+      gainNode.gain.setValueAtTime(0.05, audioContext.currentTime); // Lower volume
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.15); // Fade out
+      
+      // Connect nodes
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      // Start and stop oscillator
+      oscillator.start();
+      oscillator.stop(audioContext.currentTime + 0.15);
+      
+      console.log("Generated laser sound played");
+    } catch (error) {
+      console.log("Web Audio API error:", error);
     }
   },
   
