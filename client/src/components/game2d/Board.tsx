@@ -428,19 +428,6 @@ function renderBlock(
     ctx.quadraticCurveTo(blockX, blockY, blockX + radius, blockY);
     ctx.closePath();
     ctx.stroke();
-    
-    // TEMPORARY: Display block type number for debugging
-    ctx.shadowColor = 'transparent';
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = "white";
-    ctx.font = `bold ${Math.floor(blockSize * 0.4)}px Arial`;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(
-      block.type.toString(), 
-      blockX + blockSize/2, 
-      blockY + blockSize/2
-    );
   }
   
   // Reset opacity
