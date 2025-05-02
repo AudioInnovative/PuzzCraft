@@ -23,6 +23,8 @@ export default function MobileEditor() {
     placeEditorBlock, 
     removeEditorBlock, 
     saveUserLevel, 
+    loadUserLevel,
+    userLevels,
     exitEditMode,
     createEmptyLevel,
     testLevel
@@ -39,6 +41,7 @@ export default function MobileEditor() {
   const [selectedType, setSelectedType] = useState<number>(1);
   const [message, setMessage] = useState<string | null>(null);
   const [showBlockPalette, setShowBlockPalette] = useState(true);
+  const [showLevelSelector, setShowLevelSelector] = useState(false);
   
   // Ensure we're in edit mode
   if (gamePhase !== 'editing') return null;
@@ -156,6 +159,13 @@ export default function MobileEditor() {
               className="bg-purple-600 text-white py-[2px] px-2 border border-white text-xs flex-1"
             >
               NEW
+            </button>
+            
+            <button
+              onClick={() => setShowLevelSelector(!showLevelSelector)}
+              className="bg-orange-600 text-white py-[2px] px-2 border border-white text-xs flex-1"
+            >
+              LOAD
             </button>
             
             <button
