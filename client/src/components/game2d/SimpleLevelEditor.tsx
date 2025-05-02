@@ -70,17 +70,17 @@ export default function SimpleLevelEditor() {
   return (
     <div className="absolute inset-0 flex flex-col bg-black overflow-auto">
       {/* Header */}
-      <div className="bg-gradient-to-r from-slate-900 via-gray-900 to-slate-900 text-white p-4 sticky top-0 z-10 shadow-lg border-b border-gray-800">
+      <div className="bg-black p-4 sticky top-0 z-10 shadow-lg border-b-4 border-cyan-600">
         <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-bold text-white flex items-center">
-            <span className="mr-2 text-blue-400">✏️</span>Level Editor
+          <h2 className="text-2xl font-bold text-cyan-300 flex items-center font-mono tracking-wider">
+            LEVEL EDITOR
           </h2>
           <div className="flex gap-3">
             <button 
               onClick={() => exitEditMode()}
-              className="bg-gradient-to-b from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 text-white px-5 py-2 text-lg font-bold rounded-xl shadow-md active:translate-y-1 transition-all"
+              className="bg-blue-600 hover:bg-blue-800 text-white font-bold py-2 px-4 border-2 border-white"
             >
-              Main Menu
+              MAIN MENU
             </button>
             
             <button 
@@ -90,26 +90,26 @@ export default function SimpleLevelEditor() {
                   playHit();
                 }
               }}
-              className="bg-gradient-to-b from-red-500 to-red-600 hover:from-red-400 hover:to-red-500 text-white px-5 py-2 text-lg font-bold rounded-xl shadow-md active:translate-y-1 transition-all"
+              className="bg-red-600 hover:bg-red-800 text-white font-bold py-2 px-4 border-2 border-white"
             >
-              Test Level
+              TEST LEVEL
             </button>
             
             <button 
               onClick={handleSaveLevel}
-              className="bg-gradient-to-b from-green-500 to-green-600 hover:from-green-400 hover:to-green-500 text-white px-5 py-2 text-lg font-bold rounded-xl shadow-md active:translate-y-1 transition-all"
+              className="bg-green-600 hover:bg-green-800 text-white font-bold py-2 px-4 border-2 border-white"
             >
-              Save
+              SAVE
             </button>
           </div>
         </div>
       </div>
       
       {/* Main layout */}
-      <div className="flex flex-col md:flex-row flex-1 overflow-auto p-4 gap-4 bg-gradient-to-b from-gray-900 to-black">
+      <div className="flex flex-col md:flex-row flex-1 overflow-auto p-4 gap-4 bg-black">
         {/* Sidebar */}
-        <div className="bg-gradient-to-b from-gray-800 to-gray-900 p-6 rounded-xl flex flex-col gap-4 md:w-80 shadow-lg border border-gray-700">
-          <div className="text-white text-xl font-semibold text-center mb-2">Block Types</div>
+        <div className="bg-black p-6 flex flex-col gap-4 md:w-80 shadow-lg border-4 border-cyan-600">
+          <div className="text-cyan-300 text-xl font-bold text-center mb-2 font-mono tracking-wider">BLOCK TYPES</div>
           
           <div className="grid grid-cols-2 gap-4 place-items-center">
             {blockTypes.map(type => (
@@ -120,8 +120,8 @@ export default function SimpleLevelEditor() {
                   playHit();
                 }}
                 className={cn(
-                  "cursor-pointer rounded-lg flex items-center justify-center shadow-md",
-                  selectedType === type ? "ring-4 ring-white bg-gray-600" : "bg-gray-700 hover:ring-2 hover:ring-gray-400"
+                  "cursor-pointer flex items-center justify-center",
+                  selectedType === type ? "ring-4 ring-white" : "hover:ring-2 hover:ring-gray-400"
                 )}
                 style={{ padding: '4px' }}
               >
@@ -195,28 +195,28 @@ export default function SimpleLevelEditor() {
               setMessage("Created new empty level");
               setTimeout(() => setMessage(null), 2000);
             }}
-            className="w-full bg-gradient-to-b from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 text-white py-3 text-lg font-bold rounded-xl shadow-md active:translate-y-1 mt-4 transition-all"
+            className="w-full bg-blue-600 hover:bg-blue-800 text-white py-2 text-lg font-bold border-2 border-white mt-4 font-mono"
           >
-            New Level
+            NEW LEVEL
           </button>
           
           {/* Instructions */}
-          <div className="mt-4 text-white">
-            <p className="text-center mb-2 font-semibold">Instructions:</p>
-            <p className="text-sm mb-1">• Select a block type from the sidebar</p>
-            <p className="text-sm mb-1">• Click in the grid to place it</p>
-            <p className="text-sm mb-1">• Click on an existing block to remove it</p>
-            <p className="text-sm">• Create any level design you want</p>
+          <div className="mt-4 bg-blue-900 border-2 border-blue-700 p-4">
+            <p className="text-cyan-300 font-mono mb-2 font-semibold text-center">HOW TO USE:</p>
+            <p className="text-white mb-1 font-mono text-sm">• SELECT A BLOCK TYPE</p>
+            <p className="text-white mb-1 font-mono text-sm">• CLICK IN GRID TO PLACE</p>
+            <p className="text-white mb-1 font-mono text-sm">• CLICK BLOCK TO REMOVE</p>
+            <p className="text-white font-mono text-sm">• DESIGN YOUR LEVEL</p>
           </div>
           
           {/* Status indicator */}
           <div className="mt-auto">
-            <div className="py-2 text-lg font-bold rounded-lg shadow-md text-center bg-green-600 text-white">
-              Ready to Test/Save
+            <div className="py-2 text-lg font-bold text-center bg-green-600 text-white border-2 border-white font-mono">
+              READY TO TEST/SAVE
             </div>
             
             {message && (
-              <div className="mt-2 text-yellow-300 text-sm font-medium p-2 bg-gray-900 rounded-lg text-center">
+              <div className="mt-2 text-yellow-300 text-center p-2 bg-gray-900 font-mono">
                 {message}
               </div>
             )}
@@ -225,7 +225,7 @@ export default function SimpleLevelEditor() {
         
         {/* Grid area */}
         <div className="flex-1 flex flex-col items-center overflow-auto p-4">
-          <div className="bg-gradient-to-b from-gray-800 to-gray-900 p-4 rounded-xl shadow-lg border border-gray-700">
+          <div className="bg-black p-4 shadow-lg border-4 border-cyan-600">
             {/* The grid */}
             <div className="flex flex-col gap-1.5">
               {Array.from({ length: GRID_SIZE }).map((_, rowIndex) => {
@@ -246,14 +246,13 @@ export default function SimpleLevelEditor() {
                         <div
                           key={`cell-${rowIndex}-${colIndex}`}
                           className={cn(
-                            "relative rounded-lg flex items-center justify-center transition-all",
-                            block ? "" : "bg-gradient-to-b from-gray-700 to-gray-800 hover:from-gray-600 hover:to-gray-700",
-                            "shadow-inner"
+                            "relative flex items-center justify-center transition-all",
+                            block ? "" : "bg-gray-900 hover:bg-gray-800"
                           )}
                           style={{ 
                             width: CELL_SIZE, 
                             height: CELL_SIZE,
-                            border: block ? 'none' : '1px solid rgba(75, 85, 99, 0.4)'
+                            border: block ? 'none' : '1px solid rgba(44, 185, 210, 0.4)'
                           }}
                           onClick={() => {
                             if (block) {
@@ -327,9 +326,9 @@ export default function SimpleLevelEditor() {
           
           {/* Saved levels section */}
           {userLevels.length > 0 && (
-            <div className="w-full mt-4">
-              <div className="text-white text-xl font-semibold mb-3 text-center">
-                Saved Levels: {userLevels.length}
+            <div className="w-full mt-4 border-4 border-cyan-600 bg-black p-4">
+              <div className="text-cyan-300 text-xl font-bold mb-3 text-center font-mono tracking-wider">
+                SAVED LEVELS: {userLevels.length}
               </div>
               <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
                 {userLevels.map((_, index) => (
@@ -341,9 +340,9 @@ export default function SimpleLevelEditor() {
                       setMessage(`Level ${index + 1} loaded`);
                       setTimeout(() => setMessage(null), 2000);
                     }}
-                    className="bg-blue-700 text-white py-3 text-base font-semibold rounded-lg shadow-md active:translate-y-1"
+                    className="bg-blue-600 hover:bg-blue-800 text-white py-2 font-bold border-2 border-white font-mono"
                   >
-                    Level {index + 1}
+                    LEVEL {index + 1}
                   </button>
                 ))}
               </div>
