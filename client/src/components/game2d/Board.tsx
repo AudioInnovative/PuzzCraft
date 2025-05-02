@@ -82,7 +82,7 @@ function renderBlock(
     ctx.strokeStyle = '#666666';
     ctx.lineWidth = 2;
     ctx.strokeRect(blockX, blockY, blockSize, blockSize);
-  } else if (block.isFixed && !block.isFloor) {
+  } else if (block.isFixed && block.type !== 1) {
     // Wall blocks - blue/gray like in NES Puzznic
     ctx.fillStyle = '#6688AA'; // Blue-gray
     ctx.fillRect(blockX, blockY, blockSize, blockSize);
