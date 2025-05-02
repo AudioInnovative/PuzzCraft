@@ -29,20 +29,14 @@ export default function SimpleLevelEditor() {
   const [message, setMessage] = useState<string | null>(null);
   const [isValid, setIsValid] = useState(true);
   
-  // Check level validity whenever the board changes
+  // Level validation is no longer required
   useEffect(() => {
     if (gamePhase === 'editing') {
-      const levelData = generateLevelData();
-      const valid = validateLevelData(levelData);
-      setIsValid(valid);
-      
-      if (!valid) {
-        setMessage('Each block type must appear an even number of times');
-      } else {
-        setMessage(null);
-      }
+      // All levels are valid now
+      setIsValid(true);
+      setMessage(null);
     }
-  }, [board, gamePhase, validateLevelData, generateLevelData]);
+  }, [gamePhase]);
   
   // Only render in editing mode
   if (gamePhase !== 'editing') return null;
@@ -50,14 +44,9 @@ export default function SimpleLevelEditor() {
   const blockTypes = Array.from({ length: 7 }, (_, i) => i + 2);
   
   const handleSaveLevel = () => {
-    if (isValid) {
-      saveUserLevel();
-      setMessage('Level saved successfully!');
-      setTimeout(() => setMessage(null), 2000);
-    } else {
-      setMessage('Cannot save invalid level!');
-      setTimeout(() => setMessage(null), 2000);
-    }
+    saveUserLevel();
+    setMessage('Level saved successfully!');
+    setTimeout(() => setMessage(null), 2000);
   };
   
   // Function to get a color for each block type
@@ -92,37 +81,19 @@ export default function SimpleLevelEditor() {
             
             <button 
               onClick={() => {
-                if (isValid) {
-                  const success = testLevel();
-                  if (success) {
-                    playHit();
-                  } else {
-                    setMessage("Cannot test invalid level!");
-                    setTimeout(() => setMessage(null), 2000);
-                  }
-                } else {
-                  setMessage("Cannot test invalid level!");
-                  setTimeout(() => setMessage(null), 2000);
+                const success = testLevel();
+                if (success) {
+                  playHit();
                 }
               }}
-              disabled={!isValid}
-              className={
-                isValid 
-                  ? "bg-blue-600 text-white px-4 py-2 text-lg font-bold rounded-lg shadow-md active:translate-y-1" 
-                  : "bg-gray-600 text-white px-4 py-2 text-lg font-bold rounded-lg opacity-50"
-              }
+              className="bg-blue-600 text-white px-4 py-2 text-lg font-bold rounded-lg shadow-md active:translate-y-1"
             >
               Test Level
             </button>
             
             <button 
               onClick={handleSaveLevel}
-              disabled={!isValid}
-              className={
-                isValid 
-                  ? "bg-green-600 text-white px-4 py-2 text-lg font-bold rounded-lg shadow-md active:translate-y-1" 
-                  : "bg-gray-600 text-white px-4 py-2 text-lg font-bold rounded-lg opacity-50"
-              }
+              className="bg-green-600 text-white px-4 py-2 text-lg font-bold rounded-lg shadow-md active:translate-y-1"
             >
               Save
             </button>
@@ -177,16 +148,13 @@ export default function SimpleLevelEditor() {
             <p className="text-sm mb-1">• Select a block type from the sidebar</p>
             <p className="text-sm mb-1">• Click in the grid to place it</p>
             <p className="text-sm mb-1">• Click on an existing block to remove it</p>
-            <p className="text-sm">• Each block type must have an even number</p>
+            <p className="text-sm">• Create any level design you want</p>
           </div>
           
           {/* Status indicator */}
           <div className="mt-auto">
-            <div className={cn(
-              "py-2 text-lg font-bold rounded-lg shadow-md text-center",
-              isValid ? "bg-green-600 text-white" : "bg-red-600 text-white"
-            )}>
-              {isValid ? 'Level Valid ✓' : 'Level Invalid ✗'}
+            <div className="py-2 text-lg font-bold rounded-lg shadow-md text-center bg-green-600 text-white">
+              Ready to Test/Save
             </div>
             
             {message && (
