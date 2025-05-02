@@ -1,6 +1,26 @@
-import { usePuzznic } from "../../lib/stores/usePuzznic";
+import { useEffect, useState } from "react";
+import { usePuzznic, BlockType } from "../../lib/stores/usePuzznic";
 import { GamePanel } from "../ui/game-panel";
 import { useIsMobile } from "../../hooks/use-is-mobile";
+
+// Color map for block counter display
+const blockColors = [
+  "#777777", // Type 1 - Floor blocks (gray)
+  "#FF5555", // Type 2 - Red
+  "#55FF55", // Type 3 - Green
+  "#5555FF", // Type 4 - Blue
+  "#FFFF55", // Type 5 - Yellow
+  "#FF55FF", // Type 6 - Magenta
+  "#55FFFF", // Type 7 - Cyan
+  "#FF9955", // Type 8 - Orange
+  "#AA55FF"  // Type 9 - Purple
+];
+
+// Interface for block counter
+interface BlockCount {
+  type: number;
+  count: number;
+}
 
 export default function GameUI2D() {
   const { 
@@ -15,9 +35,47 @@ export default function GameUI2D() {
     enterEditMode,
     exitEditMode,
     isTestingCustomLevel,
-    skipToLevel
+    skipToLevel,
+    board
   } = usePuzznic();
   const isMobile = useIsMobile();
+  
+  // State to track remaining blocks by type
+  const [blockCounts, setBlockCounts] = useState<BlockCount[]>([]);
+  
+  // Update block counts whenever the board changes
+  useEffect(() => {
+    if (gamePhase === "playing") {
+      updateBlockCounts();
+    }
+  }, [board, gamePhase]);
+  
+  // Count blocks of each type that remain on the board
+  const updateBlockCounts = () => {
+    const counts = new Map<number, number>();
+    
+    // Count blocks by type (excluding floor blocks)
+    for (let y = 0; y < board.length; y++) {
+      for (let x = 0; x < board[y].length; x++) {
+        const block = board[y][x];
+        if (block && block.type > 1 && !block.matched) { // Skip empty cells, floor blocks, and matched blocks
+          const count = counts.get(block.type) || 0;
+          counts.set(block.type, count + 1);
+        }
+      }
+    }
+    
+    // Convert map to array sorted by block type
+    const countsArray: BlockCount[] = [];
+    counts.forEach((count, type) => {
+      countsArray.push({ type, count });
+    });
+    
+    // Sort by type
+    countsArray.sort((a, b) => a.type - b.type);
+    
+    setBlockCounts(countsArray);
+  };
   
   // Format time as MM:SS
   const formatTime = (seconds: number) => {
@@ -36,7 +94,27 @@ export default function GameUI2D() {
         <GamePanel title="Moves" value={moveCount.toString()} />
         <GamePanel title="Level" value={`${level}-${maxLevel}`} />
         
-        {/* Controls help */}
+        {/* Block Counter - shows remaining blocks by type */}
+        {gamePhase === "playing" && blockCounts.length > 0 && (
+          <div className="mt-4 pt-2 border-t border-gray-700 w-full">
+            <h3 className="text-xs uppercase font-bold text-white mb-1">Blocks Left</h3>
+            <div className="flex flex-col gap-1">
+              {blockCounts.map(item => (
+                <div key={`block-${item.type}`} className="flex items-center gap-1">
+                  {/* Block color indicator */}
+                  <div 
+                    className="w-4 h-4 rounded-sm shadow-sm" 
+                    style={{ backgroundColor: blockColors[item.type - 1] }}
+                  />
+                  {/* Block count */}
+                  <span className="text-xs text-white font-mono">× {item.count}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {/* Controls help (moved after block counter) */}
         {gamePhase === "playing" && (
           <div className="mt-4 pt-2 border-t border-gray-700 w-full">
             <h3 className="text-xs uppercase font-bold text-white mb-1">Controls</h3>
