@@ -54,6 +54,10 @@ interface PuzznicState {
   skipToLevel: (targetLevel: number) => void; // Added for temporary level skipping
   decrementTime: () => void;
   
+  // Level selection actions
+  toggleLevelSelector: () => void;
+  selectLevel: (levelNumber: number) => void;
+  
   // Editor-specific actions
   enterEditMode: () => void;
   exitEditMode: () => void;

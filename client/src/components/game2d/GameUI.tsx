@@ -237,7 +237,7 @@ export default function GameUI2D() {
       </div>
       
       {/* Game messages */}
-      {gamePhase === "ready" && (
+      {gamePhase === "ready" && !showLevelSelector && (
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="bg-black p-8 border-4 border-cyan-600 text-center w-4/5 max-w-md">
             <div className="flex justify-center items-center mb-4">
@@ -250,7 +250,7 @@ export default function GameUI2D() {
             <div className="bg-blue-900 border-2 border-blue-700 p-4 mb-6">
               <p className="text-xl text-white mb-4">MATCH THE BLOCKS TO CLEAR THE LEVEL!</p>
             </div>
-            <div className="flex justify-center space-x-4">
+            <div className="flex justify-center space-x-4 mb-4">
               <button 
                 className="bg-red-600 hover:bg-red-800 text-white font-bold py-2 px-8 pointer-events-auto border-2 border-white"
                 onClick={() => usePuzznic.getState().startGame()}
@@ -264,6 +264,57 @@ export default function GameUI2D() {
                 LEVEL EDITOR
               </button>
             </div>
+            
+            {/* Show level selector button only if player has completed levels */}
+            {completedLevels.length > 0 && (
+              <button 
+                className="bg-cyan-600 hover:bg-cyan-800 text-white font-bold py-2 px-4 mt-2 pointer-events-auto border-2 border-white w-full"
+                onClick={() => toggleLevelSelector()}
+              >
+                SELECT LEVEL
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+      
+      {/* Level Selector Modal */}
+      {gamePhase === "ready" && showLevelSelector && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="bg-black p-8 border-4 border-cyan-600 text-center w-4/5 max-w-md">
+            <h2 className="text-3xl font-bold text-cyan-300 mb-6 font-mono uppercase">LEVEL SELECT</h2>
+            <div className="bg-blue-900 border-2 border-blue-700 p-4 mb-6">
+              <p className="text-xl text-yellow-300 mb-4 font-mono">SELECT A COMPLETED LEVEL</p>
+              
+              <div className="grid grid-cols-4 gap-2 mb-4">
+                {Array.from({ length: maxLevel }, (_, i) => i + 1).map(levelNum => {
+                  // Check if this level is completed
+                  const isCompleted = completedLevels.includes(levelNum);
+                  return (
+                    <button
+                      key={`level-${levelNum}`}
+                      className={`
+                        p-2 border-2 pointer-events-auto
+                        ${isCompleted 
+                          ? "border-green-500 bg-green-900 text-white hover:bg-green-700" 
+                          : "border-gray-600 bg-gray-900 text-gray-500 cursor-not-allowed"}
+                      `}
+                      onClick={() => isCompleted && selectLevel(levelNum)}
+                      disabled={!isCompleted}
+                    >
+                      {levelNum}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            
+            <button 
+              className="bg-blue-600 hover:bg-blue-800 text-white font-bold py-2 px-4 pointer-events-auto border-2 border-white"
+              onClick={() => toggleLevelSelector()}
+            >
+              BACK
+            </button>
           </div>
         </div>
       )}
