@@ -14,7 +14,7 @@ interface AudioState {
   setHitSound: (sound: HTMLAudioElement) => void;
   setSuccessSound: (sound: HTMLAudioElement) => void;
   setMoveSound: (sound: HTMLAudioElement) => void;
-  setMatchSound: (sound: HTMLAudioElement) => void;
+  setMatchSound: (sound: HTMLAudioElement | null) => void;
   setFallSound: (sound: HTMLAudioElement) => void;
   
   // Control functions
@@ -121,13 +121,13 @@ export const useAudio = create<AudioState>((set, get) => ({
       // Create oscillator for laser-like sound
       const oscillator = audioContext.createOscillator();
       oscillator.type = 'sine';
-      oscillator.frequency.setValueAtTime(880, audioContext.currentTime); // Starting frequency
-      oscillator.frequency.exponentialRampToValueAtTime(2200, audioContext.currentTime + 0.15); // Ending frequency
+      oscillator.frequency.setValueAtTime(1200, audioContext.currentTime); // Starting frequency 
+      oscillator.frequency.exponentialRampToValueAtTime(3000, audioContext.currentTime + 0.2); // Ending frequency (higher for laser effect)
       
-      // Create volume node
+      // Create volume node with subtle volume
       const gainNode = audioContext.createGain();
-      gainNode.gain.setValueAtTime(0.05, audioContext.currentTime); // Lower volume
-      gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.15); // Fade out
+      gainNode.gain.setValueAtTime(0.04, audioContext.currentTime); // Lower volume for subtlety
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.2); // Fade out
       
       // Connect nodes
       oscillator.connect(gainNode);
@@ -135,7 +135,7 @@ export const useAudio = create<AudioState>((set, get) => ({
       
       // Start and stop oscillator
       oscillator.start();
-      oscillator.stop(audioContext.currentTime + 0.15);
+      oscillator.stop(audioContext.currentTime + 0.2);
       
       console.log("Generated laser sound played");
     } catch (error) {

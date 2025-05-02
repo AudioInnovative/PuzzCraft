@@ -37,8 +37,10 @@ export default function Game2D() {
     const moveSound = new Audio("/sounds/move.mp3");
     moveSound.volume = 0.15; // Quieter click for moving blocks
     
-    const matchSound = new Audio("/sounds/match.mp3");
-    matchSound.volume = 0.12; // Laser sound at a subtle volume
+    // We're creating a dummy audio element for TypeScript compatibility
+    // But we'll use Web Audio API for the actual sound
+    const dummyAudio = new Audio();
+    const matchSound = dummyAudio;
     
     const fallSound = new Audio("/sounds/fall.mp3");
     fallSound.volume = 0.2; // Lower volume for falling blocks
