@@ -125,10 +125,8 @@ export const usePuzznic = create<PuzznicState>()(
         for (let x = 0; x < cols; x++) {
           const value = levelData[levelY][x];
           if (value > 0) {
-            // Floor blocks are at the bottom (gameY=0) and are typically type 1
-            // Important: Only blocks at the very bottom should be fixed floor blocks
-            // Red blocks (type 1) anywhere else should behave like normal blocks
-            const isFloor = gameY === 0 && value === 1;
+            // All type 1 blocks are now considered fixed/floor blocks regardless of position
+            const isFloor = value === 1;
             
             board[gameY][x] = {
               id: gameY * cols + x,
@@ -138,8 +136,8 @@ export const usePuzznic = create<PuzznicState>()(
               selected: false,
               matched: false,
               falling: false,
-              isFixed: isFloor, // Mark floor blocks as fixed
-              isFloor: isFloor // Also explicitly mark them as floor blocks
+              isFixed: isFloor, // Mark all type 1 blocks as fixed
+              isFloor: isFloor // Mark all type 1 blocks as floor blocks
             };
           }
         }
@@ -162,11 +160,12 @@ export const usePuzznic = create<PuzznicState>()(
       
       // Timer functionality removed - no time limit
 
-      // Apply gravity immediately when the game starts
+      // Apply gravity almost immediately when the game starts
+      // Using a very small delay to allow the game state to update first
       setTimeout(() => {
         const { applyGravity } = get();
         applyGravity();
-      }, 500);
+      }, 50);
     },
     
     // Select a block at given position
