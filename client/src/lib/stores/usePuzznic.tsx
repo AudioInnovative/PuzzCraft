@@ -79,58 +79,9 @@ export const usePuzznic = create<PuzznicState>()(
     
     // Helper function to validate level data
     validateLevelData: (levelData: number[][]) => {
-      const blockCounts: Record<number, number> = {};
-      
-      // Identify the floor blocks which are typically at the bottom rows
-      const floorBlocks: Set<string> = new Set();
-      
-      // First find all rows that look like floor rows (rows with many type 1 blocks at the bottom)
-      const potentialFloorRows: number[] = [];
-      for (let y = levelData.length - 1; y >= Math.max(0, levelData.length - 3); y--) {
-        // Check if this row has type 1 blocks (typical floor blocks)
-        const type1Count = levelData[y].filter(value => value === 1).length;
-        if (type1Count >= 3) { // If there are several type 1 blocks, this is likely a floor row
-          potentialFloorRows.push(y);
-          
-          // Mark all type 1 blocks in this row as floor blocks
-          for (let x = 0; x < levelData[y].length; x++) {
-            if (levelData[y][x] === 1) {
-              floorBlocks.add(`${y},${x}`);
-            }
-          }
-        }
-      }
-      
-      // Now count all non-floor blocks
-      for (let y = 0; y < levelData.length; y++) {
-        for (let x = 0; x < levelData[y].length; x++) {
-          const blockType = levelData[y][x];
-          const isFloorBlock = floorBlocks.has(`${y},${x}`);
-          
-          // Count only non-floor, non-zero blocks
-          if (blockType > 0 && !isFloorBlock) {
-            blockCounts[blockType] = (blockCounts[blockType] || 0) + 1;
-          }
-        }
-      }
-      
-      // Check if all block types have an even count
-      let isValid = true;
-      const blockTypeErrors: number[] = [];
-      
-      for (const blockType in blockCounts) {
-        if (blockCounts[blockType] % 2 !== 0) {
-          isValid = false;
-          blockTypeErrors.push(parseInt(blockType));
-        }
-      }
-      
-      // Log warning if level is not valid
-      if (!isValid) {
-        console.warn(`Level validation failed: Block types ${blockTypeErrors.join(', ')} have odd counts.`);
-      }
-      
-      return isValid;
+      // Removed even-block validation requirement
+      // Always return true to allow any number of blocks in custom levels
+      return true;
     },
     
     // Game initialization
@@ -597,14 +548,10 @@ export const usePuzznic = create<PuzznicState>()(
     
     testLevel: () => {
       // Save the current level data for testing
-      const { generateLevelData, validateLevelData } = get();
+      const { generateLevelData } = get();
       const levelData = generateLevelData();
       
-      // Validate the level first
-      if (!validateLevelData(levelData)) {
-        console.warn("Cannot test invalid level - all block types must have even counts");
-        return false;
-      }
+      // No validation required - any level can be tested now
       
       // Store the current level as a temporary test level
       const currentUserLevels = get().userLevels;
@@ -755,14 +702,9 @@ export const usePuzznic = create<PuzznicState>()(
     },
     
     saveUserLevel: () => {
-      const { currentLevelData, userLevels, validateLevelData } = get();
+      const { currentLevelData, userLevels } = get();
       
-      // Validate level before saving
-      const isValid = validateLevelData(currentLevelData);
-      if (!isValid) {
-        console.warn("Cannot save invalid level. Each block type must appear an even number of times.");
-        return;
-      }
+      // No validation needed - any level design is allowed now
       
       // Add the level to user levels
       const updatedUserLevels = [...userLevels, JSON.parse(JSON.stringify(currentLevelData))];
