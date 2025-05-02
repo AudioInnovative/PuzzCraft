@@ -851,6 +851,25 @@ export const usePuzznic = create<PuzznicState>()(
       set({ maxLevel: Levels.length + updatedUserLevels.length });
     },
     
+    // Toggle level selector visibility
+    toggleLevelSelector: () => {
+      set((state) => ({ showLevelSelector: !state.showLevelSelector }));
+    },
+    
+    // Select a specific level that player has completed
+    selectLevel: (levelNumber: number) => {
+      set({ level: levelNumber, showLevelSelector: false });
+      
+      const { initGame } = get();
+      initGame();
+      
+      // Start game with the initial gravity
+      setTimeout(() => {
+        const { startGame } = get();
+        startGame();
+      }, 300);
+    },
+    
     loadUserLevel: (index) => {
       const { userLevels } = get();
       

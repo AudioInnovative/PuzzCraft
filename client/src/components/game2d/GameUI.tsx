@@ -48,6 +48,7 @@ export default function GameUI2D() {
     gamePhase, 
     level, 
     maxLevel,
+    completedLevels, 
     score, 
     moveCount, 
     timeLeft,
@@ -57,7 +58,10 @@ export default function GameUI2D() {
     exitEditMode,
     isTestingCustomLevel,
     skipToLevel,
-    board
+    board,
+    showLevelSelector,
+    toggleLevelSelector,
+    selectLevel
   } = usePuzznic();
   const isMobile = useIsMobile();
   
