@@ -5,11 +5,13 @@ import { KeyboardController } from './KeyboardController';
 import { TouchController } from './TouchController';
 import SoundManager2D from './SoundManager';
 import SimpleLevelEditor from './SimpleLevelEditor';
+import SoundControlMenu from './SoundControlMenu';
 import { useAudio } from '../../lib/stores/useAudio';
 import { usePuzznic } from '../../lib/stores/usePuzznic';
 
 export default function Game2D() {
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
+  const [showSoundMenu, setShowSoundMenu] = useState(false);
   const { 
     setBackgroundMusic, 
     setHitSound, 
@@ -22,11 +24,32 @@ export default function Game2D() {
 
   // Initialize sounds and game
   useEffect(() => {
+    // --- BACKGROUND MUSIC CYCLING ---
+    // List of background music files
+    const backgroundTracks = [
+      "/sounds/Background/Echoes of the Heroic Heart.mp3",
+      "/sounds/Background/Eternal Drift.mp3",
+      "/sounds/Background/PuzzCraft bg.mp3"
+    ];
+    let currentTrackIndex = 0;
+    let backgroundMusic = new Audio(backgroundTracks[currentTrackIndex]);
+    backgroundMusic.volume = 0.075; // 50% lower than before
+    backgroundMusic.loop = false;
+
+    // Function to play next track
+    const playNextTrack = () => {
+      currentTrackIndex = (currentTrackIndex + 1) % backgroundTracks.length;
+      backgroundMusic.src = backgroundTracks[currentTrackIndex];
+      backgroundMusic.currentTime = 0;
+      backgroundMusic.play();
+    };
+
+    // When a track ends, play the next one
+    backgroundMusic.addEventListener('ended', playNextTrack);
+
+    // --- END BACKGROUND MUSIC CYCLING ---
+
     // Load audio elements
-    const backgroundMusic = new Audio("/sounds/background.mp3");
-    backgroundMusic.loop = true;
-    backgroundMusic.volume = 0.15; // Reduced volume substantially
-    
     const hitSound = new Audio("/sounds/hit.mp3");
     hitSound.volume = 0.5;
     
@@ -58,6 +81,7 @@ export default function Game2D() {
     
     return () => {
       backgroundMusic.pause();
+      backgroundMusic.removeEventListener('ended', playNextTrack);
       hitSound.pause();
       successSound.pause();
       moveSound.pause();
@@ -95,6 +119,15 @@ export default function Game2D() {
 
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden' }}>
+      <button
+        style={{
+          position: 'absolute', top: 20, right: 20, zIndex: 1100, padding: '8px 16px', borderRadius: 8, border: 'none', background: '#252542', color: '#fff', fontWeight: 600, cursor: 'pointer', boxShadow: '0 2px 8px #0004'
+        }}
+        onClick={() => setShowSoundMenu((v) => !v)}
+      >
+        {showSoundMenu ? 'Close Sound Menu' : 'Sound Settings'}
+      </button>
+      {showSoundMenu && <SoundControlMenu />}
       {gamePhase !== "editing" && (
         <>
           {/* Position the game board with a left margin to account for the score panel */}
