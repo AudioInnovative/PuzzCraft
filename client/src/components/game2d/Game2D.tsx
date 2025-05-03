@@ -121,7 +121,7 @@ export default function Game2D() {
     <div style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden' }}>
       <button
         style={{
-          position: 'absolute', top: 20, right: 20, zIndex: 1100, padding: '8px 16px', borderRadius: 8, border: 'none', background: '#252542', color: '#fff', fontWeight: 600, cursor: 'pointer', boxShadow: '0 2px 8px #0004'
+          position: 'absolute', bottom: 20, right: 20, zIndex: 1100, padding: '8px 16px', borderRadius: 8, border: 'none', background: '#252542', color: '#fff', fontWeight: 600, cursor: 'pointer', boxShadow: '0 2px 8px #0004'
         }}
         onClick={() => setShowSoundMenu((v) => !v)}
       >

@@ -61,7 +61,7 @@ const SoundControlMenu: React.FC = () => {
   return (
     <div style={{
       position: "absolute",
-      top: 60, // 40px below button (button is 20px from top + ~40px height)
+      bottom: 60, // 40px above button (button is 20px from bottom + ~40px height)
       right: 20,
       background: "rgba(30,30,40,0.97)",
       borderRadius: 12,

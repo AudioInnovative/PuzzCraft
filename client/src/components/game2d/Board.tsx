@@ -31,16 +31,27 @@ function renderBlock(
   animationProgress: number = 0 // Animation progress from 0 to 1 for falling
 ) {
   // Apply selection effect
-  const blockSize = isSelected ? size * 1.1 : size * 0.95;
+  const baseBlockSize = isSelected ? size * 1.1 : size * 0.95;
+  let drawBlockSize = baseBlockSize;
   
   // Calculate position with animation if block is falling
-  let blockX = x + (size - blockSize) / 2;
-  let blockY = y + (size - blockSize) / 2;
+  let blockX = x + (size - drawBlockSize) / 2;
+  let blockY = y + (size - drawBlockSize) / 2;
   
   // If block is falling, animate its position
   if (block.falling && animationProgress > 0) {
-    // Animate from the position above to current position
-    blockY = (y - size) + (size * animationProgress) + (size - blockSize) / 2;
+    // Use an ease-out cubic for smoother falling
+    const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
+    const easedProgress = easeOutCubic(animationProgress);
+    blockY = (y - size) + (size * easedProgress) + (size - drawBlockSize) / 2;
+    // Add a more pronounced squash effect as it lands
+    if (animationProgress > 0.85) {
+      const squash = 1 + 0.18 * (1 - (animationProgress - 0.85) / 0.15); // Squash at the end
+      const squashFactor = Math.min(squash, 1.18);
+      drawBlockSize = baseBlockSize * squashFactor;
+      blockY += size * 0.03 * (1 - squashFactor); // Adjust Y so squash stays centered
+    }
+    blockX = x + (size - drawBlockSize) / 2;
   }
   
   // Set opacity for matched blocks
@@ -95,7 +106,7 @@ function renderBlock(
   // Floor block (type 1) with 3D effect
   if (block.type === 1) {
     // Use futuristic version of floor blocks with rounded corners
-    let radius = blockSize * 0.2; // Same radius as regular blocks
+    let radius = drawBlockSize * 0.2; // Same radius as regular blocks
     
     // Draw shadow effect directly on the canvas
     ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
@@ -107,12 +118,12 @@ function renderBlock(
     ctx.fillStyle = '#333333'; // Very dark gray base
     ctx.beginPath();
     ctx.moveTo(blockX + radius, blockY);
-    ctx.lineTo(blockX + blockSize - radius, blockY);
-    ctx.quadraticCurveTo(blockX + blockSize, blockY, blockX + blockSize, blockY + radius);
-    ctx.lineTo(blockX + blockSize, blockY + blockSize - radius);
-    ctx.quadraticCurveTo(blockX + blockSize, blockY + blockSize, blockX + blockSize - radius, blockY + blockSize);
-    ctx.lineTo(blockX + radius, blockY + blockSize);
-    ctx.quadraticCurveTo(blockX, blockY + blockSize, blockX, blockY + blockSize - radius);
+    ctx.lineTo(blockX + drawBlockSize - radius, blockY);
+    ctx.quadraticCurveTo(blockX + drawBlockSize, blockY, blockX + drawBlockSize, blockY + radius);
+    ctx.lineTo(blockX + drawBlockSize, blockY + drawBlockSize - radius);
+    ctx.quadraticCurveTo(blockX + drawBlockSize, blockY + drawBlockSize, blockX + drawBlockSize - radius, blockY + drawBlockSize);
+    ctx.lineTo(blockX + radius, blockY + drawBlockSize);
+    ctx.quadraticCurveTo(blockX, blockY + drawBlockSize, blockX, blockY + drawBlockSize - radius);
     ctx.lineTo(blockX, blockY + radius);
     ctx.quadraticCurveTo(blockX, blockY, blockX + radius, blockY);
     ctx.closePath();
@@ -127,7 +138,7 @@ function renderBlock(
     // Add 3D bevel effect with metallic gradient
     const bevelGradient = ctx.createLinearGradient(
       blockX, blockY, 
-      blockX + blockSize, blockY + blockSize
+      blockX + drawBlockSize, blockY + drawBlockSize
     );
     
     // Gradient goes from lighter to darker for 3D effect
@@ -142,12 +153,12 @@ function renderBlock(
     const bevel = 2;
     ctx.beginPath();
     ctx.moveTo(blockX + radius, blockY + bevel);
-    ctx.lineTo(blockX + blockSize - radius, blockY + bevel);
-    ctx.quadraticCurveTo(blockX + blockSize - bevel, blockY + bevel, blockX + blockSize - bevel, blockY + radius);
-    ctx.lineTo(blockX + blockSize - bevel, blockY + blockSize - radius);
-    ctx.quadraticCurveTo(blockX + blockSize - bevel, blockY + blockSize - bevel, blockX + blockSize - radius, blockY + blockSize - bevel);
-    ctx.lineTo(blockX + radius, blockY + blockSize - bevel);
-    ctx.quadraticCurveTo(blockX + bevel, blockY + blockSize - bevel, blockX + bevel, blockY + blockSize - radius);
+    ctx.lineTo(blockX + drawBlockSize - radius, blockY + bevel);
+    ctx.quadraticCurveTo(blockX + drawBlockSize - bevel, blockY + bevel, blockX + drawBlockSize - bevel, blockY + radius);
+    ctx.lineTo(blockX + drawBlockSize - bevel, blockY + drawBlockSize - radius);
+    ctx.quadraticCurveTo(blockX + drawBlockSize - bevel, blockY + drawBlockSize - bevel, blockX + drawBlockSize - radius, blockY + drawBlockSize - bevel);
+    ctx.lineTo(blockX + radius, blockY + drawBlockSize - bevel);
+    ctx.quadraticCurveTo(blockX + bevel, blockY + drawBlockSize - bevel, blockX + bevel, blockY + drawBlockSize - radius);
     ctx.lineTo(blockX + bevel, blockY + radius);
     ctx.quadraticCurveTo(blockX + bevel, blockY + bevel, blockX + radius, blockY + bevel);
     ctx.closePath();
@@ -158,13 +169,13 @@ function renderBlock(
     ctx.clip(); // Still use clipping for safety
     
     // Just a very subtle highlight in the top-left
-    const lightSize = blockSize * 0.5;
+    const lightSize = drawBlockSize * 0.5;
     const gradientHighlight = ctx.createRadialGradient(
-      blockX + blockSize * 0.3,
-      blockY + blockSize * 0.3,
+      blockX + drawBlockSize * 0.3,
+      blockY + drawBlockSize * 0.3,
       0,
-      blockX + blockSize * 0.3,
-      blockY + blockSize * 0.3,
+      blockX + drawBlockSize * 0.3,
+      blockY + drawBlockSize * 0.3,
       lightSize
     );
     
@@ -172,7 +183,7 @@ function renderBlock(
     gradientHighlight.addColorStop(1, `rgba(255, 255, 255, 0)`); // Fade to transparent
     
     ctx.fillStyle = gradientHighlight;
-    ctx.fillRect(blockX, blockY, blockSize, blockSize);
+    ctx.fillRect(blockX, blockY, drawBlockSize, drawBlockSize);
     
     ctx.restore();
     
@@ -188,12 +199,12 @@ function renderBlock(
     
     ctx.beginPath();
     ctx.moveTo(blockX + radius, blockY);
-    ctx.lineTo(blockX + blockSize - radius, blockY);
-    ctx.quadraticCurveTo(blockX + blockSize, blockY, blockX + blockSize, blockY + radius);
-    ctx.lineTo(blockX + blockSize, blockY + blockSize - radius);
-    ctx.quadraticCurveTo(blockX + blockSize, blockY + blockSize, blockX + blockSize - radius, blockY + blockSize);
-    ctx.lineTo(blockX + radius, blockY + blockSize);
-    ctx.quadraticCurveTo(blockX, blockY + blockSize, blockX, blockY + blockSize - radius);
+    ctx.lineTo(blockX + drawBlockSize - radius, blockY);
+    ctx.quadraticCurveTo(blockX + drawBlockSize, blockY, blockX + drawBlockSize, blockY + radius);
+    ctx.lineTo(blockX + drawBlockSize, blockY + drawBlockSize - radius);
+    ctx.quadraticCurveTo(blockX + drawBlockSize, blockY + drawBlockSize, blockX + drawBlockSize - radius, blockY + drawBlockSize);
+    ctx.lineTo(blockX + radius, blockY + drawBlockSize);
+    ctx.quadraticCurveTo(blockX, blockY + drawBlockSize, blockX, blockY + drawBlockSize - radius);
     ctx.lineTo(blockX, blockY + radius);
     ctx.quadraticCurveTo(blockX, blockY, blockX + radius, blockY);
     ctx.closePath();
@@ -204,7 +215,7 @@ function renderBlock(
     ctx.shadowBlur = 0;
   } else if (block.isFixed && block.type !== 1) {
     // Wall blocks with futuristic tech style and 3D effect
-    let radius = blockSize * 0.2; // Match radius with other blocks
+    let radius = drawBlockSize * 0.2; // Match radius with other blocks
     
     // Draw shadow effect directly on the canvas
     ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
@@ -216,12 +227,12 @@ function renderBlock(
     ctx.fillStyle = '#1A2530'; // Very dark blue base
     ctx.beginPath();
     ctx.moveTo(blockX + radius, blockY);
-    ctx.lineTo(blockX + blockSize - radius, blockY);
-    ctx.quadraticCurveTo(blockX + blockSize, blockY, blockX + blockSize, blockY + radius);
-    ctx.lineTo(blockX + blockSize, blockY + blockSize - radius);
-    ctx.quadraticCurveTo(blockX + blockSize, blockY + blockSize, blockX + blockSize - radius, blockY + blockSize);
-    ctx.lineTo(blockX + radius, blockY + blockSize);
-    ctx.quadraticCurveTo(blockX, blockY + blockSize, blockX, blockY + blockSize - radius);
+    ctx.lineTo(blockX + drawBlockSize - radius, blockY);
+    ctx.quadraticCurveTo(blockX + drawBlockSize, blockY, blockX + drawBlockSize, blockY + radius);
+    ctx.lineTo(blockX + drawBlockSize, blockY + drawBlockSize - radius);
+    ctx.quadraticCurveTo(blockX + drawBlockSize, blockY + drawBlockSize, blockX + drawBlockSize - radius, blockY + drawBlockSize);
+    ctx.lineTo(blockX + radius, blockY + drawBlockSize);
+    ctx.quadraticCurveTo(blockX, blockY + drawBlockSize, blockX, blockY + drawBlockSize - radius);
     ctx.lineTo(blockX, blockY + radius);
     ctx.quadraticCurveTo(blockX, blockY, blockX + radius, blockY);
     ctx.closePath();
@@ -236,7 +247,7 @@ function renderBlock(
     // Add 3D bevel effect with tech gradient
     const bevelGradient = ctx.createLinearGradient(
       blockX, blockY, 
-      blockX + blockSize, blockY + blockSize
+      blockX + drawBlockSize, blockY + drawBlockSize
     );
     
     // Gradient goes from lighter to darker for 3D effect
@@ -251,12 +262,12 @@ function renderBlock(
     const bevel = 2;
     ctx.beginPath();
     ctx.moveTo(blockX + radius, blockY + bevel);
-    ctx.lineTo(blockX + blockSize - radius, blockY + bevel);
-    ctx.quadraticCurveTo(blockX + blockSize - bevel, blockY + bevel, blockX + blockSize - bevel, blockY + radius);
-    ctx.lineTo(blockX + blockSize - bevel, blockY + blockSize - radius);
-    ctx.quadraticCurveTo(blockX + blockSize - bevel, blockY + blockSize - bevel, blockX + blockSize - radius, blockY + blockSize - bevel);
-    ctx.lineTo(blockX + radius, blockY + blockSize - bevel);
-    ctx.quadraticCurveTo(blockX + bevel, blockY + blockSize - bevel, blockX + bevel, blockY + blockSize - radius);
+    ctx.lineTo(blockX + drawBlockSize - radius, blockY + bevel);
+    ctx.quadraticCurveTo(blockX + drawBlockSize - bevel, blockY + bevel, blockX + drawBlockSize - bevel, blockY + radius);
+    ctx.lineTo(blockX + drawBlockSize - bevel, blockY + drawBlockSize - radius);
+    ctx.quadraticCurveTo(blockX + drawBlockSize - bevel, blockY + drawBlockSize - bevel, blockX + drawBlockSize - radius, blockY + drawBlockSize - bevel);
+    ctx.lineTo(blockX + radius, blockY + drawBlockSize - bevel);
+    ctx.quadraticCurveTo(blockX + bevel, blockY + drawBlockSize - bevel, blockX + bevel, blockY + drawBlockSize - radius);
     ctx.lineTo(blockX + bevel, blockY + radius);
     ctx.quadraticCurveTo(blockX + bevel, blockY + bevel, blockX + radius, blockY + bevel);
     ctx.closePath();
@@ -267,13 +278,13 @@ function renderBlock(
     ctx.clip(); // Still use clipping for safety
     
     // Just a very subtle top-left highlight for 3D effect
-    const lightSize = blockSize * 0.6;
+    const lightSize = drawBlockSize * 0.6;
     const gradientHighlight = ctx.createRadialGradient(
-      blockX + blockSize * 0.25, // More towards the top-left
-      blockY + blockSize * 0.25,
+      blockX + drawBlockSize * 0.25, // More towards the top-left
+      blockY + drawBlockSize * 0.25,
       0,
-      blockX + blockSize * 0.25,
-      blockY + blockSize * 0.25,
+      blockX + drawBlockSize * 0.25,
+      blockY + drawBlockSize * 0.25,
       lightSize
     );
     
@@ -281,7 +292,7 @@ function renderBlock(
     gradientHighlight.addColorStop(1, 'rgba(60, 100, 140, 0)'); // Fade to transparent
     
     ctx.fillStyle = gradientHighlight;
-    ctx.fillRect(blockX, blockY, blockSize, blockSize);
+    ctx.fillRect(blockX, blockY, drawBlockSize, drawBlockSize);
     
     ctx.restore();
     
@@ -297,12 +308,12 @@ function renderBlock(
     
     ctx.beginPath();
     ctx.moveTo(blockX + radius, blockY);
-    ctx.lineTo(blockX + blockSize - radius, blockY);
-    ctx.quadraticCurveTo(blockX + blockSize, blockY, blockX + blockSize, blockY + radius);
-    ctx.lineTo(blockX + blockSize, blockY + blockSize - radius);
-    ctx.quadraticCurveTo(blockX + blockSize, blockY + blockSize, blockX + blockSize - radius, blockY + blockSize);
-    ctx.lineTo(blockX + radius, blockY + blockSize);
-    ctx.quadraticCurveTo(blockX, blockY + blockSize, blockX, blockY + blockSize - radius);
+    ctx.lineTo(blockX + drawBlockSize - radius, blockY);
+    ctx.quadraticCurveTo(blockX + drawBlockSize, blockY, blockX + drawBlockSize, blockY + radius);
+    ctx.lineTo(blockX + drawBlockSize, blockY + drawBlockSize - radius);
+    ctx.quadraticCurveTo(blockX + drawBlockSize, blockY + drawBlockSize, blockX + drawBlockSize - radius, blockY + drawBlockSize);
+    ctx.lineTo(blockX + radius, blockY + drawBlockSize);
+    ctx.quadraticCurveTo(blockX, blockY + drawBlockSize, blockX, blockY + drawBlockSize - radius);
     ctx.lineTo(blockX, blockY + radius);
     ctx.quadraticCurveTo(blockX, blockY, blockX + radius, blockY);
     ctx.closePath();
@@ -319,12 +330,13 @@ function renderBlock(
     // Convert hex to RGB for glow
     let r = 255, g = 255, b = 255;
     if (color.startsWith('#')) {
+      // Convert hex to RGB
       r = parseInt(color.substring(1, 3), 16);
       g = parseInt(color.substring(3, 5), 16);
       b = parseInt(color.substring(5, 7), 16);
     }
     
-    let radius = blockSize * 0.2; // Slightly larger rounded corner radius for modern look
+    let radius = drawBlockSize * 0.2; // Slightly larger rounded corner radius for modern look
     
     // Draw shadow effect directly on the canvas rather than as another shape
     // to prevent overlapping issues
@@ -337,12 +349,12 @@ function renderBlock(
     ctx.fillStyle = `rgb(${Math.floor(r*0.4)}, ${Math.floor(g*0.4)}, ${Math.floor(b*0.4)})`;
     ctx.beginPath();
     ctx.moveTo(blockX + radius, blockY);
-    ctx.lineTo(blockX + blockSize - radius, blockY);
-    ctx.quadraticCurveTo(blockX + blockSize, blockY, blockX + blockSize, blockY + radius);
-    ctx.lineTo(blockX + blockSize, blockY + blockSize - radius);
-    ctx.quadraticCurveTo(blockX + blockSize, blockY + blockSize, blockX + blockSize - radius, blockY + blockSize);
-    ctx.lineTo(blockX + radius, blockY + blockSize);
-    ctx.quadraticCurveTo(blockX, blockY + blockSize, blockX, blockY + blockSize - radius);
+    ctx.lineTo(blockX + drawBlockSize - radius, blockY);
+    ctx.quadraticCurveTo(blockX + drawBlockSize, blockY, blockX + drawBlockSize, blockY + radius);
+    ctx.lineTo(blockX + drawBlockSize, blockY + drawBlockSize - radius);
+    ctx.quadraticCurveTo(blockX + drawBlockSize, blockY + drawBlockSize, blockX + drawBlockSize - radius, blockY + drawBlockSize);
+    ctx.lineTo(blockX + radius, blockY + drawBlockSize);
+    ctx.quadraticCurveTo(blockX, blockY + drawBlockSize, blockX, blockY + drawBlockSize - radius);
     ctx.lineTo(blockX, blockY + radius);
     ctx.quadraticCurveTo(blockX, blockY, blockX + radius, blockY);
     ctx.closePath();
@@ -357,7 +369,7 @@ function renderBlock(
     // Add a 3D bevel effect with gradient
     const bevelGradient = ctx.createLinearGradient(
       blockX, blockY, 
-      blockX + blockSize, blockY + blockSize
+      blockX + drawBlockSize, blockY + drawBlockSize
     );
     
     // Gradient goes from lighter to darker for 3D effect
@@ -372,12 +384,12 @@ function renderBlock(
     const bevel = 2;
     ctx.beginPath();
     ctx.moveTo(blockX + radius, blockY + bevel);
-    ctx.lineTo(blockX + blockSize - radius, blockY + bevel);
-    ctx.quadraticCurveTo(blockX + blockSize - bevel, blockY + bevel, blockX + blockSize - bevel, blockY + radius);
-    ctx.lineTo(blockX + blockSize - bevel, blockY + blockSize - radius);
-    ctx.quadraticCurveTo(blockX + blockSize - bevel, blockY + blockSize - bevel, blockX + blockSize - radius, blockY + blockSize - bevel);
-    ctx.lineTo(blockX + radius, blockY + blockSize - bevel);
-    ctx.quadraticCurveTo(blockX + bevel, blockY + blockSize - bevel, blockX + bevel, blockY + blockSize - radius);
+    ctx.lineTo(blockX + drawBlockSize - radius, blockY + bevel);
+    ctx.quadraticCurveTo(blockX + drawBlockSize - bevel, blockY + bevel, blockX + drawBlockSize - bevel, blockY + radius);
+    ctx.lineTo(blockX + drawBlockSize - bevel, blockY + drawBlockSize - radius);
+    ctx.quadraticCurveTo(blockX + drawBlockSize - bevel, blockY + drawBlockSize - bevel, blockX + drawBlockSize - radius, blockY + drawBlockSize - bevel);
+    ctx.lineTo(blockX + radius, blockY + drawBlockSize - bevel);
+    ctx.quadraticCurveTo(blockX + bevel, blockY + drawBlockSize - bevel, blockX + bevel, blockY + drawBlockSize - radius);
     ctx.lineTo(blockX + bevel, blockY + radius);
     ctx.quadraticCurveTo(blockX + bevel, blockY + bevel, blockX + radius, blockY + bevel);
     ctx.closePath();
@@ -388,13 +400,13 @@ function renderBlock(
     ctx.clip(); // Still use clipping for safety
     
     // Just a very subtle top highlight to maintain 3D look without patterns
-    const lightSize = blockSize * 0.3;
+    const lightSize = drawBlockSize * 0.3;
     const gradientHighlight = ctx.createRadialGradient(
-      blockX + blockSize * 0.3, // Slightly to the top-left
-      blockY + blockSize * 0.3,
+      blockX + drawBlockSize * 0.3, // Slightly to the top-left
+      blockY + drawBlockSize * 0.3,
       0,
-      blockX + blockSize * 0.3,
-      blockY + blockSize * 0.3,
+      blockX + drawBlockSize * 0.3,
+      blockY + drawBlockSize * 0.3,
       lightSize
     );
     
@@ -402,7 +414,7 @@ function renderBlock(
     gradientHighlight.addColorStop(1, `rgba(255, 255, 255, 0)`); // Fade to transparent
     
     ctx.fillStyle = gradientHighlight;
-    ctx.fillRect(blockX, blockY, blockSize, blockSize);
+    ctx.fillRect(blockX, blockY, drawBlockSize, drawBlockSize);
     
     ctx.restore();
     
@@ -418,12 +430,12 @@ function renderBlock(
     
     ctx.beginPath();
     ctx.moveTo(blockX + radius, blockY);
-    ctx.lineTo(blockX + blockSize - radius, blockY);
-    ctx.quadraticCurveTo(blockX + blockSize, blockY, blockX + blockSize, blockY + radius);
-    ctx.lineTo(blockX + blockSize, blockY + blockSize - radius);
-    ctx.quadraticCurveTo(blockX + blockSize, blockY + blockSize, blockX + blockSize - radius, blockY + blockSize);
-    ctx.lineTo(blockX + radius, blockY + blockSize);
-    ctx.quadraticCurveTo(blockX, blockY + blockSize, blockX, blockY + blockSize - radius);
+    ctx.lineTo(blockX + drawBlockSize - radius, blockY);
+    ctx.quadraticCurveTo(blockX + drawBlockSize, blockY, blockX + drawBlockSize, blockY + radius);
+    ctx.lineTo(blockX + drawBlockSize, blockY + drawBlockSize - radius);
+    ctx.quadraticCurveTo(blockX + drawBlockSize, blockY + drawBlockSize, blockX + drawBlockSize - radius, blockY + drawBlockSize);
+    ctx.lineTo(blockX + radius, blockY + drawBlockSize);
+    ctx.quadraticCurveTo(blockX, blockY + drawBlockSize, blockX, blockY + drawBlockSize - radius);
     ctx.lineTo(blockX, blockY + radius);
     ctx.quadraticCurveTo(blockX, blockY, blockX + radius, blockY);
     ctx.closePath();
@@ -530,9 +542,8 @@ interface BoardProps {
 export function Board2D({ width, height }: BoardProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationFrameRef = useRef<number | null>(null);
-  const animationProgressRef = useRef<number>(0);
   const lastFrameTimeRef = useRef<number | null>(null);
-  const anyBlocksFallingRef = useRef<boolean>(false);
+  const blockAnimationProgress = useRef(new Map());
   
   const { 
     board, 
@@ -592,6 +603,61 @@ export function Board2D({ width, height }: BoardProps) {
   const mouseMoveThresholdRef = useRef<number>(15); // Moderate threshold for intentional movement
   const lastMoveTimeRef = useRef<number>(0); // To limit how frequently moves can happen
   
+  // --- Mouse down handler (editor and game) ---
+  const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (e.button !== 0) return; // Only respond to left mouse button
+    const coords = getGridCoordinates(e.clientX, e.clientY);
+    if (!coords) return;
+    const { gridX, gameY } = coords;
+    if (gamePhase === "editing") {
+      placeEditorBlock(gridX, gameY, currentEditingBlockType);
+    } else if (gamePhase === "playing") {
+      selectBlock(gridX, gameY);
+      dragStartRef.current = { x: e.clientX, y: e.clientY, gridX, gameY };
+    }
+  };
+
+  // --- Mouse move handler (editor and game) ---
+  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    // Only handle drag logic for playing mode
+    if (gamePhase !== "playing" || !dragStartRef.current) return;
+    const coords = getGridCoordinates(e.clientX, e.clientY);
+    if (coords) {
+      const { gridX, gameY } = coords;
+      if (!selectedBlockPos || selectedBlockPos.x !== gridX || selectedBlockPos.y !== gameY) {
+        selectBlock(gridX, gameY);
+      }
+    }
+    const currentTime = Date.now();
+    const timeSinceLastMove = currentTime - lastMoveTimeRef.current;
+    if (timeSinceLastMove < 120) return;
+    const { x: startX } = dragStartRef.current;
+    const diffX = e.clientX - startX;
+    if (Math.abs(diffX) > mouseMoveThresholdRef.current) {
+      const { moveSelectedBlock } = usePuzznic.getState();
+      if (diffX < 0) {
+        moveSelectedBlock('left');
+        playHitSound();
+      } else {
+        moveSelectedBlock('right');
+        playHitSound();
+      }
+      lastMoveTimeRef.current = currentTime;
+      dragStartRef.current.x = e.clientX;
+      dragStartRef.current.y = e.clientY;
+    }
+  };
+
+  // --- Mouse up handler ---
+  const handleMouseUp = () => {
+    dragStartRef.current = null;
+  };
+
+  // --- Mouse leave handler ---
+  const handleMouseLeave = () => {
+    dragStartRef.current = null;
+  };
+
   // Function to handle pointer (mouse or touch) events for selection
   const handlePointerSelect = (clientX: number, clientY: number) => {
     const coords = getGridCoordinates(clientX, clientY);
@@ -626,198 +692,126 @@ export function Board2D({ width, height }: BoardProps) {
     // Play sound for feedback
     playHitSound();
   };
+
+  // Helper: get unique key for a block
+  function blockKey(x: number, y: number): string {
+    return `${x},${y}`;
+  }
   
-  // Mouse move handler for dragging blocks
-  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    // Only handle mouse move if we're in game mode and have a dragging operation
-    if (gamePhase !== "playing" || !dragStartRef.current || !selectedBlockPos) return;
-    
-    // Check if we've moved recently (enforcing a cooldown period)
-    const currentTime = Date.now();
-    const timeSinceLastMove = currentTime - lastMoveTimeRef.current;
-    
-    // Don't allow moves more frequently than every 500ms to ensure one space at a time
-    if (timeSinceLastMove < 500) return;
-    
-    const { x: startX } = dragStartRef.current;
-    const diffX = e.clientX - startX;
-    
-    // Check if we've moved enough to trigger a direction
-    if (Math.abs(diffX) > mouseMoveThresholdRef.current) {
-      const { moveSelectedBlock } = usePuzznic.getState();
-      const { x, y } = selectedBlockPos;
-      
-      if (diffX < 0) {
-        // Move left
-        moveSelectedBlock('left');
-        playHitSound();
-      } else {
-        // Move right
-        moveSelectedBlock('right');
-        playHitSound();
-      }
-      
-      // Update last move time - longer delay forces user to re-drag for next move
-      lastMoveTimeRef.current = currentTime;
-      
-      // Reset drag - this forces the user to release mouse and drag again for another move
-      dragStartRef.current = null;
-    }
-  };
-  
-  // Handle mouse up to reset drag operation
-  const handleMouseUp = () => {
-    dragStartRef.current = null;
-  };
-  
-  // Handle mouse leaving canvas to reset drag operation
-  const handleMouseLeave = () => {
-    dragStartRef.current = null;
-  };
-  
-  // Handle mouse click
-  const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    handlePointerSelect(e.clientX, e.clientY);
-  };
-  
-  // Handle touch start event
-  const handleCanvasTouch = (e: React.TouchEvent<HTMLCanvasElement>) => {
-    if (e.touches.length === 1) {
-      // Prevent scrolling when touching the canvas
-      e.preventDefault();
-      
-      // Handle block selection
-      handlePointerSelect(e.touches[0].clientX, e.touches[0].clientY);
-    }
-  };
-  
-  // Handle touch end/cancel (now much simpler)
-  const handleTouchEnd = () => {
-    // No action needed since we removed the long press restart
-  };
-  
-  // Function to render the current game state with animations
+  // --- Render game state with per-block animation ---
   const renderGameState = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    
-    // Clear canvas
     ctx.clearRect(0, 0, width, height);
-    
-    // Apply scaling and translation to center the board
     ctx.save();
     ctx.translate(offsetX, offsetY);
     ctx.scale(scale, scale);
-    
-    // Render game board background and border only
     renderGameBoard(ctx, BLOCK_SIZE, rows, cols);
-    
-    // Render blocks
-    board.forEach((row, y) => {
-      row.forEach((block, x) => {
+    board.forEach((row, y: number) => {
+      row.forEach((block, x: number) => {
         if (block) {
-          // Convert from game y-coordinate (bottom-up) to UI y-coordinate (top-down)
           const uiY = rows - y - 1;
+          const key = blockKey(x, y);
+          const progress = blockAnimationProgress.current.get(key) || 0;
           renderBlock(
-            ctx, 
-            block, 
-            x * BLOCK_SIZE, 
-            uiY * BLOCK_SIZE, 
+            ctx,
+            block,
+            x * BLOCK_SIZE,
+            uiY * BLOCK_SIZE,
             BLOCK_SIZE,
             selectedBlockPos?.x === x && selectedBlockPos?.y === y,
-            animationProgressRef.current // Pass animation progress
+            progress
           );
         }
       });
     });
-    
     ctx.restore();
   }, [board, width, height, offsetX, offsetY, scale, rows, cols, selectedBlockPos]);
 
-  // Animation loop for smooth falling blocks
+  // --- Update animation progress for each falling block ---
   const animateBlocks = useCallback((timestamp: number) => {
     if (!lastFrameTimeRef.current) {
       lastFrameTimeRef.current = timestamp;
     }
-    
     const elapsed = timestamp - lastFrameTimeRef.current;
-    const ANIMATION_DURATION = 200; // 200ms for the falling animation
-    
-    // Update animation progress
-    animationProgressRef.current += elapsed / ANIMATION_DURATION;
-    
-    // Check if any blocks are falling
-    anyBlocksFallingRef.current = board.some(row => 
-      row.some(block => block?.falling)
-    );
-    
-    // If animation is complete or no blocks are falling, reset
-    if (animationProgressRef.current >= 1 || !anyBlocksFallingRef.current) {
-      animationProgressRef.current = 0;
-      lastFrameTimeRef.current = null;
-      
-      // If no blocks are falling, stop the animation loop
-      if (!anyBlocksFallingRef.current) {
-        if (animationFrameRef.current !== null) {
-          cancelAnimationFrame(animationFrameRef.current);
-          animationFrameRef.current = null;
+    const ANIMATION_DURATION = 200;
+
+    let anyFalling = false;
+    board.forEach((row, y: number) => {
+      row.forEach((block, x: number) => {
+        if (block && block.falling) {
+          anyFalling = true;
+          const key = blockKey(x, y);
+          const prev = blockAnimationProgress.current.get(key) || 0;
+          let next = prev + elapsed / ANIMATION_DURATION;
+          if (next > 1) next = 1;
+          blockAnimationProgress.current.set(key, next);
+        } else if (block) {
+          // Reset progress if not falling
+          blockAnimationProgress.current.set(blockKey(x, y), 0);
         }
-        return;
+      });
+    });
+
+    // Remove progress for blocks no longer present
+    for (const key of Array.from(blockAnimationProgress.current.keys())) {
+      const [x, y] = key.split(',').map(Number);
+      if (!board[y] || !board[y][x]) {
+        blockAnimationProgress.current.delete(key);
       }
+    }
+
+    // If animation is complete or no blocks are falling, reset
+    if (!anyFalling) {
+      lastFrameTimeRef.current = null;
+      if (animationFrameRef.current !== null) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
+      renderGameState();
+      return;
     } else {
-      // Otherwise update last frame time
       lastFrameTimeRef.current = timestamp;
     }
-    
-    // Render the current state
+
     renderGameState();
-    
-    // Continue the animation loop
     animationFrameRef.current = requestAnimationFrame(animateBlocks);
   }, [board, renderGameState]);
-  
+
   // Start animation when blocks start falling
   useEffect(() => {
-    // Check if any blocks are falling
-    const blocksFalling = board.some(row => 
-      row.some(block => block?.falling)
-    );
-    
-    // Start animation if blocks are falling and animation isn't already running
+    const blocksFalling = board.some(row => row.some(block => block?.falling));
     if (blocksFalling && animationFrameRef.current === null) {
-      animationProgressRef.current = 0;
+      // Reset per-block progress
+      blockAnimationProgress.current = new Map();
       lastFrameTimeRef.current = null;
       animationFrameRef.current = requestAnimationFrame(animateBlocks);
-    } 
-    
-    // Initial render if no animation
+    }
     if (!blocksFalling) {
       renderGameState();
     }
-    
-    // Cleanup animation on unmount
     return () => {
       if (animationFrameRef.current !== null) {
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
   }, [board, animateBlocks, renderGameState]);
-  
+
   return (
     <canvas
       ref={canvasRef}
       width={width}
       height={height}
-      onClick={handleCanvasClick}
+      onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseLeave}
-      onTouchStart={handleCanvasTouch}
-      onTouchEnd={handleTouchEnd}
-      onTouchCancel={handleTouchEnd}
+      onClick={undefined}
+      onTouchStart={undefined}
+      onTouchEnd={undefined}
+      onTouchCancel={undefined}
       style={{ 
         width: '100%', 
         height: '100%',
