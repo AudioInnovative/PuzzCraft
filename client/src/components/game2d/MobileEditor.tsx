@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { usePuzznic } from '../../lib/stores/usePuzznic';
+import { usePuzznic, MOVING_GROUND_TYPE } from '../../lib/stores/usePuzznic';
 import { cn } from '../../lib/utils';
 import { useAudio } from '../../lib/stores/useAudio';
 import { useIsMobile } from '../../hooks/use-is-mobile';
@@ -46,8 +46,8 @@ export default function MobileEditor() {
   // Ensure we're in edit mode
   if (gamePhase !== 'editing') return null;
   
-  // Floor block and colored blocks (types 1-8)
-  const blockTypes = [1, 2, 3, 4, 5, 6, 7, 8];
+  // Floor block and colored blocks (types 1-8 + moving ground)
+  const blockTypes = [1, 2, 3, 4, 5, 6, 7, 8, MOVING_GROUND_TYPE];
   
   // Save the current level
   const handleSaveLevel = () => {
@@ -245,7 +245,23 @@ export default function MobileEditor() {
                     type === 1 ? "bg-gray-800" : ""
                   )}
                 >
-                  {renderBlock(type, PALETTE_BLOCK_SIZE)}
+                  {type === MOVING_GROUND_TYPE ? (
+                    <div 
+                      style={{ 
+                        width: PALETTE_BLOCK_SIZE, 
+                        height: PALETTE_BLOCK_SIZE,
+                        backgroundColor: '#555555',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        color: 'white'
+                      }}
+                    >
+                      ⬛
+                    </div>
+                  ) : (
+                    renderBlock(type, PALETTE_BLOCK_SIZE)
+                  )}
                 </button>
               ))}
             </div>

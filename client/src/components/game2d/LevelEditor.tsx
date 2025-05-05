@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef, DragEvent } from 'react';
-import { usePuzznic } from '../../lib/stores/usePuzznic';
-import { BlockType } from '../../lib/stores/usePuzznic';
+import { usePuzznic, BlockType, MOVING_GROUND_TYPE } from '../../lib/stores/usePuzznic';
 import { cn } from '../../lib/utils';
 import { useAudio } from '../../lib/stores/useAudio';
 import { useIsMobile } from '../../hooks/use-is-mobile';
@@ -58,7 +57,7 @@ export default function LevelEditor() {
   if (gamePhase !== 'editing') return null;
   
   // Calculate maximum block type (default is 6, but could be more)
-  const maxBlockType = 8;
+  const maxBlockType = 9; // Now includes moving ground block
   
   // Generate an array of block types for the palette
   const blockTypes = Array.from({ length: maxBlockType - 1 }, (_, i) => i + 2);
@@ -306,9 +305,11 @@ export default function LevelEditor() {
               >
                 <div 
                   className="w-12 h-12 rounded-md flex items-center justify-center"
-                  style={{ backgroundColor: getBlockColor(type) }}
+                  style={{ backgroundColor: type === MOVING_GROUND_TYPE ? '#555555' : getBlockColor(type) }}
                 >
-                  <span className="text-white font-bold text-2xl">{blockSymbols[type-1]}</span>
+                  <span className="text-white font-bold text-2xl">
+                    {type === MOVING_GROUND_TYPE ? "⬛" : blockSymbols[type-1]}
+                  </span>
                 </div>
               </div>
             ))}
@@ -358,10 +359,10 @@ export default function LevelEditor() {
               <div className="flex justify-center">
                 <div 
                   className="w-12 h-12 rounded-md flex items-center justify-center"
-                  style={{ backgroundColor: getBlockColor(selectedBlockType) }}
+                  style={{ backgroundColor: selectedBlockType === MOVING_GROUND_TYPE ? '#555555' : getBlockColor(selectedBlockType) }}
                 >
                   <span className="text-white font-bold text-2xl">
-                    {blockSymbols[selectedBlockType-1]}
+                    {selectedBlockType === MOVING_GROUND_TYPE ? "⬛" : blockSymbols[selectedBlockType-1]}
                   </span>
                 </div>
               </div>

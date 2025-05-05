@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useRef } from 'react';
-import { usePuzznic } from '../../lib/stores/usePuzznic';
+import { usePuzznic, BlockType, MOVING_GROUND_TYPE } from '../../lib/stores/usePuzznic';
 import { useAudio } from '../../lib/stores/useAudio';
-import { BlockType } from '../../lib/stores/usePuzznic';
 
 // Define block colors based on type (using an ultra-vibrant futuristic neon palette)
 const blockColors = [
@@ -103,6 +102,20 @@ function renderBlock(
     ctx.shadowOffsetY = 0;
   }
   
+  // --- Moving Ground Block Rendering ---
+  if (block.type === MOVING_GROUND_TYPE || block.isMovingGround) {
+    // Looks like the floor block but a shade darker
+    const darkFloorColor = '#555555';
+    ctx.fillStyle = darkFloorColor;
+    ctx.fillRect(blockX, blockY, drawBlockSize, drawBlockSize);
+    ctx.strokeStyle = '#222';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(blockX, blockY, drawBlockSize, drawBlockSize);
+    // Optionally, add a subtle animation or indicator if desired
+    ctx.globalAlpha = 1.0;
+    return;
+  }
+
   // Floor block (type 1) with 3D effect
   if (block.type === 1) {
     // Use futuristic version of floor blocks with rounded corners

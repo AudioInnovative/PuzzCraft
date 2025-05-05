@@ -12,7 +12,15 @@ export type BlockType = {
   falling: boolean;
   isFixed: boolean; // Property to identify blocks that shouldn't move (like floors)
   isFloor: boolean; // Property to specifically identify floor blocks (type 1 at bottom)
+  // --- Moving ground block properties ---
+  isMovingGround?: boolean; // True if this is a moving ground block
+  moveOriginY?: number;     // The Y position the block started at
+  moveDirection?: 1 | -1;   // Current direction of movement (1 = up, -1 = down)
+  movePhase?: number;       // Animation phase or timer for movement
 };
+
+// Add a constant for the moving ground block type
+export const MOVING_GROUND_TYPE = 9; // Use 9 if available, otherwise next unused type
 
 export type GamePhase = "ready" | "playing" | "level_complete" | "game_over" | "game_won" | "editing";
 
@@ -69,6 +77,8 @@ interface PuzznicState {
   saveUserLevel: () => void;
   loadUserLevel: (index: number) => void;
   generateLevelData: () => number[][];
+  updateMovingGroundBlocks: (board: (BlockType | null)[][]) => (BlockType | null)[][];
+  moveElevatorsAndUpdateBoard: () => void;
 }
 
 export const usePuzznic = create<PuzznicState>()(
@@ -145,8 +155,14 @@ export const usePuzznic = create<PuzznicState>()(
               selected: false,
               matched: false,
               falling: false,
-              isFixed: isFloor, // Mark all type 1 blocks as fixed
-              isFloor: isFloor // Mark all type 1 blocks as floor blocks
+              isFixed: isFloor || value === MOVING_GROUND_TYPE, // elevator blocks are fixed
+              isFloor: isFloor, // Mark all type 1 blocks as floor blocks
+              ...(value === MOVING_GROUND_TYPE ? {
+                isMovingGround: true,
+                moveOriginY: gameY,
+                moveDirection: 1,
+                movePhase: 0
+              } : {})
             };
           }
         }
@@ -335,47 +351,53 @@ export const usePuzznic = create<PuzznicState>()(
       let matchFound = false;
       let matchScore = 0;
       
-      // Check horizontal matches (at least 2 same blocks)
+      // Check horizontal matches (runs of 2+)
       console.log("Checking for horizontal matches");
       for (let y = 0; y < newBoard.length; y++) {
-        for (let x = 0; x < newBoard[0].length - 1; x++) {
-          if (newBoard[y][x] !== null && newBoard[y][x+1] !== null && 
-              !newBoard[y][x]!.isFixed && !newBoard[y][x+1]!.isFixed &&
-              !newBoard[y][x]!.falling && !newBoard[y][x+1]!.falling && // Don't match falling blocks
-              newBoard[y][x]!.type === newBoard[y][x+1]!.type) {
-            
-            // Debug logging for matches
-            const blockType = newBoard[y][x]!.type;
-            console.log(`MATCH FOUND - Horizontal: Type ${blockType} at [${x},${y}] and [${x+1},${y}]`);
-            
-            // Mark blocks as matched
-            newBoard[y][x]!.matched = true;
-            newBoard[y][x+1]!.matched = true;
-            matchFound = true;
-            matchScore += 10;
+        let x = 0;
+        while (x < newBoard[0].length) {
+          const block = newBoard[y][x];
+          if (!block || block.falling || block.isFixed) { x++; continue; }
+          const type = block.type;
+          let runLength = 1;
+          let i = x + 1;
+          while (i < newBoard[0].length) {
+            const nb = newBoard[y][i];
+            if (!nb || nb.falling || nb.isFixed || nb.type !== type) break;
+            runLength++; i++;
           }
+          if (runLength >= 2) {
+            console.log(`MATCH FOUND - Horizontal: Type ${type} at [${x},${y}] to [${i-1},${y}]`);
+            for (let j = x; j < x + runLength; j++) newBoard[y][j]!.matched = true;
+            matchFound = true;
+            matchScore += runLength * 10;
+          }
+          x = i;
         }
       }
       
-      // Check vertical matches (at least 2 same blocks)
+      // Check vertical matches
       console.log("Checking for vertical matches");
-      for (let y = 0; y < newBoard.length - 1; y++) {
-        for (let x = 0; x < newBoard[0].length; x++) {
-          if (newBoard[y][x] !== null && newBoard[y+1][x] !== null && 
-              !newBoard[y][x]!.isFixed && !newBoard[y+1][x]!.isFixed &&
-              !newBoard[y][x]!.falling && !newBoard[y+1][x]!.falling && // Don't match falling blocks
-              newBoard[y][x]!.type === newBoard[y+1][x]!.type) {
-            
-            // Debug logging for matches
-            const blockType = newBoard[y][x]!.type;
-            console.log(`MATCH FOUND - Vertical: Type ${blockType} at [${x},${y}] and [${x},${y+1}]`);
-            
-            // Mark blocks as matched
-            newBoard[y][x]!.matched = true;
-            newBoard[y+1][x]!.matched = true;
-            matchFound = true;
-            matchScore += 10;
+      for (let x = 0; x < newBoard[0].length; x++) {
+        let y = 0;
+        while (y < newBoard.length) {
+          const block = newBoard[y][x];
+          if (!block || block.falling || block.isFixed) { y++; continue; }
+          const type = block.type;
+          let runLength = 1;
+          let i = y + 1;
+          while (i < newBoard.length) {
+            const nb = newBoard[i][x];
+            if (!nb || nb.falling || nb.isFixed || nb.type !== type) break;
+            runLength++; i++;
           }
+          if (runLength >= 2) {
+            console.log(`MATCH FOUND - Vertical: Type ${type} at [${x},${y}] to [${x},${i-1}]`);
+            for (let j = y; j < y + runLength; j++) newBoard[j][x]!.matched = true;
+            matchFound = true;
+            matchScore += runLength * 10;
+          }
+          y = i;
         }
       }
       
@@ -461,7 +483,8 @@ export const usePuzznic = create<PuzznicState>()(
             if (newBoard[y][x] !== null && 
                 newBoard[y-1][x] === null && 
                 !newBoard[y][x]!.isFixed && 
-                newBoard[y][x]!.type !== 1) {  // Type 1 blocks never fall
+                newBoard[y][x]!.type !== 1 &&
+                !newBoard[y][x]!.isMovingGround) {  // Prevent elevator blocks from falling
               newBoard[y][x]!.falling = true;
               anyBlocksMarkedForFalling = true;
             }
@@ -513,7 +536,7 @@ export const usePuzznic = create<PuzznicState>()(
           // Apply gravity again if needed, but only check for matches 
           // when the entire board has settled (no more blocks can fall)
           setTimeout(() => {
-            const { applyGravity, boardHasBlocksThatCanFall, checkMatches } = get();
+            const { applyGravity, boardHasBlocksThatCanFall, checkMatches, updateMovingGroundBlocks } = get();
             const currentBoard = get().board;
             
             if (boardHasBlocksThatCanFall(currentBoard)) {
@@ -523,6 +546,8 @@ export const usePuzznic = create<PuzznicState>()(
               // Board is settled, now check for matches
               // No need to manually call updateGameState here as checkMatches will handle it 
               // when there are no more matches and the board is fully settled
+              const movedBoard = updateMovingGroundBlocks(currentBoard);
+              set({ board: movedBoard });
               checkMatches();
             }
           }, FALL_ANIMATION_DELAY); // Consistent delay between gravity steps
@@ -530,7 +555,10 @@ export const usePuzznic = create<PuzznicState>()(
       } else {
         // No blocks are falling, board is settled, check for matches
         // checkMatches will handle updateGameState when there are no more matches
-        const { checkMatches } = get();
+        const { checkMatches, updateMovingGroundBlocks } = get();
+        const currentBoard = get().board;
+        const movedBoard = updateMovingGroundBlocks(currentBoard);
+        set({ board: movedBoard });
         checkMatches();
       }
     },
@@ -630,6 +658,10 @@ export const usePuzznic = create<PuzznicState>()(
       setTimeout(() => {
         const { startGame } = get();
         startGame();
+        
+        // Load the test level
+        const { loadUserLevel } = get();
+        loadUserLevel(targetLevel - 1);
       }, 300);
     },
     
@@ -800,7 +832,14 @@ export const usePuzznic = create<PuzznicState>()(
           matched: false,
           falling: false,
           isFixed: blockType === 1, // ALL type 1 blocks are now fixed floor blocks regardless of position
-          isFloor: blockType === 1  // ALL type 1 blocks are now floor blocks regardless of position
+          isFloor: blockType === 1, // ALL type 1 blocks are now floor blocks regardless of position
+          // Moving ground block properties
+          ...(blockType === MOVING_GROUND_TYPE ? {
+            isMovingGround: true,
+            moveOriginY: y,
+            moveDirection: 1,
+            movePhase: 0
+          } : {})
         };
         
         set({ board: newBoard });
@@ -895,10 +934,6 @@ export const usePuzznic = create<PuzznicState>()(
           for (let x = 0; x < cols; x++) {
             const value = levelData[levelY][x];
             if (value > 0) {
-              // All type 1 blocks are floor blocks and fixed, regardless of position
-              // This is crucial for level testing to prevent floor blocks from falling
-              const isFloor = value === 1;
-              
               board[gameY][x] = {
                 id: gameY * cols + x,
                 type: value,
@@ -907,8 +942,14 @@ export const usePuzznic = create<PuzznicState>()(
                 selected: false,
                 matched: false,
                 falling: false,
-                isFixed: isFloor, // Mark all type 1 blocks as fixed so they don't fall
-                isFloor: isFloor  // Also explicitly mark them as floor blocks for visual treatment
+                isFixed: value === 1 || value === MOVING_GROUND_TYPE, // elevator blocks are fixed
+                isFloor: value === 1,
+                ...(value === MOVING_GROUND_TYPE ? {
+                  isMovingGround: true,
+                  moveOriginY: gameY,
+                  moveDirection: 1,
+                  movePhase: 0
+                } : {})
               };
             }
           }
@@ -954,6 +995,86 @@ export const usePuzznic = create<PuzznicState>()(
       }
       
       return levelData;
-    }
+    },
+    
+    updateMovingGroundBlocks: (board: (BlockType | null)[][]) => {
+      const rows = board.length;
+      const cols = board[0]?.length || 0;
+      // Deep clone the board
+      const newBoard = board.map(row => row.map(b => b ? { ...b } : null));
+
+      for (let y = 0; y < rows; y++) {
+        for (let x = 0; x < cols; x++) {
+          const block = board[y][x];
+          if (!block || !(block.type === MOVING_GROUND_TYPE || block.isMovingGround)) continue;
+
+          const originY = block.moveOriginY ?? y;
+          const dir: 1 | -1 = block.moveDirection === 1 ? 1 : -1;
+          const targetY = y + dir;
+          const oppositeDir: 1 | -1 = dir === 1 ? -1 : 1;
+
+          // Check bounds and origin
+          if (targetY < 0 || targetY >= rows || Math.abs(targetY - originY) > 1) {
+            newBoard[y][x] = { ...block, moveDirection: oppositeDir };
+            continue;
+          }
+
+          // Gather contiguous stack from elevator upward
+          const stackYs: number[] = [];
+          for (let sy = y; sy < rows; sy++) {
+            if (board[sy][x]) stackYs.push(sy);
+            else break;
+          }
+
+          // Validate target positions for stack
+          const origSet = new Set(stackYs);
+          let canMove = true;
+          for (const sy of stackYs) {
+            const ny = sy + dir;
+            if (ny < 0 || ny >= rows) { canMove = false; break; }
+            const cell = board[ny][x];
+            if (cell && !origSet.has(ny)) { canMove = false; break; }
+          }
+          if (!canMove) {
+            newBoard[y][x] = { ...block, moveDirection: oppositeDir };
+            continue;
+          }
+
+          // Move elevator and stack
+          const order = dir === 1
+            ? [...stackYs].sort((a, b) => b - a)
+            : [...stackYs].sort((a, b) => a - b);
+          for (const sy of order) {
+            const blk = board[sy][x]!;
+            newBoard[sy][x] = null;
+            const ny = sy + dir;
+            newBoard[ny][x] = {
+              ...blk,
+              y: ny,
+              falling: false,
+              isFixed: blk.isMovingGround ? true : blk.isFixed,
+              isMovingGround: blk.isMovingGround,
+              moveOriginY: originY,
+              moveDirection: dir,
+            };
+          }
+        }
+      }
+
+      return newBoard;
+    },
+    
+    moveElevatorsAndUpdateBoard: () => {
+      const { board, updateMovingGroundBlocks, checkMatches } = get();
+      const newBoard = updateMovingGroundBlocks(board);
+      // Only update if changed
+      if (JSON.stringify(newBoard) !== JSON.stringify(board)) {
+        set({ board: newBoard });
+        checkMatches();
+      }
+    },
   }))
 );
+
+// --- Moving Ground Block Movement Logic ---
+// This should be called at the start of each tick or after gravity resolves.

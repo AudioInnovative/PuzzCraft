@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Board2D } from './Board';
 import GameUI2D from './GameUI';
 import { KeyboardController } from './KeyboardController';
@@ -20,7 +20,8 @@ export default function Game2D() {
     setMatchSound,
     setFallSound
   } = useAudio();
-  const { initGame } = usePuzznic();
+  const { initGame, gamePhase, board, updateMovingGroundBlocks } = usePuzznic();
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Initialize sounds and game
   useEffect(() => {
@@ -90,6 +91,28 @@ export default function Game2D() {
     };
   }, [setBackgroundMusic, setHitSound, setSuccessSound, setMoveSound, setMatchSound, setFallSound, initGame]);
 
+  useEffect(() => {
+    if (gamePhase !== "playing") {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      return;
+    }
+    intervalRef.current = setInterval(() => {
+      // Only update if there are elevators present
+      const hasElevator = board.some(row =>
+        row.some(
+          block => block && (block.type === 9 || block.isMovingGround)
+        )
+      );
+      if (hasElevator) {
+        // Use the new Zustand action for elevator movement
+        usePuzznic.getState().moveElevatorsAndUpdateBoard();
+      }
+    }, 300); // Elevator movement interval (ms)
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [gamePhase, board]);
+
   // Update dimensions on window resize
   useEffect(() => {
     const handleResize = () => {
@@ -111,8 +134,6 @@ export default function Game2D() {
     };
   }, []);
 
-  const { gamePhase } = usePuzznic();
-  
   // Calculate game area width, accounting for the score panel on the left
   // We'll reserve about 100px for the score panel
   const SCORE_PANEL_WIDTH = 100;
