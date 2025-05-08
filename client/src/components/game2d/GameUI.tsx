@@ -252,7 +252,7 @@ export default function GameUI2D() {
             <div className="flex justify-center space-x-4 mb-4">
               <button 
                 className="bg-red-600 hover:bg-red-800 text-white font-bold py-2 px-8 pointer-events-auto border-2 border-white"
-                onClick={() => usePuzznic.getState().startGame()}
+                onClick={() => toggleLevelSelector()}
               >
                 PLAY GAME
               </button>
@@ -283,25 +283,30 @@ export default function GameUI2D() {
           <div className="bg-black p-8 border-4 border-cyan-600 text-center w-4/5 max-w-md">
             <h2 className="text-3xl font-bold text-cyan-300 mb-6 font-mono uppercase">LEVEL SELECT</h2>
             <div className="bg-blue-900 border-2 border-blue-700 p-4 mb-6">
-              <p className="text-xl text-yellow-300 mb-4 font-mono">SELECT A COMPLETED LEVEL</p>
+              <p className="text-xl text-yellow-300 mb-4 font-mono">SELECT A LEVEL</p>
               
               <div className="grid grid-cols-4 gap-2 mb-4">
                 {Array.from({ length: maxLevel }, (_, i) => i + 1).map(levelNum => {
-                  // Check if this level is completed
                   const isCompleted = completedLevels.includes(levelNum);
+                  // Next uncleared level is the first not in completedLevels
+                  const nextUncleared = !isCompleted && (completedLevels.length === 0 ? levelNum === 1 : levelNum === Math.min(...Array.from({length: maxLevel}, (_, i) => i + 1).filter(l => !completedLevels.includes(l))));
+                  const isSelectable = isCompleted || nextUncleared;
                   return (
                     <button
                       key={`level-${levelNum}`}
                       className={`
                         p-2 border-2 pointer-events-auto
-                        ${isCompleted 
-                          ? "border-green-500 bg-green-900 text-white hover:bg-green-700" 
-                          : "border-gray-600 bg-gray-900 text-gray-500 cursor-not-allowed"}
+                        ${isCompleted
+                          ? "border-green-500 bg-green-900 text-white hover:bg-green-700"
+                          : nextUncleared
+                            ? "border-yellow-400 bg-yellow-900 text-yellow-200 hover:bg-yellow-700 animate-pulse"
+                            : "border-gray-600 bg-gray-900 text-gray-500 cursor-not-allowed"}
                       `}
-                      onClick={() => isCompleted && selectLevel(levelNum)}
-                      disabled={!isCompleted}
+                      onClick={() => isSelectable && selectLevel(levelNum)}
+                      disabled={!isSelectable}
                     >
                       {levelNum}
+                      {nextUncleared && <span className="block text-xs font-bold text-yellow-300">Next</span>}
                     </button>
                   );
                 })}

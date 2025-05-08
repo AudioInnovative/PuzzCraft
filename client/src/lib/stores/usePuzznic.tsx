@@ -759,13 +759,13 @@ export const usePuzznic = create<PuzznicState>()(
       return true;
     },
     
-    createEmptyLevel: () => {
-      // Create an 8x8 empty grid with floor blocks at the bottom row
-      const emptyLevel: number[][] = Array(8).fill(0).map(() => Array(8).fill(0));
+    createEmptyLevel: (width = 8, height = 8) => {
+      // Create an empty grid with floor blocks at the bottom row
+      const emptyLevel: number[][] = Array(height).fill(0).map(() => Array(width).fill(0));
       
       // Add floor blocks at the bottom row (but they can be removed later)
-      for (let x = 0; x < 8; x++) {
-        emptyLevel[7][x] = 1; // Type 1 is floor blocks
+      for (let x = 0; x < width; x++) {
+        emptyLevel[height - 1][x] = 1; // Type 1 is floor blocks
       }
       
       // Create a board from this level data

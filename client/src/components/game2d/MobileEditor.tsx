@@ -30,11 +30,21 @@ export default function MobileEditor() {
     testLevel
   } = usePuzznic();
   
+  // --- Grid size state ---
+  const [gridWidth, setGridWidth] = useState(8);
+  const [gridHeight, setGridHeight] = useState(8);
+
+  // When grid size changes, create a new empty level
+  const handleGridSizeChange = (w: number, h: number) => {
+    setGridWidth(w);
+    setGridHeight(h);
+    createEmptyLevel(w, h);
+  };
+  
   const { playHit } = useAudio();
   const isMobile = useIsMobile();
   
   // Grid configuration with compact cells on mobile to fit everything on one screen
-  const GRID_SIZE = 8;
   const CELL_SIZE = isMobile ? 30 : 40; // Compact size on mobile to fit the entire grid
   const PALETTE_BLOCK_SIZE = isMobile ? 30 : 40; // Size of blocks in the palette
   
@@ -125,6 +135,31 @@ export default function MobileEditor() {
           {/* Title and primary buttons in one row */}
           <div className="flex justify-between items-center">
             <h2 className="text-lg font-bold text-cyan-300 font-mono">EDITOR</h2>
+            {/* Grid size controls */}
+            <div className="flex items-center gap-1">
+              <label className="text-xs text-white">W</label>
+              <select
+                value={gridWidth}
+                onChange={e => handleGridSizeChange(Number(e.target.value), gridHeight)}
+                className="bg-gray-800 text-white text-xs border border-cyan-600 rounded px-1"
+              >
+                {[...Array(7)].map((_, i) => {
+                  const val = i + 6;
+                  return <option key={val} value={val}>{val}</option>;
+                })}
+              </select>
+              <label className="text-xs text-white">× H</label>
+              <select
+                value={gridHeight}
+                onChange={e => handleGridSizeChange(gridWidth, Number(e.target.value))}
+                className="bg-gray-800 text-white text-xs border border-cyan-600 rounded px-1"
+              >
+                {[...Array(7)].map((_, i) => {
+                  const val = i + 6;
+                  return <option key={val} value={val}>{val}</option>;
+                })}
+              </select>
+            </div>
             
             <div className="flex gap-1">
               {/* Add Save as Story Level button before MENU, only in dev mode */}
@@ -321,13 +356,13 @@ export default function MobileEditor() {
           <div className="bg-black p-1 shadow-md border-2 border-cyan-600 rounded">
             {/* The grid with minimal spacing */}
             <div className="flex flex-col gap-[1px]">
-              {Array.from({ length: GRID_SIZE }).map((_, rowIndex) => {
+              {Array.from({ length: gridHeight }).map((_, rowIndex) => {
                 // Convert visual row to game row (y)
-                const gameY = GRID_SIZE - rowIndex - 1;
+                const gameY = gridHeight - rowIndex - 1;
                 
                 return (
                   <div key={`row-${rowIndex}`} className="flex flex-row gap-[1px]">
-                    {Array.from({ length: GRID_SIZE }).map((_, colIndex) => {
+                    {Array.from({ length: gridWidth }).map((_, colIndex) => {
                       const gameX = colIndex;
                       const block = board[gameY][gameX];
                       
