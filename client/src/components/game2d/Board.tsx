@@ -104,15 +104,104 @@ function renderBlock(
   
   // --- Moving Ground Block Rendering ---
   if (block.type === MOVING_GROUND_TYPE || block.isMovingGround) {
-    // Looks like the floor block but a shade darker
-    const darkFloorColor = '#555555';
-    ctx.fillStyle = darkFloorColor;
+    // Draw elevator block as a floor block with a square hole
+    let radius = drawBlockSize * 0.2;
+    ctx.save();
+    // Shadow effect
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 3;
+    ctx.shadowOffsetY = 3;
+    // Base elevator block color (darker than ground)
+    ctx.fillStyle = '#23242A';
+    ctx.beginPath();
+    ctx.moveTo(blockX + radius, blockY);
+    ctx.lineTo(blockX + drawBlockSize - radius, blockY);
+    ctx.quadraticCurveTo(blockX + drawBlockSize, blockY, blockX + drawBlockSize, blockY + radius);
+    ctx.lineTo(blockX + drawBlockSize, blockY + drawBlockSize - radius);
+    ctx.quadraticCurveTo(blockX + drawBlockSize, blockY + drawBlockSize, blockX + drawBlockSize - radius, blockY + drawBlockSize);
+    ctx.lineTo(blockX + radius, blockY + drawBlockSize);
+    ctx.quadraticCurveTo(blockX, blockY + drawBlockSize, blockX, blockY + drawBlockSize - radius);
+    ctx.lineTo(blockX, blockY + radius);
+    ctx.quadraticCurveTo(blockX, blockY, blockX + radius, blockY);
+    ctx.closePath();
+    ctx.fill();
+    // Reset shadow
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+    // Bevel gradient
+    const bevelGradient = ctx.createLinearGradient(
+      blockX, blockY,
+      blockX + drawBlockSize, blockY + drawBlockSize
+    );
+    // Slightly darker bevel gradient for elevator block
+    bevelGradient.addColorStop(0, '#44444A');
+    bevelGradient.addColorStop(0.5, '#36363A');
+    bevelGradient.addColorStop(1, '#23242A');
+    ctx.fillStyle = bevelGradient;
+    // Smaller bevel
+    const bevel = 2;
+    ctx.beginPath();
+    ctx.moveTo(blockX + radius, blockY + bevel);
+    ctx.lineTo(blockX + drawBlockSize - radius, blockY + bevel);
+    ctx.quadraticCurveTo(blockX + drawBlockSize - bevel, blockY + bevel, blockX + drawBlockSize - bevel, blockY + radius);
+    ctx.lineTo(blockX + drawBlockSize - bevel, blockY + drawBlockSize - radius);
+    ctx.quadraticCurveTo(blockX + drawBlockSize - bevel, blockY + drawBlockSize - bevel, blockX + drawBlockSize - radius, blockY + drawBlockSize - bevel);
+    ctx.lineTo(blockX + radius, blockY + drawBlockSize - bevel);
+    ctx.quadraticCurveTo(blockX + bevel, blockY + drawBlockSize - bevel, blockX + bevel, blockY + drawBlockSize - radius);
+    ctx.lineTo(blockX + bevel, blockY + radius);
+    ctx.quadraticCurveTo(blockX + bevel, blockY + bevel, blockX + radius, blockY + bevel);
+    ctx.closePath();
+    ctx.fill();
+    // Highlight
+    ctx.save();
+    ctx.clip();
+    const lightSize = drawBlockSize * 0.5;
+    const gradientHighlight = ctx.createRadialGradient(
+      blockX + drawBlockSize * 0.3,
+      blockY + drawBlockSize * 0.3,
+      0,
+      blockX + drawBlockSize * 0.3,
+      blockY + drawBlockSize * 0.3,
+      lightSize
+    );
+    gradientHighlight.addColorStop(0, `rgba(255, 255, 255, 0.1)`);
+    gradientHighlight.addColorStop(1, `rgba(255, 255, 255, 0)`);
+    ctx.fillStyle = gradientHighlight;
     ctx.fillRect(blockX, blockY, drawBlockSize, drawBlockSize);
-    ctx.strokeStyle = '#222';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(blockX, blockY, drawBlockSize, drawBlockSize);
-    // Optionally, add a subtle animation or indicator if desired
-    ctx.globalAlpha = 1.0;
+    ctx.restore();
+    // Subtle glowing border
+    ctx.strokeStyle = 'rgba(0, 150, 255, 0.5)';
+    ctx.lineWidth = 1.5;
+    ctx.shadowColor = 'rgba(0, 150, 255, 0.5)';
+    ctx.shadowBlur = 8;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+    ctx.beginPath();
+    ctx.moveTo(blockX + radius, blockY);
+    ctx.lineTo(blockX + drawBlockSize - radius, blockY);
+    ctx.quadraticCurveTo(blockX + drawBlockSize, blockY, blockX + drawBlockSize, blockY + radius);
+    ctx.lineTo(blockX + drawBlockSize, blockY + drawBlockSize - radius);
+    ctx.quadraticCurveTo(blockX + drawBlockSize, blockY + drawBlockSize, blockX + drawBlockSize - radius, blockY + drawBlockSize);
+    ctx.lineTo(blockX + radius, blockY + drawBlockSize);
+    ctx.quadraticCurveTo(blockX, blockY + drawBlockSize, blockX, blockY + drawBlockSize - radius);
+    ctx.lineTo(blockX, blockY + radius);
+    ctx.quadraticCurveTo(blockX, blockY, blockX + radius, blockY);
+    ctx.closePath();
+    ctx.stroke();
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
+    // --- Draw the hole ---
+    ctx.save();
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.fillStyle = '#0A1521'; // Board background color (matches top left of gradient)
+    ctx.beginPath();
+    ctx.rect(blockX + drawBlockSize * 0.28, blockY + drawBlockSize * 0.28, drawBlockSize * 0.44, drawBlockSize * 0.44);
+    ctx.fill();
+    ctx.restore();
+    ctx.restore();
     return;
   }
 

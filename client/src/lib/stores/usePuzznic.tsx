@@ -497,7 +497,7 @@ export const usePuzznic = create<PuzznicState>()(
         
         // Use a consistent falling speed for all blocks
         // We use a constant delay regardless of whether the block was previously moved horizontally
-        const FALL_ANIMATION_DELAY = 300; // Slightly slower for more natural feel
+        const FALL_ANIMATION_DELAY = 120; // Even faster block fall
         
         // Move falling blocks down
         // Start animation and give time for visual effect
@@ -550,8 +550,8 @@ export const usePuzznic = create<PuzznicState>()(
               set({ board: movedBoard });
               checkMatches();
             }
-          }, FALL_ANIMATION_DELAY); // Consistent delay between gravity steps
-        }, FALL_ANIMATION_DELAY); // Consistent time for animation to complete
+          }, FALL_ANIMATION_DELAY); // Consistent delay between gravity steps (now even quicker)
+        }, FALL_ANIMATION_DELAY); // Consistent time for animation to complete (now even quicker)
       } else {
         // No blocks are falling, board is settled, check for matches
         // checkMatches will handle updateGameState when there are no more matches
