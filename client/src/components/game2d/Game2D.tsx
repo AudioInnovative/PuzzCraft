@@ -148,7 +148,7 @@ export default function Game2D() {
       >
         {showSoundMenu ? 'Close Sound Menu' : 'Sound Settings'}
       </button>
-      {showSoundMenu && <SoundControlMenu />}
+      {showSoundMenu && <SoundControlMenu onClose={() => setShowSoundMenu(false)} />}
       {gamePhase !== "editing" && (
         <>
           {/* Position the game board with a left margin to account for the score panel */}

@@ -1,7 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useAudio } from "../../lib/stores/useAudio";
 
-const SoundControlMenu: React.FC = () => {
+interface SoundControlMenuProps {
+  onClose?: () => void;
+}
+
+const SoundControlMenu: React.FC<SoundControlMenuProps> = ({ onClose }) => {
   const {
     backgroundMusic,
     hitSound,
@@ -18,6 +22,21 @@ const SoundControlMenu: React.FC = () => {
     setFallSound,
     toggleMute,
   } = useAudio();
+
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // Close on outside click
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        onClose?.();
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [onClose]);
 
   // Local UI state for volumes
   const [bgVolume, setBgVolume] = useState(backgroundMusic ? backgroundMusic.volume : 0.15);
@@ -59,7 +78,7 @@ const SoundControlMenu: React.FC = () => {
   };
 
   return (
-    <div style={{
+    <div ref={menuRef} style={{
       position: "absolute",
       bottom: 60, // 40px above button (button is 20px from bottom + ~40px height)
       right: 20,
@@ -107,3 +126,4 @@ const SoundControlMenu: React.FC = () => {
 };
 
 export default SoundControlMenu;
+
