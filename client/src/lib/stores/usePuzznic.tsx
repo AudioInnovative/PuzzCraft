@@ -1008,56 +1008,58 @@ export const usePuzznic = create<PuzznicState>()(
           const block = board[y][x];
           if (!block || !(block.type === MOVING_GROUND_TYPE || block.isMovingGround)) continue;
 
-          const originY = block.moveOriginY ?? y;
-          const dir: 1 | -1 = block.moveDirection === 1 ? 1 : -1;
-          const targetY = y + dir;
-          const oppositeDir: 1 | -1 = dir === 1 ? -1 : 1;
+           const originY = block.moveOriginY ?? y;
+           const dir: 1 | -1 = block.moveDirection === 1 ? 1 : -1;
+           const targetY = y + dir;
+           const oppositeDir: 1 | -1 = dir === 1 ? -1 : 1;
 
-          // Check bounds and origin
-          if (targetY < 0 || targetY >= rows || Math.abs(targetY - originY) > 1) {
-            newBoard[y][x] = { ...block, moveDirection: oppositeDir };
-            continue;
-          }
+           // Gather contiguous stack from elevator upward
+           const stackYs: number[] = [];
+           for (let sy = y; sy < rows; sy++) {
+             const cell = board[sy][x];
+             // Include elevator and any blocks except floor blocks
+             if (cell && !cell.isFloor) {
+               stackYs.push(sy);
+             } else {
+               break;
+             }
+           }
 
-          // Gather contiguous stack from elevator upward
-          const stackYs: number[] = [];
-          for (let sy = y; sy < rows; sy++) {
-            if (board[sy][x]) stackYs.push(sy);
-            else break;
-          }
+           // Check if the stack can move in the current direction by one block
+           let canMove = true;
+           for (const sy of stackYs) {
+             const ny = sy + dir;
+             if (ny < 0 || ny >= rows) { canMove = false; break; }
+             const cell = board[ny][x];
+             if (cell && !stackYs.includes(ny)) { canMove = false; break; }
+             // Prevent moving into fixed blocks or floors (unless it's part of the stack)
+             if (cell && cell.isFixed && !stackYs.includes(ny)) { canMove = false; break; }
+           }
 
-          // Validate target positions for stack
-          const origSet = new Set(stackYs);
-          let canMove = true;
-          for (const sy of stackYs) {
-            const ny = sy + dir;
-            if (ny < 0 || ny >= rows) { canMove = false; break; }
-            const cell = board[ny][x];
-            if (cell && !origSet.has(ny)) { canMove = false; break; }
-          }
-          if (!canMove) {
-            newBoard[y][x] = { ...block, moveDirection: oppositeDir };
-            continue;
-          }
+           if (!canMove) {
+             // Reverse direction but do not move this tick
+             newBoard[y][x] = { ...block, moveDirection: oppositeDir };
+             continue;
+           }
 
-          // Move elevator and stack
-          const order = dir === 1
-            ? [...stackYs].sort((a, b) => b - a)
-            : [...stackYs].sort((a, b) => a - b);
-          for (const sy of order) {
-            const blk = board[sy][x]!;
-            newBoard[sy][x] = null;
-            const ny = sy + dir;
-            newBoard[ny][x] = {
-              ...blk,
-              y: ny,
-              falling: false,
-              isFixed: blk.isMovingGround ? true : blk.isFixed,
-              isMovingGround: blk.isMovingGround,
-              moveOriginY: originY,
-              moveDirection: dir,
-            };
-          }
+           // Move elevator and stack by one block in the current direction
+           const order = dir === 1
+             ? [...stackYs].sort((a, b) => b - a)
+             : [...stackYs].sort((a, b) => a - b);
+           for (const sy of order) {
+             const blk = board[sy][x]!;
+             newBoard[sy][x] = null;
+             const ny = sy + dir;
+             newBoard[ny][x] = {
+               ...blk,
+               y: ny,
+               falling: false,
+               isFixed: blk.isMovingGround ? true : blk.isFixed,
+               isMovingGround: blk.isMovingGround,
+               moveOriginY: originY,
+               moveDirection: dir,
+             };
+           }
         }
       }
 

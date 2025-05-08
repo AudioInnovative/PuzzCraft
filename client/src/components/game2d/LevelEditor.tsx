@@ -27,15 +27,23 @@ export default function LevelEditor() {
     validateLevelData,
     generateLevelData,
     createEmptyLevel,
-    loadUserLevel
+    loadUserLevel,
+    set
   } = usePuzznic();
   
+  // Log gamePhase for LevelEditor context
+  console.log('[LevelEditor.tsx] gamePhase:', gamePhase);
+  const isDevMode = import.meta.env.VITE_REACT_APP_DEV_MODE === 'true';
+  console.log('[LevelEditor.tsx] isDevMode:', isDevMode);
+
   const { playHit } = useAudio();
   const isMobile = useIsMobile();
   
   const [message, setMessage] = useState<string | null>(null);
+  const [storyLevelSaveMessage, setStoryLevelSaveMessage] = useState<string | null>(null); // New state for story level save
   const [isValid, setIsValid] = useState(true);
   const [selectedBlockType, setSelectedBlockType] = useState<number | null>(null);
+  const [editingUserLevelIndex, setEditingUserLevelIndex] = useState<number | null>(null);
   const editorGridRef = useRef<HTMLDivElement>(null);
   
   // Check level validity whenever the board changes
@@ -55,6 +63,14 @@ export default function LevelEditor() {
   
   // Only render in editing mode
   if (gamePhase !== 'editing') return null;
+
+  // If user loads a new level, update the editing index
+  useEffect(() => {
+    // If the board matches a user level, set the editing index
+    const idx = userLevels.findIndex(lvl => JSON.stringify(lvl) === JSON.stringify(generateLevelData()));
+    setEditingUserLevelIndex(idx >= 0 ? idx : null);
+    // eslint-disable-next-line
+  }, [board, userLevels]);
   
   // Calculate maximum block type (default is 6, but could be more)
   const maxBlockType = 9; // Now includes moving ground block
@@ -63,14 +79,24 @@ export default function LevelEditor() {
   const blockTypes = Array.from({ length: maxBlockType - 1 }, (_, i) => i + 2);
   
   const handleSaveLevel = () => {
-    if (isValid) {
-      saveUserLevel();
-      setMessage('Level saved successfully!');
-      setTimeout(() => setMessage(null), 2000);
-    } else {
+    if (!isValid) {
       setMessage('Cannot save invalid level!');
       setTimeout(() => setMessage(null), 2000);
+      return;
     }
+    const levelData = generateLevelData();
+    if (editingUserLevelIndex !== null && editingUserLevelIndex >= 0 && editingUserLevelIndex < userLevels.length) {
+      // Overwrite existing level
+      const updatedUserLevels = [...userLevels];
+      updatedUserLevels[editingUserLevelIndex] = JSON.parse(JSON.stringify(levelData));
+      set({ userLevels: updatedUserLevels });
+      setMessage(`Level ${editingUserLevelIndex + 1} updated!`);
+    } else {
+      // Add as new level
+      saveUserLevel();
+      setMessage('Level saved successfully!');
+    }
+    setTimeout(() => setMessage(null), 2000);
   };
   
   // Handle selection of block type from palette
@@ -238,187 +264,112 @@ export default function LevelEditor() {
   };
   
   return (
-    <div className="absolute inset-0 flex flex-col bg-black overflow-auto">
-      {/* Editor Header */}
-      <div className="bg-gray-900 text-white p-4 sticky top-0 z-10">
-        <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-bold text-white">Level Editor</h2>
-          <div className="flex space-x-3">
-            <button 
-              onClick={() => exitEditMode()}
-              className="bg-red-600 text-white px-4 py-2 text-lg font-bold rounded-lg shadow-md active:translate-y-1"
-            >
-              Exit
-            </button>
-            <button 
-              onClick={handleSaveLevel}
-              disabled={!isValid}
-              className={
-                isValid 
-                  ? "bg-green-600 text-white px-4 py-2 text-lg font-bold rounded-lg shadow-md active:translate-y-1" 
-                  : "bg-gray-600 text-white px-4 py-2 text-lg font-bold rounded-lg opacity-50"
-              }
-            >
-              Save
-            </button>
-          </div>
-        </div>
-      </div>
-      
-      {/* Main editor layout with side panel and grid */}
-      <div className="flex flex-col md:flex-row flex-1 overflow-auto p-4 gap-4">
-        {/* Block palette (sidebar) */}
-        <div className="bg-gray-800 p-4 rounded-lg flex flex-col gap-4 md:w-60">
-          <div className="text-white text-xl font-semibold text-center mb-2">Block Types</div>
-          
-          <div className="grid grid-cols-2 md:grid-cols-1 gap-4">
-            {blockTypes.map(type => (
-              <div 
-                key={type}
-                draggable={true}
-                onClick={() => handleSelectBlockType(type)}
-                onDragStart={(e) => {
-                  // Set drag data
-                  e.dataTransfer.setData('text/plain', JSON.stringify({ blockType: type }));
-                  e.dataTransfer.effectAllowed = 'copy';
-                  
-                  // Set custom drag ghost image (optional)
-                  const ghostElement = document.createElement('div');
-                  ghostElement.className = 'w-12 h-12 rounded-md flex items-center justify-center opacity-80';
-                  ghostElement.style.backgroundColor = getBlockColor(type);
-                  ghostElement.innerHTML = `<span class="text-white font-bold text-2xl">${blockSymbols[type-1]}</span>`;
-                  document.body.appendChild(ghostElement);
-                  e.dataTransfer.setDragImage(ghostElement, 20, 20);
-                  
-                  // Remove ghost element after drag starts
-                  setTimeout(() => {
-                    document.body.removeChild(ghostElement);
-                  }, 0);
-                  
-                  console.log(`Started dragging block type ${type}`);
-                  playHit();
-                }}
-                className={cn(
-                  "h-16 cursor-grab active:cursor-grabbing rounded-lg flex items-center justify-center shadow-md",
-                  selectedBlockType === type ? "ring-4 ring-white bg-gray-600" : "bg-gray-700 hover:ring-2 hover:ring-gray-400"
-                )}
-              >
-                <div 
-                  className="w-12 h-12 rounded-md flex items-center justify-center"
-                  style={{ backgroundColor: type === MOVING_GROUND_TYPE ? '#555555' : getBlockColor(type) }}
-                >
-                  <span className="text-white font-bold text-2xl">
-                    {type === MOVING_GROUND_TYPE ? "⬛" : blockSymbols[type-1]}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-          
-          <div className="mt-4 space-y-3">
-            <button
-              onClick={() => {
-                createEmptyLevel();
-                playHit();
-                setMessage("Created new empty level");
-                setTimeout(() => setMessage(null), 2000);
-              }}
-              className="w-full bg-blue-600 text-white py-3 text-lg font-bold rounded-lg shadow-md active:translate-y-1"
-            >
-              New Level
-            </button>
-            
-            {selectedBlockType !== null && (
+    <div className="level-editor-container w-full max-w-2xl mx-auto p-4 bg-gray-800 text-white rounded-lg shadow-xl">
+      {/* Palette and Grid */}
+      <div className="flex flex-col md:flex-row gap-4 mb-4">
+        {/* Block Palette */}
+        <div className="palette-container bg-gray-700 p-3 rounded-md shadow">
+          <h3 className="text-lg font-semibold mb-2 text-center">Block Palette</h3>
+          <div className="grid grid-cols-4 gap-2">
+            {blockTypes.map((type) => (
               <button
-                onClick={() => {
-                  setSelectedBlockType(null);
-                  playHit();
-                  setMessage("Block selection cleared");
-                  setTimeout(() => setMessage(null), 2000);
-                }}
-                className="w-full bg-gray-600 text-white py-2 text-base font-semibold rounded-lg shadow-md active:translate-y-1"
+                key={type}
+                onClick={() => handleSelectBlockType(type)}
+                title={`Select block type ${blockSymbols[type-1]}`}
+                className={cn(
+                  "w-12 h-12 text-2xl rounded-md flex items-center justify-center transition-all duration-150 ease-in-out transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800",
+                  selectedBlockType === type ? "ring-2 ring-yellow-400 shadow-lg scale-105" : "hover:bg-opacity-70",
+                  `bg-${getBlockColor(type)}-500` // Using Tailwind dynamic classes might require full class names in safelist
+                )}
+                style={{ backgroundColor: getBlockColor(type) }} // Fallback for dynamic bg
               >
-                Clear Selection
+                {blockSymbols[type-1]}
               </button>
-            )}
-          </div>
-          
-          {/* Instructions */}
-          <div className="mt-4 text-white">
-            <p className="text-center mb-2 font-semibold">Instructions:</p>
-            <p className="text-sm mb-1">• Drag blocks directly onto the grid</p>
-            <p className="text-sm mb-1">• Or click a block to select, then click grid</p>
-            <p className="text-sm mb-1">• Click on existing blocks to remove</p>
-            <p className="text-sm">• Each block type must have an even number</p>
-          </div>
-          
-          {/* Currently selected block */}
-          {selectedBlockType && (
-            <div className="mt-4 bg-gray-900 p-3 rounded-lg">
-              <p className="text-white text-center text-sm mb-2">Selected Block:</p>
-              <div className="flex justify-center">
-                <div 
-                  className="w-12 h-12 rounded-md flex items-center justify-center"
-                  style={{ backgroundColor: selectedBlockType === MOVING_GROUND_TYPE ? '#555555' : getBlockColor(selectedBlockType) }}
-                >
-                  <span className="text-white font-bold text-2xl">
-                    {selectedBlockType === MOVING_GROUND_TYPE ? "⬛" : blockSymbols[selectedBlockType-1]}
-                  </span>
-                </div>
-              </div>
-            </div>
-          )}
-          
-          {/* Status indicator */}
-          <div className="mt-auto">
-            <div className={cn(
-              "py-2 text-lg font-bold rounded-lg shadow-md text-center",
-              isValid ? "bg-green-600 text-white" : "bg-red-600 text-white"
-            )}>
-              {isValid ? 'Level Valid ✓' : 'Level Invalid ✗'}
-            </div>
-            
-            {message && (
-              <div className="mt-2 text-yellow-300 text-sm font-medium p-2 bg-gray-900 rounded-lg text-center">
-                {message}
-              </div>
-            )}
+            ))}
+            <button
+              onClick={() => handleSelectBlockType(MOVING_GROUND_TYPE)} // Ground Block type
+              title="Select Moving Ground Block"
+              className={cn(
+                "w-12 h-12 text-xl rounded-md flex items-center justify-center transition-all duration-150 ease-in-out transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 bg-gray-500",
+                selectedBlockType === MOVING_GROUND_TYPE ? "ring-2 ring-yellow-400 shadow-lg scale-105" : "hover:bg-opacity-70"
+              )}
+            >
+               जमीन
+            </button>
           </div>
         </div>
-        
-        {/* Board/grid area */}
-        <div className="flex-1 flex flex-col items-center overflow-auto p-4">
-          {/* Editor grid */}
-          <div className="mb-4 overflow-auto">
-            {renderEditorGrid()}
-          </div>
-          
-          {/* Saved levels */}
-          {userLevels.length > 0 && (
-            <div className="w-full mt-4">
-              <div className="text-white text-xl font-semibold mb-3 text-center">
-                Saved Levels: {userLevels.length}
-              </div>
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
-                {userLevels.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => {
-                      loadUserLevel(index);
-                      playHit();
-                      setMessage(`Level ${index + 1} loaded`);
-                      setTimeout(() => setMessage(null), 2000);
-                    }}
-                    className="bg-blue-700 text-white py-3 text-base font-semibold rounded-lg shadow-md active:translate-y-1"
-                  >
-                    Level {index + 1}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
+
+        {/* Editor Grid */}
+        <div ref={editorGridRef} className="editor-grid-container flex-grow bg-gray-700 p-3 rounded-md shadow">
+          {renderEditorGrid()} 
         </div>
       </div>
+
+      {/* Action Buttons & Messages */}
+      <div className="action-buttons-messages text-center mb-4">
+        {/* Example: <button onClick={handleSomeActualAction}>Actual Button</button> */}
+        {/* The 'Save as Story Level' button will be placed here in the next step */}
+        {isDevMode && (
+            <button
+              style={{ marginLeft: 16, background: '#223', color: '#fff', border: '1px solid #446', borderRadius: 6, padding: '6px 14px', fontWeight: 600, cursor: 'pointer' }}
+              onClick={async () => {
+                setStoryLevelSaveMessage('Saving story level...');
+                const exportData = generateLevelData();
+                if (exportData) {
+                  try {
+                    const response = await fetch('/api/dev/save-story-level', {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                      },
+                      body: JSON.stringify({ levelData: exportData }),
+                    });
+                    const contentType = response.headers.get("content-type");
+                    if (contentType && contentType.indexOf("application/json") !== -1) {
+                      const result = await response.json();
+                      if (response.ok) {
+                        setStoryLevelSaveMessage(`Success: ${result.message}`);
+                      } else {
+                        setStoryLevelSaveMessage(`Error: ${result.message || 'Failed to save level.'}`);
+                      }
+                    } else {
+                      const textResponse = await response.text();
+                      setStoryLevelSaveMessage(`Error: Server returned non-JSON response. Status: ${response.status}. Response: ${textResponse}`);
+                    }
+                  } catch (error) {
+                    console.error('Error saving story level:', error);
+                    setStoryLevelSaveMessage(`Network Error: Could not connect to server. ${(error as Error).message}`);
+                  }
+                } else {
+                  setStoryLevelSaveMessage('Error: Could not generate level data to export.');
+                }
+              }}
+            >
+              Save as Story Level
+            </button>
+          )}
+      </div>
+
+      {message && (
+        <div className={`p-3 rounded-md text-center font-semibold ${isValid ? 'bg-green-600' : 'bg-red-600'} shadow`}>
+          {message}
+        </div>
+      )}
+
+      {/* Modal for story level save message */}
+      {storyLevelSaveMessage && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(10,21,33,0.78)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ background: '#181e2a', borderRadius: 8, padding: 24, boxShadow: '0 2px 16px #0008', maxWidth: 600, width: '90vw', textAlign: 'center' }}>
+            <h3 style={{ color: '#fff', marginTop: 0, marginBottom: 16 }}>Save Story Level Status</h3>
+            <p style={{ color: '#eee', fontSize: '16px', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+              {storyLevelSaveMessage}
+            </p>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 20 }}>
+              <button onClick={() => setStoryLevelSaveMessage(null)} style={{ background: '#223', color: '#fff', border: '1px solid #446', borderRadius: 6, padding: '6px 18px', fontWeight: 600, cursor: 'pointer' }}>Close</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

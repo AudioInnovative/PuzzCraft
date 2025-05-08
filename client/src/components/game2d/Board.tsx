@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { usePuzznic, BlockType, MOVING_GROUND_TYPE } from '../../lib/stores/usePuzznic';
 import { useAudio } from '../../lib/stores/useAudio';
 
@@ -658,7 +658,7 @@ export function Board2D({ width, height }: BoardProps) {
     removeEditorBlock
   } = usePuzznic();
   const { playHit: playHitSound } = useAudio();
-  
+
   // Game board dimensions
   const rows = board.length;
   const cols = board[0]?.length || 0;
@@ -902,29 +902,37 @@ export function Board2D({ width, height }: BoardProps) {
   }, [board, animateBlocks, renderGameState]);
 
   return (
-    <canvas
-      ref={canvasRef}
-      width={width}
-      height={height}
-      onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseLeave}
-      onClick={undefined}
-      onTouchStart={undefined}
-      onTouchEnd={undefined}
-      onTouchCancel={undefined}
-      style={{ 
-        width: '100%', 
-        height: '100%',
-        background: '#000000', // Black background
-        touchAction: 'none', // Prevent browser handling of touch gestures (like scrolling)
-        cursor: selectedBlockPos 
-          ? `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><defs><filter id="glow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="2.5" result="blur"/><feComposite in="SourceGraphic" in2="blur" operator="over"/></filter></defs><circle cx="24" cy="24" r="6" fill="%23FFFFFF" filter="url(%23glow)" /><circle cx="24" cy="24" r="11" stroke="%23000000" stroke-width="3" fill="none" /><circle cx="24" cy="24" r="18" stroke="%23FF3300" stroke-width="3.5" fill="none" filter="url(%23glow)" /><circle cx="24" cy="24" r="11" stroke="%23FF3300" stroke-width="2" fill="none" filter="url(%23glow)" /></svg>') 24 24, auto`
-          : gamePhase === "editing"
-            ? `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><defs><filter id="glow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="2.5" result="blur"/><feComposite in="SourceGraphic" in2="blur" operator="over"/></filter></defs><circle cx="24" cy="24" r="5" fill="%23FFFFFF" /><path d="M10 24 L38 24 M24 10 L24 38" stroke="%23000000" stroke-width="4" /><path d="M10 24 L38 24 M24 10 L24 38" stroke="%23FF3300" stroke-width="2.5" filter="url(%23glow)" /><circle cx="24" cy="24" r="18" stroke="%23FF3300" stroke-width="2.5" fill="none" filter="url(%23glow)" /></svg>') 24 24, auto`
-            : `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><defs><filter id="glow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="2.5" result="blur"/><feComposite in="SourceGraphic" in2="blur" operator="over"/></filter></defs><circle cx="24" cy="24" r="5" fill="%23FFFFFF" /><path d="M24 6 L24 15 M24 33 L24 42 M6 24 L15 24 M33 24 L42 24" stroke="%23000000" stroke-width="4" /><path d="M24 6 L24 15 M24 33 L24 42 M6 24 L15 24 M33 24 L42 24" stroke="%23FF3300" stroke-width="2.5" filter="url(%23glow)" /><circle cx="24" cy="24" r="20" stroke="%23FF3300" stroke-width="2.5" stroke-dasharray="4,4" fill="none" filter="url(%23glow)" /></svg>') 24 24, auto`
-      }}
-    />
+    <div className="game-board-container">
+      <canvas
+        ref={canvasRef}
+        width={width}
+        height={height}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseLeave}
+        onClick={undefined}
+        onTouchStart={undefined}
+        onTouchEnd={undefined}
+        onTouchCancel={undefined}
+        style={{ 
+          width: '100%', 
+          height: '100%',
+          background: '#000000', // Black background
+          touchAction: 'none', // Prevent browser handling of touch gestures (like scrolling)
+          cursor: selectedBlockPos 
+            ? `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><defs><filter id="glow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="2.5" result="blur"/><feComposite in="SourceGraphic" in2="blur" operator="over"/></filter></defs><circle cx="24" cy="24" r="6" fill="%23FFFFFF" filter="url(%23glow)" /><circle cx="24" cy="24" r="11" stroke="%23000000" stroke-width="3" fill="none" /><circle cx="24" cy="24" r="18" stroke="%23FF3300" stroke-width="3.5" fill="none" filter="url(%23glow)" /><circle cx="24" cy="24" r="11" stroke="%23FF3300" stroke-width="2" fill="none" filter="url(%23glow)" /></svg>') 24 24, auto`
+            : gamePhase === "editing"
+              ? `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><defs><filter id="glow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="2.5" result="blur"/><feComposite in="SourceGraphic" in2="blur" operator="over"/></filter></defs><circle cx="24" cy="24" r="5" fill="%23FFFFFF" /><path d="M10 24 L38 24 M24 10 L24 38" stroke="%23000000" stroke-width="4" /><path d="M10 24 L38 24 M24 10 L24 38" stroke="%23FF3300" stroke-width="2.5" filter="url(%23glow)" /><circle cx="24" cy="24" r="18" stroke="%23FF3300" stroke-width="2.5" fill="none" filter="url(%23glow)" /></svg>') 24 24, auto`
+              : `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><defs><filter id="glow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="2.5" result="blur"/><feComposite in="SourceGraphic" in2="blur" operator="over"/></filter></defs><circle cx="24" cy="24" r="5" fill="%23FFFFFF" /><path d="M24 6 L24 15 M24 33 L24 42 M6 24 L15 24 M33 24 L42 24" stroke="%23000000" stroke-width="4" /><path d="M24 6 L24 15 M24 33 L24 42 M6 24 L15 24 M33 24 L42 24" stroke="%23FF3300" stroke-width="2.5" filter="url(%23glow)" /><circle cx="24" cy="24" r="20" stroke="%23FF3300" stroke-width="2.5" stroke-dasharray="4,4" fill="none" filter="url(%23glow)" /></svg>') 24 24, auto`
+        }}
+      />
+      {/* Editor UI */}
+      {gamePhase === "editing" && (
+        <div className="editor-controls" style={{ marginTop: 12 }}>
+          {/* ...existing editor controls... */}
+        </div>
+      )}
+    </div>
   );
 }

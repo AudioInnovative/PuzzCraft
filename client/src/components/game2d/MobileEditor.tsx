@@ -42,6 +42,12 @@ export default function MobileEditor() {
   const [message, setMessage] = useState<string | null>(null);
   const [showBlockPalette, setShowBlockPalette] = useState(true);
   const [showLevelSelector, setShowLevelSelector] = useState(false);
+  // Add state for story level save status
+  const [storyLevelSaveMessage, setStoryLevelSaveMessage] = useState<string | null>(null);
+  
+  // Check if in dev mode
+  const isDevMode = import.meta.env.VITE_REACT_APP_DEV_MODE === 'true';
+  console.log('[MobileEditor.tsx] isDevMode:', isDevMode);
   
   // Ensure we're in edit mode
   if (gamePhase !== 'editing') return null;
@@ -121,6 +127,48 @@ export default function MobileEditor() {
             <h2 className="text-lg font-bold text-cyan-300 font-mono">EDITOR</h2>
             
             <div className="flex gap-1">
+              {/* Add Save as Story Level button before MENU, only in dev mode */}
+              {isDevMode && (
+                <button
+                  onClick={async () => {
+                    setStoryLevelSaveMessage('Saving story level...');
+                    const exportData = board.map(row => row.map(b => b ? b.type : 0));
+                    
+                    if (exportData) {
+                      try {
+                        const response = await fetch('/api/dev/save-story-level', {
+                          method: 'POST',
+                          headers: {
+                            'Content-Type': 'application/json',
+                          },
+                          body: JSON.stringify({ levelData: exportData }),
+                        });
+                        const contentType = response.headers.get("content-type");
+                        if (contentType && contentType.indexOf("application/json") !== -1) {
+                          const result = await response.json();
+                          if (response.ok) {
+                            setStoryLevelSaveMessage(`Success: ${result.message}`);
+                          } else {
+                            setStoryLevelSaveMessage(`Error: ${result.message || 'Failed to save level.'}`);
+                          }
+                        } else {
+                          const textResponse = await response.text();
+                          setStoryLevelSaveMessage(`Error: Server returned non-JSON response. Status: ${response.status}. Response: ${textResponse}`);
+                        }
+                      } catch (error) {
+                        console.error('Error saving story level:', error);
+                        setStoryLevelSaveMessage(`Network Error: Could not connect to server. ${(error as Error).message}`);
+                      }
+                    } else {
+                      setStoryLevelSaveMessage('Error: Could not generate level data to export.');
+                    }
+                  }}
+                  className="bg-purple-600 text-white font-bold py-1 px-2 border border-white text-xs"
+                >
+                  STORY
+                </button>
+              )}
+              
               <button 
                 onClick={() => exitEditMode()}
                 className="bg-blue-600 text-white font-bold py-1 px-2 border border-white text-xs"
@@ -315,6 +363,20 @@ export default function MobileEditor() {
           </div>
         </div>
       </div>
+      {/* Add modal for story level save message */}
+      {storyLevelSaveMessage && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(10,21,33,0.78)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ background: '#181e2a', borderRadius: 8, padding: 24, boxShadow: '0 2px 16px #0008', maxWidth: 600, width: '90vw', textAlign: 'center' }}>
+            <h3 style={{ color: '#fff', marginTop: 0, marginBottom: 16 }}>Save Story Level Status</h3>
+            <p style={{ color: '#eee', fontSize: '16px', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+              {storyLevelSaveMessage}
+            </p>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 20 }}>
+              <button onClick={() => setStoryLevelSaveMessage(null)} style={{ background: '#223', color: '#fff', border: '1px solid #446', borderRadius: 6, padding: '6px 18px', fontWeight: 600, cursor: 'pointer' }}>Close</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
